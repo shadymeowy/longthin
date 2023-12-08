@@ -59,7 +59,7 @@ class LTRenderer:
     def draw(self):
         self.eventlist.reset()
         self.eventlist.poll()
-        self.draw_vehicle()
+        self.update_coordinates()
         for window, drawlists in self.windows.items():
             if window.handle_events(self.eventlist):
                 return True
@@ -73,7 +73,7 @@ class LTRenderer:
                 else:
                     window.render(drawlist)
             window.render_end()
-        self.drawlist_vehicle.empty()
+        self.drawlist_vehicle.load()
         self.drawlist_area.load()
         return False
 
@@ -181,6 +181,7 @@ class LTRenderer:
         # line from top of chassis to camera
         self.drawlist_vehicle.line(x, y, - h, x, y, z)
         self.drawlist_vehicle.draw_camera(self.camera_pose, self.camera_params)
+        self.drawlist_vehicle.save()
 
 
 if __name__ == '__main__':
