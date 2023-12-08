@@ -34,6 +34,32 @@ def marker_draw(img, corners, ids):
     return img
 
 
+def marker_distribute(n, width, height, alt, pitch):
+    # overly complicated marker distribution algorithm
+    result = []
+    result.append(np.array([[width/2, height/2, alt], [0, pitch, 45]]))
+    result.append(np.array([[-width/2, height/2, alt], [0, pitch, 135]]))
+    result.append(np.array([[-width/2, -height/2, alt], [0, pitch, 225]]))
+    result.append(np.array([[width/2, -height/2, alt], [0, pitch, 315]]))
+    # distribute markers in a square
+    for j in range(4):
+        angle = j * 90
+        c, s = np.cos(np.deg2rad(angle)), np.sin(np.deg2rad(angle))
+        w = abs(s) * width
+        h = abs(c) * height
+        x = c * width / 2
+        y = s * height / 2
+        # marker count for this side
+        sw = w / (n + 1)
+        sh = h / (n + 1)
+        for i in range(n):
+            pos = np.array([x + (i+1) * sw, y + (i+1) * sh, alt])
+            pos -= np.array([w/2, h/2, 0])
+            att = np.array([0, pitch, angle])
+            result.append(np.array([pos, att]))
+    return result
+
+
 if __name__ == '__main__':
     markers = marker_gen(8)
     for i, marker in enumerate(markers):

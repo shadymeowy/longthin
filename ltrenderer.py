@@ -5,7 +5,7 @@ from scipy.spatial.transform import Rotation as R
 
 from ltdrawlist import LTDrawList
 from ltparams import LTParams
-from marker import marker_gen, marker_detect, marker_draw
+from marker import *
 from geometry import *
 from pose import Pose
 from camera import CameraParams
@@ -18,7 +18,7 @@ class LTRenderer:
         self.camera_pose = Pose(params.camera_pos_rel, params.camera_att_rel)
         self.vehicle_pose = Pose(params.vehicle_pos, params.vehicle_att)
         self.camera_params = CameraParams(params.camera_hfov, params.camera_vfov,
-                                    params.camera_width, params.camera_height)
+                                          params.camera_width, params.camera_height)
 
         self.windows = dict()
         self.window_free = self.add_window(720, 720, b"Free")
@@ -102,27 +102,30 @@ class LTRenderer:
         self.drawlist_area.plane(
             spot_x, strip_w+spot_y+spot_w/2, 0, spot_w, spot_l-spot_w, spot_w, 0.1)
 
+        w = self.params.area_w + 2 * self.params.strip_w
+        h = self.params.area_h + 2 * self.params.strip_w
         # markers
         marker_n = self.params.marker_n
         markers = marker_gen(marker_n*4 + 4)
         # corners with 45 degree angle
         marker_alt = self.params.marker_alt
-        pos = np.array([w/2 + strip_w, h/2 + strip_w, marker_alt])
+        pos = np.array([w/2, h/2, marker_alt])
         self.draw_marker(pos, markers[0], 45)
-        pos = np.array([-w/2 - strip_w, h/2 + strip_w, marker_alt])
+        pos = np.array([-w/2, h/2, marker_alt])
         self.draw_marker(pos, markers[1], 135)
-        pos = np.array([-w/2 - strip_w, -h/2 - strip_w, marker_alt])
+        pos = np.array([-w/2, -h/2, marker_alt])
         self.draw_marker(pos, markers[2], -135)
-        pos = np.array([w/2 + strip_w, -h/2 - strip_w, marker_alt])
+        pos = np.array([w/2, -h/2, marker_alt])
         self.draw_marker(pos, markers[3], -45)
         # sides
         marker_side = int(np.sqrt(markers[0].size))
         markers = markers[4:].reshape((4, marker_n, marker_side, marker_side))
-        self.draw_markers(w/2 + strip_w, 0, 0, h, 0, markers[0])
-        self.draw_markers(0, h/2 + strip_w, w, 0, 90, markers[1])
-        self.draw_markers(-w/2 - strip_w, 0, 0, h, 180, markers[2])
-        self.draw_markers(0, -h/2 - strip_w, w, 0, -90, markers[3])
-
+        self.draw_markers(w/2, 0, 0, h, 0, markers[0])
+        self.draw_markers(0, h/2, w, 0, 90, markers[1])
+        self.draw_markers(-w/2, 0, 0, h, 180, markers[2])
+        self.draw_markers(0, -h/2, w, 0, -90, markers[3])
+        marker_dist = marker_distribute(
+            marker_n, w, h, marker_alt, self.params.marker_pitch)
         self.drawlist_area.save()
 
     def draw_marker(self, p, data, angle=0):
