@@ -64,12 +64,9 @@ class CameraParams:
 
     def rays(self, att, img_points):
         vec, vec_v, vec_h = self.image_plane_vecs(att)
-        rays = []
-        for p in img_points:
-            p = np.array(p, np.float64)
-            p[0] = (p[0] / self.width - 0.5) * 2
-            p[1] = (p[1] / self.height - 0.5) * 2
-            p = p[0] * vec_h + p[1] * vec_v + vec
-            p /= norm(p)
-            rays.append(p)
+        rays = np.array(img_points, np.float64)
+        rays[:, 0] = (rays[:, 0] / self.width - 0.5) * 2
+        rays[:, 1] = (rays[:, 1] / self.height - 0.5) * 2
+        rays = rays[:, 0:1] * vec_h + rays[:, 1:2] * vec_v + vec
+        rays /= np.linalg.norm(rays, axis=1, keepdims=True)
         return rays
