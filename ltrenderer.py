@@ -25,7 +25,7 @@ class LTRenderer:
         self.camera_free = self.window_free.get_camera()
         self.camera_free.set_perspective(45.0, 45.0)
         self.camera_free.distance = 3
-        self.camera_free.rotation = (0.0, np.pi/5, np.pi/4)
+        self.camera_free.rotation = (0.0, -np.pi/5, np.pi/4)
         self.window_vehicle = self.add_window(
             self.params.camera_width, self.params.camera_height, b"Vehicle")
         self.camera_vehicle = self.window_vehicle.get_camera()
@@ -37,7 +37,7 @@ class LTRenderer:
         self.camera_top = self.window_top.get_camera()
         self.camera_top.set_orthographic(0.2, 0.2)
         self.camera_top.position = (0., 0.0, 1.0)
-        self.camera_top.rotation = (0.0, np.pi/2, 0.0)
+        self.camera_top.rotation = (0.0, -np.pi/2, 0.0)
         self.window_top.controllable = False
         self.eventlist = drawing3d.EventList()
 
@@ -64,7 +64,15 @@ class LTRenderer:
             if window.handle_events(self.eventlist):
                 return True
             window.clear()
-            window.renders(drawlists)
+            for drawlist in drawlists:
+                # temporary hack
+                if drawlist == self.drawlist_vehicle:
+                    pos = self.vehicle_pose.pos
+                    att = np.deg2rad(self.vehicle_pose.att)
+                    window.render_at(drawlist, pos, att)
+                else:
+                    window.render(drawlist)
+            window.render_end()
         self.drawlist_vehicle.empty()
         self.drawlist_area.load()
         return False
@@ -126,11 +134,9 @@ class LTRenderer:
         self.drawlist_area.draw_binary_grid(pose, marker_w, marker_h, data)
 
     def update_coordinates(self):
-        self.drawlist_vehicle.translation = self.vehicle_pose.pos
-        self.drawlist_vehicle.rotation = self.vehicle_pose.att
         camera_pose = self.vehicle_pose.from_frame(self.camera_pose)
         self.camera_vehicle.position = camera_pose.pos
-        self.camera_vehicle.rotation = -np.deg2rad(camera_pose.att)
+        self.camera_vehicle.rotation = np.deg2rad(camera_pose.att)
 
     def draw_vehicle(self):
         self.update_coordinates()

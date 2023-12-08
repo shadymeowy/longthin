@@ -6,48 +6,6 @@ from geometry import *
 
 
 class LTDrawList(drawing3d.DrawList):
-    def __init__(self, obj=None):
-        super().__init__(obj)
-        self._rotation = None
-        self.rotation = np.array([0., 0., 0.])
-        self.translation = np.array([0., 0., 0.])
-
-    @property
-    def rotation(self):
-        return self._rotation.as_euler('xyz', degrees=True)
-
-    @rotation.setter
-    def rotation(self, rot):
-        if not isinstance(rot, R):
-            rot = R.from_euler('xyz', rot, degrees=True)
-        self._rotation = rot
-
-    def points(self, points):
-        super().points(self._transform(points))
-
-    def lines(self, lines):
-        super().lines(self._transform(lines))
-
-    def line(self, *line):
-        super().line(*self._transform(line))
-
-    def point(self, *point):
-        super().point(*self._transform(point))
-
-    def polygon(self, points):
-        super().polygon(self._transform(points))
-
-    def polyline(self, points):
-        super().polyline(self._transform(points))
-
-    def _transform(self, points):
-        points = np.array(points, np.float64)
-        shape = points.shape
-        points = points.reshape((-1, 3))
-        points = self._rotation.apply(points)
-        points += self.translation
-        return points.reshape(shape)
-
     def plane(self, x, y, z, w, h, dw, dh):
         nw = int(np.ceil(w / dw))
         nh = int(np.ceil(h / dh))
