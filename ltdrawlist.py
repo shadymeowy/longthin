@@ -179,12 +179,10 @@ class LTDrawList(drawing3d.DrawList):
         ])
         self.lines(lines)
 
-    def draw_binary_grid(self, pos, att, width, height, data):
+    def draw_binary_grid(self, pose, width, height, data):
         # data = data[::-1, :]
         nw = data.shape[0]
         nh = data.shape[1]
-        if not isinstance(att, R):
-            att = R.from_euler('xyz', att, degrees=True)
         dw = width / nw
         dh = height / nh
         e = min(dw, dh) / 16
@@ -201,6 +199,5 @@ class LTDrawList(drawing3d.DrawList):
                     [0, j * dh - e, (i + 1) * dw + e],
                 ])
                 points -= np.array([0, width / 2, height])
-                points = att.apply(points)
-                points += pos
+                points = pose.from_frame(points)
                 self.polygon(points)

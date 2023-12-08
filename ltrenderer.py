@@ -107,49 +107,23 @@ class LTRenderer:
         # markers
         marker_n = self.params.marker_n
         markers = marker_gen(marker_n*4 + 4)
-        # corners with 45 degree angle
-        marker_alt = self.params.marker_alt
-        pos = np.array([w/2, h/2, marker_alt])
-        self.draw_marker(pos, markers[0], 45)
-        pos = np.array([-w/2, h/2, marker_alt])
-        self.draw_marker(pos, markers[1], 135)
-        pos = np.array([-w/2, -h/2, marker_alt])
-        self.draw_marker(pos, markers[2], -135)
-        pos = np.array([w/2, -h/2, marker_alt])
-        self.draw_marker(pos, markers[3], -45)
-        # sides
-        marker_side = int(np.sqrt(markers[0].size))
-        markers = markers[4:].reshape((4, marker_n, marker_side, marker_side))
-        self.draw_markers(w/2, 0, 0, h, 0, markers[0])
-        self.draw_markers(0, h/2, w, 0, 90, markers[1])
-        self.draw_markers(-w/2, 0, 0, h, 180, markers[2])
-        self.draw_markers(0, -h/2, w, 0, -90, markers[3])
-        marker_dist = marker_distribute(
-            marker_n, w, h, marker_alt, self.params.marker_pitch)
+        # marker locations and orientations
+        marker_dist = marker_distribute(marker_n, w, h, self.params.marker_alt)
+        for p, data in zip(marker_dist, markers):
+            pose = Pose(p[:3], [0., self.params.marker_pitch, p[3]])
+            self.draw_marker(pose, data)
         self.drawlist_area.save()
 
-    def draw_marker(self, p, data, angle=0):
+    def draw_marker(self, pose, data):
         marker_w = self.params.marker_w
         marker_h = self.params.marker_h
-        marker_pitch = self.params.marker_pitch
-        att = np.array([0, marker_pitch, angle])
         # draw line to ground
         self.drawlist_area.style2(0., 0., 0., 1., 8.)
+        p = pose.pos
         self.drawlist_area.line(p[0], p[1], p[2], p[0], p[1], 0)
         # add 2 rows and columns of zeros
         data = np.pad(data, 1, 'constant')
-        self.drawlist_area.draw_binary_grid(p, att, marker_w, marker_h, data)
-
-    def draw_markers(self, x, y, w, h, angle, datas):
-        # marker count for this side
-        count = len(datas)
-        sw = w / (count + 1)
-        sh = h / (count + 1)
-        alt = self.params.marker_alt
-        for i, data in enumerate(datas):
-            p = np.array([x + (i+1) * sw, y + (i+1) * sh, alt])
-            p -= np.array([w/2, h/2, 0])
-            self.draw_marker(p, data, angle)
+        self.drawlist_area.draw_binary_grid(pose, marker_w, marker_h, data)
 
     def update_coordinates(self):
         self.drawlist_vehicle.translation = self.vehicle_pose.pos

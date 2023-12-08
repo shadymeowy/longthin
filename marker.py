@@ -3,8 +3,6 @@ import cv2
 
 marker_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 marker_params = cv2.aruco.DetectorParameters()
-"""marker_params.polygonalApproxAccuracyRate = 0.1
-marker_params.minMarkerPerimeterRate = 0.01"""
 marker_params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
 detector = cv2.aruco.ArucoDetector(marker_dict, marker_params)
 
@@ -34,13 +32,13 @@ def marker_draw(img, corners, ids):
     return img
 
 
-def marker_distribute(n, width, height, alt, pitch):
+def marker_distribute(n, width, height, alt):
     # overly complicated marker distribution algorithm
     result = []
-    result.append(np.array([[width/2, height/2, alt], [0, pitch, 45]]))
-    result.append(np.array([[-width/2, height/2, alt], [0, pitch, 135]]))
-    result.append(np.array([[-width/2, -height/2, alt], [0, pitch, 225]]))
-    result.append(np.array([[width/2, -height/2, alt], [0, pitch, 315]]))
+    result.append(np.array([width/2, height/2, alt, 45]))
+    result.append(np.array([-width/2, height/2, alt, 135]))
+    result.append(np.array([-width/2, -height/2, alt, 225]))
+    result.append(np.array([width/2, -height/2, alt, 315]))
     # distribute markers in a square
     for j in range(4):
         angle = j * 90
@@ -53,10 +51,9 @@ def marker_distribute(n, width, height, alt, pitch):
         sw = w / (n + 1)
         sh = h / (n + 1)
         for i in range(n):
-            pos = np.array([x + (i+1) * sw, y + (i+1) * sh, alt])
-            pos -= np.array([w/2, h/2, 0])
-            att = np.array([0, pitch, angle])
-            result.append(np.array([pos, att]))
+            pos = np.array([x + (i+1) * sw, y + (i+1) * sh, alt, angle])
+            pos -= np.array([w/2, h/2, 0, 0])
+            result.append(pos)
     return result
 
 
