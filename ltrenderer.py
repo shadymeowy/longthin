@@ -191,7 +191,7 @@ if __name__ == '__main__':
         camera_params = renderer.camera_params
 
         img = renderer.drawlist_area.save_buffer(renderer.camera_vehicle)
-        img = np.ascontiguousarray(img[..., :3])
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
         corners, ids = marker_detect(img)
         img_markers = marker_draw(img, corners, ids)
         if corners.size > 0:
