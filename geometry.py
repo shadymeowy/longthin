@@ -1,5 +1,7 @@
 from scipy.spatial.transform import Rotation as R
 import numpy as np
+from dataclasses import dataclass
+
 
 NORMAL_XY = np.array([0., 0., 1.])
 NORMAL_YZ = np.array([1., 0., 0.])
@@ -8,6 +10,34 @@ NORMAL_XZ = np.array([0., 1., 0.])
 E_X = np.array([1., 0., 0.])
 E_Y = np.array([0., 1., 0.])
 E_Z = np.array([0., 0., 1.])
+
+
+def as_rotation(att):
+    if isinstance(att, (list, tuple)):
+        att = np.array(att, np.float64)
+    if isinstance(att, np.ndarray):
+        if att.shape == (3, 3):
+            att = R.from_matrix(att)
+        elif att.shape == (4,):
+            att = R.from_quat(att)
+        elif att.shape == (3,):
+            att = R.from_euler('xyz', att, degrees=True)
+        else:
+            raise ValueError(f'Invalid shape for att: {att.shape}')
+    elif isinstance(att, R):
+        pass
+    else:
+        raise ValueError(f'Invalid type for att: {type(att)}')
+    return att
+
+
+def as_euler(att, degrees=True):
+    if isinstance(att, (list, tuple)):
+        att = np.array(att, np.float64)
+    if isinstance(att, np.ndarray) and att.shape == (3,):
+        return att
+    att = as_rotation(att)
+    return att.as_euler('xyz', degrees=degrees)
 
 
 def norm(v):
@@ -96,52 +126,3 @@ def orthogonal_vectors2(v):
     v2 = np.cross(v, v1)
     v2 /= norm(v2)
     return v1, v2
-
-
-def camera_get_vecs(pos, att, hfov, vfov, vec=E_X, vec_h=E_Y, vec_v=E_Z):
-    if not isinstance(att, R):
-        att = R.from_euler('xyz', att, degrees=True)
-    vfov = np.deg2rad(vfov)
-    hfov = np.deg2rad(hfov)
-    vfov_half = vfov / 2
-    hfov_half = hfov / 2
-    vec = att.apply(vec)
-    vec_v = att.apply(vec_v)
-    vec_h = att.apply(vec_h)
-    vec_v = vec_v * np.tan(vfov_half)
-    vec_h = vec_h * np.tan(hfov_half)
-    return (vec, vec_v, vec_h)
-
-
-def camera_get_bpoints(pos, att, hfov, vfov, max_dist=2.):
-    vec, vec_v, vec_h = camera_get_vecs(pos, att, hfov, vfov)
-    vecs = [
-        vec + vec_v + vec_h,
-        vec + vec_v - vec_h,
-        vec - vec_v + vec_h,
-        vec - vec_v - vec_h,
-    ]
-    pg = np.array([0., 0., 0.])
-    ng = np.array([0., 0., 1.])
-    bpoints = [intersection_plane_line((pg, ng), (pos, v)) for v in vecs]
-    for i, point in enumerate(bpoints):
-        if np.dot(point - pos, vec) < 0:
-            p = pos + max_dist * vecs[i]
-            # project onto plane
-            p = intersection_plane_line((pg, ng), (p, ng))
-            bpoints[i] = p
-
-    return bpoints
-
-
-def camera_rays(img_points, pos, att, hfov, vfov, width, height):
-    vec, vec_v, vec_h = camera_get_vecs(pos, att, hfov, vfov)
-    rays = []
-    for p in img_points:
-        p = np.array(p, np.float64)
-        p[0] = (p[0] / width - 0.5) * 2
-        p[1] = (p[1] / height - 0.5) * 2
-        p = p[0] * vec_h + p[1] * vec_v + vec
-        p /= norm(p)
-        rays.append(p)
-    return rays

@@ -121,8 +121,9 @@ class LTDrawList(drawing3d.DrawList):
         self.style2(0.0, 0.0, 1.0, 1.0, w)
         self.line(x, y, z, x, y, z + l)
 
-    def draw_camera(self, pos, att, hfov, vfov, l=7.5e-2):
-        vec, vec_v, vec_h = camera_get_vecs(pos, att, hfov, vfov)
+    def draw_camera(self, camera, l=7.5e-2):
+        vec, vec_v, vec_h = camera.image_plane_vecs()
+        pos = camera.pos
         vec *= l
         vec_v *= l
         vec_h *= l
@@ -159,8 +160,8 @@ class LTDrawList(drawing3d.DrawList):
         self.style2(.43, .56, .95, .2, 1.)
         self.polygon([p1, p2, p3, p4])
 
-    def draw_camera_field(self, pos, att, hfov, vfov):
-        bpoints = camera_get_bpoints(pos, att, hfov, vfov)
+    def draw_camera_field(self, camera):
+        bpoints = camera.ground_points()
         points = np.array([
             bpoints[3],
             bpoints[1],
@@ -173,8 +174,8 @@ class LTDrawList(drawing3d.DrawList):
         self.polyline(points)
 
         lines = np.array([
-            [pos, bpoints[0]],
-            [pos, bpoints[1]],
+            [camera.pos, bpoints[0]],
+            [camera.pos, bpoints[1]],
         ])
         self.lines(lines)
 

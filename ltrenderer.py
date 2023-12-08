@@ -7,13 +7,20 @@ from ltdrawlist import LTDrawList
 from ltparams import LTParams
 from marker import marker_gen, marker_detect, marker_draw
 from geometry import *
+from pose import Pose
+from camera import Camera
 
 
 class LTRenderer:
     def __init__(self, params: LTParams):
         self.params = params
-        self.vehicle_pos = np.array([0., 0., 0.])
-        self.vehicle_rot = np.array([0., 0., 0.])
+
+        self.vehicle_cam = Camera(
+            Pose(params.camera_pos_rel, params.camera_att_rel),
+            params.camera_hfov, params.camera_vfov,
+            params.camera_width, params.camera_height)
+        self.vehicle_pose = Pose(
+            params.chassis_pos_rel, params.vehicle_att)
 
         self.windows = dict()
         self.window_free = self.add_window(720, 720, b"Free")
@@ -144,28 +151,28 @@ class LTRenderer:
             self.draw_marker(p, data, angle)
 
     def update_coordinates(self):
-        self.drawlist_vehicle.translation = self.vehicle_pos
-        self.drawlist_vehicle.rotation = self.vehicle_rot
+        self.drawlist_vehicle.translation = self.vehicle_pose.pos
+        self.drawlist_vehicle.rotation = self.vehicle_pose.att
         # self.camera_free.position = self.vehicle_pos
 
-        cam_pos = self.params.camera_pos_rel
+        """cam_pos = self.params.camera_pos_rel
         cam_att = self.params.camera_att_rel.copy()
         cam_R = R.from_euler('xyz', cam_att, degrees=True)
         vehicle_R = R.from_euler('xyz', self.vehicle_rot, degrees=True)
         cam_pos = vehicle_R.apply(cam_pos)
         cam_pos += self.vehicle_pos
         cam_R = vehicle_R * cam_R
-        cam_att = -cam_R.as_euler('xyz', degrees=False)
-        self.camera_vehicle.position = cam_pos
-        self.camera_vehicle.rotation = cam_att
+        cam_att = -cam_R.as_euler('xyz', degrees=False)"""
+        cam_pose = self.vehicle_pose.from_frame(self.vehicle_cam.pose)
+        self.camera_vehicle.position = cam_pose.pos
+        self.camera_vehicle.rotation = -np.deg2rad(cam_pose.att)
 
     def draw_vehicle(self):
         self.update_coordinates()
         # draw camera view first
         cam_pos = self.params.camera_pos_rel
         cam_att = self.params.camera_att_rel
-        self.drawlist_vehicle.draw_camera_field(
-            cam_pos, cam_att, self.params.camera_hfov, self.params.camera_vfov)
+        self.drawlist_vehicle.draw_camera_field(self.vehicle_cam)
 
         # draw chassis
         l = self.params.chassis_l
@@ -203,33 +210,20 @@ class LTRenderer:
         self.drawlist_vehicle.style2(1., 0., 0., 1., 4.)
         # line from top of chassis to camera
         self.drawlist_vehicle.line(x, y, - h, x, y, z)
-        self.drawlist_vehicle.draw_camera(
-            cam_pos, cam_att, self.params.camera_hfov, self.params.camera_vfov)
+        self.drawlist_vehicle.draw_camera(self.vehicle_cam)
 
 
 if __name__ == '__main__':
     params = LTParams()
     renderer = LTRenderer(params)
-
-    pos = renderer.vehicle_pos
-    rot = renderer.vehicle_rot
-    rot = np.array([0., 0., 0])
-
     while not renderer.draw():
-        angle = np.deg2rad(rot[2])
-        pos = np.array([np.sin(angle), -np.cos(angle), 0.]) * 1
-        rot += np.array([0., 0., 0.25])
-        renderer.vehicle_pos = pos
-        renderer.vehicle_rot = rot
+        angle = np.deg2rad(renderer.vehicle_pose.att[2])
+        renderer.vehicle_pose.pos = np.array(
+            [np.sin(angle), -np.cos(angle), 0.]) * 1
+        renderer.vehicle_pose.att += np.array([0., 0., 0.25])
 
-        cam_pos = params.camera_pos_rel
-        cam_att = params.camera_att_rel
-        cam_R = R.from_euler('xyz', cam_att, degrees=True)
-        vehicle_R = R.from_euler('xyz', rot, degrees=True)
-        cam_pos = vehicle_R.apply(cam_pos)
-        cam_pos += pos
-        cam_R = vehicle_R * cam_R
-        cam_att = cam_R.as_euler('xyz', degrees=True)
+        vehicle_pose = renderer.vehicle_pose
+        cam_pose = vehicle_pose.from_frame(renderer.vehicle_cam.pose)
 
         img = renderer.drawlist_area.save_buffer(renderer.camera_vehicle)
         img = np.ascontiguousarray(img[..., :3])
@@ -237,19 +231,19 @@ if __name__ == '__main__':
         img_markers = marker_draw(img, corners, ids)
         if corners.size > 0:
             corners = corners[:, :, 2:].reshape((-1, 2))
-        rays = camera_rays(corners, cam_pos, cam_att, params.camera_hfov,
-                           params.camera_vfov, params.camera_width, params.camera_height)
+        cam = renderer.vehicle_cam.with_pose(cam_pose)
+        rays = cam.rays(corners)
         renderer.drawlist_area.style2(1., 0., 1., 0.2, 2.)
         for ray in rays:
             ray *= 4
-            renderer.drawlist_area.line(cam_pos[0], cam_pos[1], cam_pos[2],
-                                        cam_pos[0] + ray[0], cam_pos[1] + ray[1], cam_pos[2] + ray[2])
+            renderer.drawlist_area.line(cam_pose.pos[0], cam_pose.pos[1], cam_pose.pos[2],
+                                        cam_pose.pos[0] + ray[0], cam_pose.pos[1] + ray[1], cam_pose.pos[2] + ray[2])
         renderer.drawlist_area.style2(1., 0., 1., 1., 4.)
         for ray in rays:
             # find intersection with ground
             pg = np.array([0., 0., 0.])
             ng = np.array([0., 0., 1.])
-            p = intersection_plane_line((pg, ng), (cam_pos, ray))
+            p = intersection_plane_line((pg, ng), (cam_pose.pos, ray))
             renderer.drawlist_area.point(p[0], p[1], p[2])
         cv2.imshow("Markers", img_markers)
         cv2.waitKey(1)
