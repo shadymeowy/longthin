@@ -40,34 +40,30 @@ def as_euler(att, degrees=True):
     return att.as_euler('xyz', degrees=degrees)
 
 
-def norm(v):
-    return np.sqrt(np.dot(v, v))
-
-
 def plane_from_points(p1, p2, p3):
     n = np.cross(p2 - p1, p3 - p1)
-    n /= norm(n)
+    n /= np.linalg.norm(n)
     return (p1, n)
 
 
 def line_from_points(p1, p2):
     v = p2 - p1
-    v /= norm(v)
+    v /= np.linalg.norm(v)
     return (p1, v)
 
 
 def intersection_plane_line(plane, line):
     p, n = plane
     p1, v = line
-    n = n / norm(n)
-    v = v / norm(v)
+    n = n / np.linalg.norm(n)
+    v = v / np.linalg.norm(v)
     t = np.dot(p - p1, n) / np.dot(v, n)
     return p1 + v * t
 
 
 def orthogonal_vector(v):
     best_i = 0
-    best_d = norm(v)
+    best_d = np.linalg.norm(v)
     for i in range(v.shape[0]):
         unit = np.zeros(v.shape[0])
         unit[i] = 1
@@ -78,13 +74,13 @@ def orthogonal_vector(v):
     v1 = np.zeros(v.shape[0])
     v1[best_i] = 1
     v1 -= v * np.dot(v, v1)
-    v1 /= norm(v1)
+    v1 /= np.linalg.norm(v1)
     return v1
 
 
 def orthogonal_vectors(v, n):
     v = np.array(v, np.float64)
-    v = v / norm(v)
+    v = v / np.linalg.norm(v)
     i_ = []
     d_ = []
     for i in range(v.shape[0]):
@@ -103,7 +99,7 @@ def orthogonal_vectors(v, n):
         v1 = np.zeros(v.shape[0])
         v1[i] = 1
         v1 -= v * np.dot(v, v1)
-        v1 /= norm(v1)
+        v1 /= np.linalg.norm(v1)
         vs.append(v1)
     return vs
 
@@ -122,7 +118,7 @@ def orthogonal_vectors2(v):
             v1 = np.cross(v, E_Y)
         else:
             v1 = np.cross(v, E_Z)
-    v1 /= norm(v1)
+    v1 /= np.linalg.norm(v1)
     v2 = np.cross(v, v1)
-    v2 /= norm(v2)
+    v2 /= np.linalg.norm(v2)
     return v1, v2
