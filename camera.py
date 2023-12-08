@@ -1,36 +1,18 @@
 from dataclasses import dataclass
 import numpy as np
 
-from pose import Pose
 from geometry import *
 
 
-@dataclass
-class Camera:
-    pose: Pose
+@dataclass(frozen=True)
+class CameraParams:
     hfov: float
     vfov: float
     width: float
     height: float
 
     def copy(self):
-        return Camera(self.pose.copy(), self.hfov, self.vfov, self.width, self.height)
-
-    @property
-    def att(self):
-        return self.pose.att
-
-    @att.setter
-    def att(self, att):
-        self.pose.att = att
-
-    @property
-    def pos(self):
-        return self.pose.pos
-
-    @pos.setter
-    def pos(self, pos):
-        self.pose.pos = pos
+        return CameraParams(self.hfov, self.vfov, self.width, self.height)
 
     @property
     def fx(self):
@@ -48,10 +30,10 @@ class Camera:
     def cy(self):
         return self.height / 2
 
-    def image_plane_vecs(self, vec=E_X, vec_h=E_Y, vec_v=E_Z):
+    def image_plane_vecs(self, att, vec=E_X, vec_h=E_Y, vec_v=E_Z):
         vfovh = np.deg2rad(self.vfov) / 2
         hfovh = np.deg2rad(self.hfov) / 2
-        rot = as_rotation(self.att)
+        rot = as_rotation(att)
         vec = rot.apply(vec)
         vec_v = rot.apply(vec_v)
         vec_h = rot.apply(vec_h)
@@ -59,8 +41,8 @@ class Camera:
         vec_h = vec_h * np.tan(hfovh)
         return (vec, vec_v, vec_h)
 
-    def ground_points(self, max_dist=2., ground_alt=0.):
-        vec, vec_v, vec_h = self.image_plane_vecs()
+    def ground_points(self, pose, max_dist=2., ground_alt=0.):
+        vec, vec_v, vec_h = self.image_plane_vecs(pose.att)
         vecs = [
             vec + vec_v + vec_h,
             vec + vec_v - vec_h,
@@ -70,18 +52,18 @@ class Camera:
         pg = np.array([0., 0., ground_alt])
         ng = np.array([0., 0., 1.])
         bpoints = [intersection_plane_line(
-            (pg, ng), (self.pose.pos, v)) for v in vecs]
+            (pg, ng), (pose.pos, v)) for v in vecs]
         for i, point in enumerate(bpoints):
-            if np.dot(point - self.pose.pos, vec) < 0:
-                p = self.pose.pos + max_dist * vecs[i]
+            if np.dot(point - pose.pos, vec) < 0:
+                p = pose.pos + max_dist * vecs[i]
                 # project onto plane
                 p = intersection_plane_line((pg, ng), (p, ng))
                 bpoints[i] = p
 
         return bpoints
 
-    def rays(self, img_points):
-        vec, vec_v, vec_h = self.image_plane_vecs()
+    def rays(self, att, img_points):
+        vec, vec_v, vec_h = self.image_plane_vecs(att)
         rays = []
         for p in img_points:
             p = np.array(p, np.float64)
@@ -91,6 +73,3 @@ class Camera:
             p /= norm(p)
             rays.append(p)
         return rays
-
-    def with_pose(self, pose):
-        return Camera(pose, self.hfov, self.vfov, self.width, self.height)

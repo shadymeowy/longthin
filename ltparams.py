@@ -11,8 +11,8 @@ class LTParams:
     spot_percent: float = 0.3  # percent of to side length
     strip_w: float = 10e-2  # width of strip
 
-    vehicle_pos: np.ndarray = np.array([0., 0., 0.]) # initial position
-    vehicle_att: np.ndarray = np.array([0., 0., 0.]) # initial attitude
+    vehicle_pos: np.ndarray = np.array([0., 0., 0.])  # initial position
+    vehicle_att: np.ndarray = np.array([0., 0., 0.])  # initial attitude
 
     chassis_l: float = 50e-2  # length
     chassis_w: float = 10e-2  # width
