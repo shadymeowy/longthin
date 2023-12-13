@@ -208,7 +208,8 @@ if __name__ == '__main__':
         camera_params = renderer.camera_params
 
         img = renderer.render_image()
-        corners, actual_corners, ids = estimator.estimate(img)
+        compound = estimator.estimate(img)
+        corners, actual_corners, ids, calculated_corners = compound
 
         renderer.drawlist_area.style2(0., 0., 1., 1., 4.)
         for x, y, z in actual_corners:
@@ -226,5 +227,10 @@ if __name__ == '__main__':
             ng = np.array([0., 0., 1.])
             p = intersection_plane_line((pg, ng), (camera_pose.pos, ray))
             renderer.drawlist_area.point(p[0], p[1], p[2])
+
+        renderer.drawlist_vehicle.style2(0., 1., 0., 1., 4.)
+        for corner in calculated_corners:
+            renderer.drawlist_vehicle.point(corner[0], corner[1], 0)
+
         cv2.imshow("Image", img)
         cv2.waitKey(1)

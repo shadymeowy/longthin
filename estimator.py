@@ -6,6 +6,7 @@ from ltparams import LTParams
 from geometry import *
 from pose import Pose
 from marker import *
+from camera import CameraParams
 
 
 @dataclass
@@ -18,11 +19,14 @@ class Estimator:
     # markers = None
     marker_dist: np.ndarray = None
 
+    hmat: np.ndarray = None
+
     def __post_init__(self):
-        self.camera_pose = Pose(self.params.camera_pos_rel,
-                                self.params.camera_att_rel)
-        self.vehicle_pose = Pose(self.params.vehicle_pos,
-                                 self.params.vehicle_att)
+        params = self.params
+        self.camera_pose = Pose(params.camera_pos_rel,
+                                params.camera_att_rel)
+        self.camera_params = CameraParams(params.camera_hfov, params.camera_vfov,
+                                          params.camera_width, params.camera_height)
 
         w = self.params.area_w + 2 * self.params.strip_w
         h = self.params.area_h + 2 * self.params.strip_w
@@ -30,6 +34,25 @@ class Estimator:
         alt = self.params.marker_alt
         # self.markers = marker_gen(n)
         self.marker_dist = marker_distribute(n, w, h, alt)
+
+        w = self.params.camera_width
+        h = self.params.camera_height
+        # calculate homography matrix
+        # a portion from the bottom of the image
+        # temporary solution
+        p_image = np.array([
+            [w/2 - 100, h - 100],
+            [w/2 + 100, h - 100],
+            [w/2 + 100, h],
+            [w/2 - 100, h]
+        ], dtype=np.float32)
+        rays = self.camera_params.rays(self.camera_pose.att, p_image)
+        pg, ng = np.array([0., 0., 0.]), np.array([0., 0., 1.])
+        p_world = np.array([intersection_plane_line(
+            (pg, ng), (self.camera_pose.pos, r)) for r in rays])
+        p_world = p_world[:, :2]
+        p_world = p_world.astype(np.float32)
+        self.hmat = cv2.findHomography(p_image, p_world)[0]
 
     def estimate(self, img):
         if self.params.distort_active:
@@ -43,10 +66,16 @@ class Estimator:
             return None
         corners = corners[:, :, 2:].reshape((-1, 2))
         ids = ids.reshape((-1))
-        actual_corners = self.corner_position(ids)[:, :2]
-        actual_corners = actual_corners.reshape((-1, 2))
-        print(actual_corners)
-        return corners, actual_corners, ids
+        actual_corners = self.corner_position(ids)[:, 2:]
+        actual_corners = actual_corners.reshape((-1, 3))
+
+        calculated_corners = np.zeros_like(corners)
+        for i in range(len(corners)):
+            p = np.array([corners[i, 0], corners[i, 1], 1.])
+            p = self.hmat @ p
+            p /= p[2]
+            calculated_corners[i] = p[:2]
+        return corners, actual_corners, ids, calculated_corners
 
     def corner_position(self, id_):
         if isinstance(id_, (list, tuple, np.ndarray)):
