@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
+from distortion import Distortion
 
 
 @dataclass
@@ -23,14 +24,20 @@ class LTParams:
     wheel_w: float = 2e-2  # width
     wheel_offset: float = 5e-2  # from the center
 
-    camera_alt: float = -20e-2  # from ground
+    camera_alt: float = -25e-2  # from ground
     camera_pos_rel: np.ndarray = None  # determined by others
     camera_att_rel: np.ndarray = np.array(
-        [0, -35, 0])  # attitude relative to vehicle
+        [0, -30, 0])  # attitude relative to vehicle
+
+    # rewritten if distortion is active
     camera_hfov: float = 102  # horizontal field of view
     camera_vfov: float = 85.6  # vertical field of view
     camera_width: int = 960  # width of image
     camera_height: int = 720  # height of image
+
+    distort_active: bool = True  # whether to apply distortion to camera
+    distort_path: str = 'other/calibration.txt'  # distortion parameters
+    distort_params: Distortion = None
 
     marker_w: float = 20e-2  # width of marker
     marker_h: float = 20e-2  # height of marker
@@ -53,3 +60,11 @@ class LTParams:
                 0,
                 self.camera_alt
             ])
+        if self.distort_active:
+            self.distort_params = Distortion.from_file(self.distort_path)
+            self.camera_hfov = np.rad2deg(self.distort_params.hfov)
+            self.camera_vfov = np.rad2deg(self.distort_params.vfov)
+            self.camera_width = self.distort_params.width2
+            self.camera_height = self.distort_params.height2
+        else:
+            self.distort_params = None

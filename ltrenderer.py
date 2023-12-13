@@ -79,7 +79,7 @@ class LTRenderer:
 
     def draw_area(self):
         # background
-        self.drawlist_area.style2(1., 1., 1., 1., 1.)
+        self.drawlist_area.style2(0xa2/255, 0xbf/255, 0xf4/255, 1., 1.)
         self.drawlist_area.clear()
         # base
         self.drawlist_area.style2(.8, .8, .8, 1., 1.)
@@ -183,6 +183,13 @@ class LTRenderer:
         self.drawlist_vehicle.draw_camera(self.camera_pose, self.camera_params)
         self.drawlist_vehicle.save()
 
+    def render_image(self):
+        img = renderer.drawlist_area.save_buffer(self.camera_vehicle)
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+        if self.params.distort_active:
+            img = self.params.distort_params.distort(img)
+        return img
+
 
 if __name__ == '__main__':
     params = LTParams()
@@ -191,18 +198,23 @@ if __name__ == '__main__':
         angle = np.deg2rad(renderer.vehicle_pose.att[2])
         renderer.vehicle_pose.pos = np.array(
             [np.sin(angle), -np.cos(angle), 0.]) * 1
-        renderer.vehicle_pose.att += np.array([0., 0., 0.25])
+        renderer.vehicle_pose.att += np.array([0., 0., 0.23])
 
         vehicle_pose = renderer.vehicle_pose
         camera_pose = vehicle_pose.from_frame(renderer.camera_pose)
         camera_params = renderer.camera_params
 
-        img = renderer.drawlist_area.save_buffer(renderer.camera_vehicle)
-        img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
-        corners, ids = marker_detect(img)
-        img_markers = marker_draw(img, corners, ids)
-        if corners.size > 0:
-            corners = corners[:, :, 2:].reshape((-1, 2))
+        img = renderer.render_image()
+        if params.distort_active:
+            img_ud = params.distort_params.undistort(img)
+        else:
+            img_ud = img
+        corners, ids = marker_detect(img_ud)
+        img_markers = marker_draw(img_ud, corners, ids)
+        if corners.size == 0:
+            continue
+        corners = corners[:, :, 2:].reshape((-1, 2))
+
         rays = camera_params.rays(camera_pose.att, corners)
         renderer.drawlist_area.style2(1., 0., 1., 0.2, 2.)
         for ray in rays:
@@ -216,5 +228,6 @@ if __name__ == '__main__':
             ng = np.array([0., 0., 1.])
             p = intersection_plane_line((pg, ng), (camera_pose.pos, ray))
             renderer.drawlist_area.point(p[0], p[1], p[2])
+        cv2.imshow("Image", img)
         cv2.imshow("Markers", img_markers)
         cv2.waitKey(1)
