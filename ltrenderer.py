@@ -9,6 +9,7 @@ from marker import *
 from geometry import *
 from pose import Pose
 from camera import CameraParams
+from estimator import Estimator
 
 
 class LTRenderer:
@@ -194,6 +195,8 @@ class LTRenderer:
 if __name__ == '__main__':
     params = LTParams()
     renderer = LTRenderer(params)
+    estimator = Estimator(params)
+
     while not renderer.draw():
         angle = np.deg2rad(renderer.vehicle_pose.att[2])
         renderer.vehicle_pose.pos = np.array(
@@ -205,16 +208,11 @@ if __name__ == '__main__':
         camera_params = renderer.camera_params
 
         img = renderer.render_image()
-        if params.distort_active:
-            img_ud = params.distort_params.undistort(img)
-        else:
-            img_ud = img
-        corners, ids = marker_detect(img_ud)
-        img_markers = marker_draw(img_ud, corners, ids)
-        if corners.size == 0:
-            continue
-        corners = corners[:, :, 2:].reshape((-1, 2))
+        corners, actual_corners, ids = estimator.estimate(img)
 
+        renderer.drawlist_area.style2(0., 0., 1., 1., 4.)
+        for x, y, z in actual_corners:
+            renderer.drawlist_area.point(x, y, z)
         rays = camera_params.rays(camera_pose.att, corners)
         renderer.drawlist_area.style2(1., 0., 1., 0.2, 2.)
         for ray in rays:
@@ -229,5 +227,4 @@ if __name__ == '__main__':
             p = intersection_plane_line((pg, ng), (camera_pose.pos, ray))
             renderer.drawlist_area.point(p[0], p[1], p[2])
         cv2.imshow("Image", img)
-        cv2.imshow("Markers", img_markers)
         cv2.waitKey(1)
