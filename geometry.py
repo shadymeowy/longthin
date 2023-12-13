@@ -122,3 +122,23 @@ def orthogonal_vectors2(v):
     v2 = np.cross(v, v1)
     v2 /= np.linalg.norm(v2)
     return v1, v2
+
+
+def estimate_rigid_transform(pointsA, pointsB):
+    pointsA = np.array(pointsA, dtype=np.float64)
+    pointsB = np.array(pointsB, dtype=np.float64)
+    centroid_A = np.mean(pointsA, axis=0)
+    centroid_B = np.mean(pointsB, axis=0)
+    centered_A = pointsA - centroid_A
+    centered_B = pointsB - centroid_B
+
+    H = np.dot(centered_A.T, centered_B)
+    U, _, Vt = np.linalg.svd(H)
+    R = np.dot(Vt.T, U.T)
+
+    if np.linalg.det(R) < 0:
+        Vt[-1, :] *= -1
+        R = np.dot(Vt.T, U.T)
+
+    T = centroid_B - np.dot(R, centroid_A)
+    return R, T

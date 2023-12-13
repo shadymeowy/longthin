@@ -41,22 +41,24 @@ class Estimator:
         # a portion from the bottom of the image
         # temporary solution
         p_image = np.array([
-            [w/2 - 100, h - 100],
-            [w/2 + 100, h - 100],
-            [w/2 + 100, h],
-            [w/2 - 100, h]
+            [w/2 - 256, h - 256],
+            [w/2 + 256, h - 256],
+            [w/2 + 256, h],
+            [w/2 - 256, h]
         ], dtype=np.float32)
         rays = self.camera_params.rays(self.camera_pose.att, p_image)
-        pg, ng = np.array([0., 0., 0.]), np.array([0., 0., 1.])
-        p_world = np.array([intersection_plane_line(
-            (pg, ng), (self.camera_pose.pos, r)) for r in rays])
+        pg, ng = np.array([0., 0., -params.camera_alt]), np.array([0., 0., 1.])
+        o = np.array([0., 0., 0.])
+        p_world = np.array(
+            [intersection_plane_line((pg, ng), (o, r)) for r in rays])
         p_world = p_world[:, :2]
         p_world = p_world.astype(np.float32)
         self.hmat = cv2.findHomography(p_image, p_world)[0]
 
     def estimate(self, img):
-        if self.params.distort_active:
-            img_ud = self.params.distort_params.undistort(img)
+        params = self.params
+        if params.distort_active:
+            img_ud = params.distort_params.undistort(img)
         else:
             img_ud = img
         corners, ids = marker_detect(img_ud)
@@ -66,8 +68,9 @@ class Estimator:
             return None
         corners = corners[:, :, 2:].reshape((-1, 2))
         ids = ids.reshape((-1))
-        actual_corners = self.corner_position(ids)[:, 2:]
-        actual_corners = actual_corners.reshape((-1, 3))
+        actual_corners = self.corner_position(ids)[:, 2:, :2]
+        actual_corners = actual_corners.reshape((-1, 2))
+        actual_corners = actual_corners.astype(np.float64)
 
         calculated_corners = np.zeros_like(corners)
         for i in range(len(corners)):
@@ -75,7 +78,21 @@ class Estimator:
             p = self.hmat @ p
             p /= p[2]
             calculated_corners[i] = p[:2]
-        return corners, actual_corners, ids, calculated_corners
+
+        # m, inliers = cv2.estimateAffinePartial2D(
+        #    calculated_corners, actual_corners)
+        # tx = m[0, 2]
+        # ty = m[1, 2]
+        # yaw = np.arctan2(m[1, 0], m[0, 0])
+        # yaw = np.rad2deg(yaw)
+        # est = np.array([tx, ty, yaw])
+
+        R, T = estimate_rigid_transform(
+            calculated_corners, actual_corners[..., :2].astype(np.float64))
+        yaw = np.arctan2(R[1, 0], R[0, 0])
+        yaw = np.rad2deg(yaw)
+        est = np.array([T[0], T[1], yaw])
+        return est, corners, ids, actual_corners, calculated_corners
 
     def corner_position(self, id_):
         if isinstance(id_, (list, tuple, np.ndarray)):
