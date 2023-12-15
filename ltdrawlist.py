@@ -143,7 +143,7 @@ class LTDrawList(drawing3d.DrawList):
         nh = data.shape[1]
         dw = width / nw
         dh = height / nh
-        e = min(dw, dh) / 16
+        e = 1e-4
         for i in range(nw):
             for j in range(nh):
                 if data[i, j]:
@@ -156,6 +156,6 @@ class LTDrawList(drawing3d.DrawList):
                     [0, (j + 1) * dh + e, (i + 1) * dw + e],
                     [0, j * dh - e, (i + 1) * dw + e],
                 ])
-                points -= np.array([0, width / 2, height])
+                points -= np.array([0, height / 2, width])
                 points = pose.from_frame(points)
                 self.polygon(points)

@@ -57,7 +57,7 @@ class Estimator:
 
     def estimate(self, img):
         params = self.params
-        if params.distort_active:
+        if params.distort_enable:
             img_ud = params.distort_params.undistort(img)
         else:
             img_ud = img

@@ -35,7 +35,7 @@ class LTParams:
     camera_width: int = 960  # width of image
     camera_height: int = 720  # height of image
 
-    distort_active: bool = True  # whether to apply distortion to camera
+    distort_enable: bool = True  # whether to apply distortion to camera
     distort_path: str = 'other/calibration.txt'  # distortion parameters
     distort_params: Distortion = None
 
@@ -44,6 +44,13 @@ class LTParams:
     marker_alt: float = 0.e-2  # from ground
     marker_n: int = 2  # per side
     marker_pitch: float = 1.  # degrees
+
+    checker_enable: bool = True
+    checker_size: float = 22.5e-3  # size of checker
+    checker_alt: float = 0.e-2
+    checker_nw: int = 7 # number of checkers in width
+    checker_nh: int = 10 # number of checkers in height
+    checker_pitch: float = -90.  # degrees
 
     def __post_init__(self):
         if self.spot_w is None:
@@ -60,7 +67,7 @@ class LTParams:
                 0,
                 self.camera_alt
             ])
-        if self.distort_active:
+        if self.distort_enable:
             self.distort_params = Distortion.from_file(self.distort_path)
             self.camera_hfov = np.rad2deg(self.distort_params.hfov)
             self.camera_vfov = np.rad2deg(self.distort_params.vfov)

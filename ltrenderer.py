@@ -123,6 +123,32 @@ class LTRenderer:
             self.draw_marker(pose, data)
         self.drawlist_area.save()
 
+        if self.params.checker_enable:
+            self.draw_checkerboard()
+            self.drawlist_area.save()
+
+    def draw_checkerboard(self):
+        self.drawlist_area.style2(0., 1., 0., 1., 4.)
+        # calibration checkerboard
+        checker_size = self.params.checker_size
+        checker_nw = self.params.checker_nw
+        checker_nh = self.params.checker_nh
+        checker_pitch = self.params.checker_pitch
+        checker_alt = self.params.checker_alt
+        pose = Pose(np.array([
+                    self.params.camera_pos_rel[0],
+                    self.params.camera_pos_rel[1],
+                    checker_alt]),
+                    np.array([0., checker_pitch, 0.]))
+        pose = pose.from_frame(self.vehicle_pose)
+        data = np.zeros((checker_nh, checker_nw), dtype=np.uint8)
+        data[::2, ::2] = 1
+        data[1::2, 1::2] = 1
+        checker_w = checker_size * checker_nw
+        checker_h = checker_size * checker_nh
+        self.drawlist_area.draw_binary_grid(
+            pose, checker_h, checker_w, data)
+
     def draw_marker(self, pose, data):
         marker_w = self.params.marker_w
         marker_h = self.params.marker_h
@@ -187,7 +213,7 @@ class LTRenderer:
     def render_image(self):
         img = renderer.drawlist_area.save_buffer(self.camera_vehicle)
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
-        if self.params.distort_active:
+        if self.params.distort_enable:
             img = self.params.distort_params.distort(img)
         return img
 
