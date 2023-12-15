@@ -17,8 +17,7 @@ def marker_gen(n, size=6):
     return result
 
 
-def marker_detect(img):
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+def marker_detect(img_gray):
     corners, ids, _ = detector.detectMarkers(img_gray)
     corners = np.array(corners, dtype=np.float32)
     return corners, ids

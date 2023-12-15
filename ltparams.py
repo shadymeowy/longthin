@@ -48,9 +48,10 @@ class LTParams:
     checker_enable: bool = True
     checker_size: float = 22.5e-3  # size of checker
     checker_alt: float = 0.e-2
-    checker_nw: int = 7 # number of checkers in width
-    checker_nh: int = 10 # number of checkers in height
+    checker_nw: int = 7  # number of checkers in width
+    checker_nh: int = 10  # number of checkers in height
     checker_pitch: float = -90.  # degrees
+    checker_offset: float = 15.e-2  # offset from center of vehicle
 
     def __post_init__(self):
         if self.spot_w is None:

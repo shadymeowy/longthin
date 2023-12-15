@@ -130,22 +130,21 @@ class LTRenderer:
     def draw_checkerboard(self):
         self.drawlist_area.style2(0., 1., 0., 1., 4.)
         # calibration checkerboard
-        checker_size = self.params.checker_size
         checker_nw = self.params.checker_nw
         checker_nh = self.params.checker_nh
         checker_pitch = self.params.checker_pitch
-        checker_alt = self.params.checker_alt
         pose = Pose(np.array([
-                    self.params.camera_pos_rel[0],
+                    self.params.camera_pos_rel[0] + self.params.checker_offset,
                     self.params.camera_pos_rel[1],
-                    checker_alt]),
+                    self.params.checker_alt]),
                     np.array([0., checker_pitch, 0.]))
         pose = pose.from_frame(self.vehicle_pose)
         data = np.zeros((checker_nh, checker_nw), dtype=np.uint8)
         data[::2, ::2] = 1
         data[1::2, 1::2] = 1
-        checker_w = checker_size * checker_nw
-        checker_h = checker_size * checker_nh
+        # borders
+        checker_w = self.params.checker_size * checker_nw
+        checker_h = self.params.checker_size * checker_nh
         self.drawlist_area.draw_binary_grid(
             pose, checker_h, checker_w, data)
 

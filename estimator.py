@@ -34,26 +34,7 @@ class Estimator:
         alt = self.params.marker_alt
         # self.markers = marker_gen(n)
         self.marker_dist = marker_distribute(n, w, h, alt)
-
-        w = self.params.camera_width
-        h = self.params.camera_height
-        # calculate homography matrix
-        # a portion from the bottom of the image
-        # temporary solution
-        p_image = np.array([
-            [w/2 - 256, h - 256],
-            [w/2 + 256, h - 256],
-            [w/2 + 256, h],
-            [w/2 - 256, h]
-        ], dtype=np.float32)
-        rays = self.camera_params.rays(self.camera_pose.att, p_image)
-        pg, ng = np.array([0., 0., -params.camera_alt]), np.array([0., 0., 1.])
-        o = np.array([0., 0., 0.])
-        p_world = np.array(
-            [intersection_plane_line((pg, ng), (o, r)) for r in rays])
-        p_world = p_world[:, :2]
-        p_world = p_world.astype(np.float32)
-        self.hmat = cv2.findHomography(p_image, p_world)[0]
+        self.hmat = self.calculate_homography()
 
     def estimate(self, img):
         params = self.params
@@ -61,7 +42,11 @@ class Estimator:
             img_ud = params.distort_params.undistort(img)
         else:
             img_ud = img
-        corners, ids = marker_detect(img_ud)
+        img_gray = cv2.cvtColor(img_ud, cv2.COLOR_BGR2GRAY)
+        if params.checker_enable:
+            self.calibrate_homography(img_gray)
+
+        corners, ids = marker_detect(img_gray)
         img_markers = marker_draw(img_ud, corners, ids)
         cv2.imshow('markers', img_markers)
         if corners.size == 0:
@@ -110,3 +95,84 @@ class Estimator:
         ])
         corners = marker_pose.from_frame(corners)
         return corners
+
+    def calculate_homography(self):
+        # calculate homography matrix
+        # a portion from the bottom of the image
+        # temporary solution
+        w = self.params.camera_width
+        h = self.params.camera_height
+        p_image = np.array([
+            [w/2 - 256, h - 256],
+            [w/2 + 256, h - 256],
+            [w/2 + 256, h],
+            [w/2 - 256, h]
+        ], dtype=np.float32)
+        rays = self.camera_params.rays(self.camera_pose.att, p_image)
+        pg, ng = np.array([0., 0., -self.params.camera_alt]
+                          ), np.array([0., 0., 1.])
+        o = np.array([0., 0., 0.])
+        p_world = np.array(
+            [intersection_plane_line((pg, ng), (o, r)) for r in rays])
+        p_world = p_world[:, :2]
+        p_world = p_world.astype(np.float32)
+        hmat = cv2.findHomography(p_image, p_world)[0]
+        return hmat
+
+    def calibrate_homography(self, img):
+        # use checkerboard to calibrate homography
+        ret, corners = cv2.findChessboardCorners(
+            img, (self.params.checker_nw - 1, self.params.checker_nh - 1),
+            cv2.CALIB_CB_ADAPTIVE_THRESH)
+        if not ret:
+            return
+        print('found checkerboard')
+        corners = corners.reshape((-1, 2))
+        img_draw = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        cv2.drawChessboardCorners(
+            img_draw, (self.params.checker_nh - 1, self.params.checker_nw - 1), corners, ret)
+        # index of corners in the image
+        for i in range(self.params.checker_nw-1):
+            cv2.putText(img_draw, str(i), tuple(
+                corners[i].astype(np.int32)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
+        cv2.imshow('checkerboard', img_draw)
+        corners = cv2.cornerSubPix(
+            img, corners, (5, 5), (-1, -1), (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001))
+        # use calculated homography matrix to calculate world coordinates
+        # to compare with checkerboard corners
+        hmat_calc = self.calculate_homography()
+        p_world = np.array([corners[:, 0], corners[:, 1],
+                           np.ones_like(corners[:, 0])])
+        p_world = hmat_calc @ p_world
+        p_world /= p_world[2]
+        p_world = p_world[:2]
+        p_world = p_world.T
+
+        # checkerboard pose
+        pose = Pose(np.array([
+            self.params.checker_offset,
+            self.params.camera_pos_rel[1],
+            self.params.checker_alt]),
+            np.array([0., 0, 0.]))
+        # checkerboard corners
+        w = self.params.checker_size * self.params.checker_nw
+        # h = self.params.checker_size * self.params.checker_nh
+        act_corners = np.meshgrid(np.arange(1, self.params.checker_nw)[::-1],
+                                  np.arange(1, self.params.checker_nh))
+        act_corners = np.stack(act_corners[::-1], axis=-1)
+        act_corners = act_corners.astype(np.float32)
+        act_corners = act_corners.reshape((-1, 2))
+        act_corners[:, 0] *= self.params.checker_size
+        act_corners[:, 1] *= self.params.checker_size
+        act_corners -= np.array([0, w/2])
+        act_corners = np.hstack(
+            (act_corners, np.zeros((act_corners.shape[0], 1))))
+        act_corners = pose.from_frame(act_corners)[:, :2]
+
+        # calculate homography matrix
+        hmat_calib = cv2.findHomography(corners, act_corners)[0]
+        print('hmat_calib', hmat_calib)
+        print('hmat_calc', hmat_calc)
+        error = (hmat_calib - hmat_calc) / np.max(np.abs(hmat_calc)) * 100
+        print('error', error)
+        return hmat_calib
