@@ -223,10 +223,11 @@ if __name__ == '__main__':
     estimator = Estimator(params)
 
     while not renderer.draw():
-        angle = np.deg2rad(renderer.vehicle_pose.att[2])
-        renderer.vehicle_pose.pos = np.array(
-            [np.sin(angle), -np.cos(angle), 0.]) * 1
-        renderer.vehicle_pose.att += np.array([0., 0., 0.23])
+        if not params.checker_enable:
+            angle = np.deg2rad(renderer.vehicle_pose.att[2])
+            renderer.vehicle_pose.pos = np.array(
+                [np.sin(angle), -np.cos(angle), 0.]) * 1
+            renderer.vehicle_pose.att += np.array([0., 0., 0.23])
 
         vehicle_pose = renderer.vehicle_pose
         camera_pose = vehicle_pose.from_frame(renderer.camera_pose)

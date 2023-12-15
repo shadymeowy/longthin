@@ -34,7 +34,10 @@ class Estimator:
         alt = self.params.marker_alt
         # self.markers = marker_gen(n)
         self.marker_dist = marker_distribute(n, w, h, alt)
-        self.hmat = self.calculate_homography()
+        if params.homography_calib_enable:
+            self.hmat = params.homography_calib_data
+        else:
+            self.hmat = self.calculate_homography()
 
     def estimate(self, img):
         params = self.params
@@ -43,7 +46,7 @@ class Estimator:
         else:
             img_ud = img
         img_gray = cv2.cvtColor(img_ud, cv2.COLOR_BGR2GRAY)
-        if params.checker_enable:
+        if params.homography_calibration:
             self.calibrate_homography(img_gray)
 
         corners, ids = marker_detect(img_gray)

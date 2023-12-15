@@ -45,13 +45,18 @@ class LTParams:
     marker_n: int = 2  # per side
     marker_pitch: float = 1.  # degrees
 
-    checker_enable: bool = True
+    checker_enable: bool = False
     checker_size: float = 22.5e-3  # size of checker
     checker_alt: float = 0.e-2
     checker_nw: int = 7  # number of checkers in width
     checker_nh: int = 10  # number of checkers in height
     checker_pitch: float = -90.  # degrees
     checker_offset: float = 15.e-2  # offset from center of vehicle
+
+    homography_calibration: bool = False
+    homography_calib_enable: bool = True
+    homography_calib_path: str = 'other/hcalib.txt'
+    homography_calib_data: np.ndarray = None
 
     def __post_init__(self):
         if self.spot_w is None:
@@ -76,3 +81,5 @@ class LTParams:
             self.camera_height = self.distort_params.height2
         else:
             self.distort_params = None
+        if self.homography_calib_enable:
+            self.homography_calib_data = np.loadtxt(self.homography_calib_path)
