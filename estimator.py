@@ -52,9 +52,12 @@ class Estimator:
         corners, ids = marker_detect(img_gray)
         img_markers = marker_draw(img_ud, corners, ids)
         cv2.imshow('markers', img_markers)
+        corners = corners[ids < len(self.marker_dist)]
+        ids = ids[ids < len(self.marker_dist)]
         if corners.size == 0:
             return None
-        corners = corners[:, :, 2:].reshape((-1, 2))
+        corners = corners.reshape((-1, 4, 2))
+        corners = corners[:, 2:, :].reshape((-1, 2))
         ids = ids.reshape((-1))
         actual_corners = self.corner_position(ids)[:, 2:, :2]
         actual_corners = actual_corners.reshape((-1, 2))
@@ -135,12 +138,15 @@ class Estimator:
         cv2.drawChessboardCorners(
             img_draw, (self.params.checker_nh - 1, self.params.checker_nw - 1), corners, ret)
         # index of corners in the image
+        corners = cv2.cornerSubPix(
+            img, corners, (5, 5), (-1, -1), (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001))
+        # sort corners, first agains y, then against x
+        value = corners[:, 0] + corners[:, 1]*100
+        corners = corners[np.argsort(-value)]
         for i in range(self.params.checker_nw-1):
             cv2.putText(img_draw, str(i), tuple(
                 corners[i].astype(np.int32)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
         cv2.imshow('checkerboard', img_draw)
-        corners = cv2.cornerSubPix(
-            img, corners, (5, 5), (-1, -1), (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001))
         # use calculated homography matrix to calculate world coordinates
         # to compare with checkerboard corners
         hmat_calc = self.calculate_homography()
