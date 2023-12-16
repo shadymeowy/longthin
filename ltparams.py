@@ -41,13 +41,13 @@ class LTParams:
 
     marker_w: float = 20e-2  # width of marker
     marker_h: float = 20e-2  # height of marker
-    marker_alt: float = 0.e-2  # from ground
+    marker_alt: float = -1e-2  # from ground
     marker_n: int = 2  # per side
     marker_pitch: float = 1.  # degrees
 
     checker_enable: bool = False
     checker_size: float = 22.5e-3  # size of checker
-    checker_alt: float = 0.e-2
+    checker_alt: float = -1e-2 # from ground
     checker_nw: int = 7  # number of checkers in width
     checker_nh: int = 10  # number of checkers in height
     checker_pitch: float = -90.  # degrees

@@ -52,6 +52,8 @@ class Estimator:
         corners, ids = marker_detect(img_gray)
         img_markers = marker_draw(img_ud, corners, ids)
         cv2.imshow('markers', img_markers)
+        if ids is None:
+            return None
         corners = corners[ids < len(self.marker_dist)]
         ids = ids[ids < len(self.marker_dist)]
         if corners.size == 0:
@@ -115,7 +117,9 @@ class Estimator:
             [w/2 - 256, h]
         ], dtype=np.float32)
         rays = self.camera_params.rays(self.camera_pose.att, p_image)
-        pg, ng = np.array([0., 0., -self.params.camera_alt]
+        pg, ng = np.array([0., 0.,
+                           -self.params.camera_alt
+                           + self.params.marker_alt]
                           ), np.array([0., 0., 1.])
         o = np.array([0., 0., 0.])
         p_world = np.array(

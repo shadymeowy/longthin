@@ -154,7 +154,7 @@ class LTRenderer:
         # draw line to ground
         self.drawlist_area.style2(0., 0., 0., 1., 8.)
         p = pose.pos
-        self.drawlist_area.line(p[0], p[1], p[2], p[0], p[1], 0)
+        # self.drawlist_area.line(p[0], p[1], p[2], p[0], p[1], 0)
         # add 2 rows and columns of zeros
         data = np.pad(data, 1, 'constant')
         self.drawlist_area.draw_binary_grid(pose, marker_w, marker_h, data)
@@ -253,7 +253,7 @@ if __name__ == '__main__':
         renderer.drawlist_area.style2(1., 0., 1., 1., 4.)
         for ray in rays:
             # find intersection with ground
-            pg = np.array([0., 0., 0.])
+            pg = np.array([0., 0., params.marker_alt])
             ng = np.array([0., 0., 1.])
             p = intersection_plane_line((pg, ng), (camera_pose.pos, ray))
             renderer.drawlist_area.point(p[0], p[1], p[2])
