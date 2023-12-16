@@ -30,9 +30,9 @@ class LTParams:
         [0, -30, 0])  # attitude relative to vehicle
 
     # rewritten if distortion is active
-    camera_hfov: float = 102  # horizontal field of view
-    camera_vfov: float = 85.6  # vertical field of view
-    camera_width: int = 960  # width of image
+    camera_hfov: float = 99.06  # horizontal field of view
+    camera_vfov: float = 67.02  # vertical field of view
+    camera_width: int = 1280  # width of image
     camera_height: int = 720  # height of image
 
     distort_enable: bool = True  # whether to apply distortion to camera
