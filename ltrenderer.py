@@ -235,6 +235,8 @@ if __name__ == '__main__':
 
         img = renderer.render_image()
         compound = estimator.estimate(img)
+        if compound is None:
+            continue
         est, corners, ids, actual_corners, calculated_corners = compound
         print('est', *est)
         print('act', *camera_pose.pos[:2], camera_pose.att[2])
