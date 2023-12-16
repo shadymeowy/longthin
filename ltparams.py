@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 from distortion import Distortion
 
@@ -12,8 +12,10 @@ class LTParams:
     spot_percent: float = 0.3  # percent of to side length
     strip_w: float = 10e-2  # width of strip
 
-    vehicle_pos: np.ndarray = np.array([0., 0., 0.])  # initial position
-    vehicle_att: np.ndarray = np.array([0., 0., 0.])  # initial attitude
+    vehicle_pos: np.ndarray = field(
+        default_factory=lambda: np.array([0., 0., 0.]))  # initial position
+    vehicle_att: np.ndarray = field(
+        default_factory=lambda: np.array([0., 0., 0.]))
 
     chassis_l: float = 50e-2  # length
     chassis_w: float = 10e-2  # width
@@ -26,8 +28,8 @@ class LTParams:
 
     camera_alt: float = -25e-2  # from ground
     camera_pos_rel: np.ndarray = None  # determined by others
-    camera_att_rel: np.ndarray = np.array(
-        [0, -30, 0])  # attitude relative to vehicle
+    camera_att_rel: np.ndarray = field(default_factory=lambda: np.array(
+        [0, -30, 0]))  # attitude relative to vehicle
 
     # rewritten if distortion is active
     camera_hfov: float = 99.06  # horizontal field of view
@@ -47,7 +49,7 @@ class LTParams:
 
     checker_enable: bool = False
     checker_size: float = 22.5e-3  # size of checker
-    checker_alt: float = -1e-2 # from ground
+    checker_alt: float = -1e-2  # from ground
     checker_nw: int = 7  # number of checkers in width
     checker_nh: int = 10  # number of checkers in height
     checker_pitch: float = -90.  # degrees

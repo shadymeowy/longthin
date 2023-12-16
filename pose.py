@@ -6,10 +6,14 @@ from geometry import as_rotation, as_euler
 
 @dataclass
 class Pose:
-    pos: np.ndarray = np.zeros(3)
-    att: np.ndarray = np.zeros(3)
+    pos: np.ndarray = None
+    att: np.ndarray = None
 
     def __post_init__(self):
+        if self.pos is None:
+            self.pos = np.zeros(3)
+        if self.att is None:
+            self.att = np.zeros(3)
         self.pos = np.array(self.pos, np.float64)
         self.att = as_euler(self.att)
 
