@@ -41,9 +41,9 @@ class LTParams:
     distort_path: str = 'other/calibration.txt'  # distortion parameters
     distort_params: Distortion = None
 
-    marker_w: float = 20e-2  # width of marker
-    marker_h: float = 20e-2  # height of marker
-    marker_alt: float = -1e-2  # from ground
+    marker_w: float = 19e-2  # width of marker
+    marker_h: float = 19e-2  # height of marker
+    marker_alt: float = -0e-2  # from ground
     marker_n: int = 2  # per side
     marker_pitch: float = 1.  # degrees
 
