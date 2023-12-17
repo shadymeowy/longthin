@@ -7,12 +7,15 @@ from .ltparams import LTParams
 
 
 def main():
+    markers = np.array([0, 0, params.marker_alt, 0])
+
     params = LTParams(
         distort_enable=True,
         distort_path='other/calibration.txt',
         homography_calib_enable=True,
         homography_calib_path='other/hcalib.txt',
-        homography_calibration=False)
+        homography_calibration=False,
+        markers=markers)
 
     cam = PiCam()
     estimator = Estimator(params)
