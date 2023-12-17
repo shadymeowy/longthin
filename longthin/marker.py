@@ -1,5 +1,5 @@
-import numpy as np
 import cv2
+import numpy as np
 
 marker_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 marker_params = cv2.aruco.DetectorParameters()

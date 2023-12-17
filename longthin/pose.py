@@ -1,7 +1,8 @@
-from dataclasses import dataclass
 import numpy as np
+from dataclasses import dataclass
 from scipy.spatial.transform import Rotation as R
-from geometry import as_rotation, as_euler
+
+from .geometry import as_rotation, as_euler
 
 
 @dataclass

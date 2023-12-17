@@ -1,7 +1,5 @@
-from scipy.spatial.transform import Rotation as R
 import numpy as np
-from dataclasses import dataclass
-
+from scipy.spatial.transform import Rotation as R
 
 NORMAL_XY = np.array([0., 0., 1.])
 NORMAL_YZ = np.array([1., 0., 0.])

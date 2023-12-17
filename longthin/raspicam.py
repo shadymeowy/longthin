@@ -4,8 +4,8 @@ from pprint import pprint
 from picamera2 import Picamera2
 from libcamera import controls
 
-from marker import *
-from distortion import Distortion
+from .marker import *
+from .distortion import Distortion
 
 
 class PiCam:

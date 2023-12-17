@@ -2,23 +2,18 @@ import numpy as np
 import cv2
 from dataclasses import dataclass
 
-from ltparams import LTParams
-from geometry import *
-from pose import Pose
-from marker import *
-from camera import CameraParams
+from .ltparams import LTParams
+from .geometry import *
+from .pose import Pose
+from .marker import *
+from .camera import CameraParams
 
 
 @dataclass
 class Estimator:
     params: LTParams
-
     camera_pose: Pose = None
     vehicle_pose: Pose = None
-
-    # markers = None
-    marker_dist: np.ndarray = None
-
     hmat: np.ndarray = None
 
     def __post_init__(self):
@@ -33,11 +28,13 @@ class Estimator:
         n = self.params.marker_n
         alt = self.params.marker_alt
         # self.markers = marker_gen(n)
-        self.marker_dist = marker_distribute(n, w, h, alt)
         if params.homography_calib_enable:
             self.hmat = params.homography_calib_data
         else:
             self.hmat = self.calculate_homography()
+
+        self.corners = None
+        self.act_corners = None
 
     def estimate(self, img):
         params = self.params
@@ -54,8 +51,9 @@ class Estimator:
         cv2.imshow('markers', img_markers)
         if ids is None:
             return None
-        corners = corners[ids < len(self.marker_dist)]
-        ids = ids[ids < len(self.marker_dist)]
+        mask = ids < len(params.markers)
+        corners = corners[mask]
+        ids = ids[mask]
         if corners.size == 0:
             return None
         corners = corners.reshape((-1, 4, 2))
@@ -90,8 +88,9 @@ class Estimator:
     def corner_position(self, id_):
         if isinstance(id_, (list, tuple, np.ndarray)):
             return np.array([self.corner_position(i) for i in id_])
-        pos = self.marker_dist[id_][:3]
-        yaw = self.marker_dist[id_][3]
+        markers = self.params.markers
+        pos = markers[id_][:3]
+        yaw = markers[id_][3]
         marker_pose = Pose(pos, [0, self.params.marker_pitch, yaw])
         w = self.params.marker_w
         h = self.params.marker_h
@@ -182,8 +181,15 @@ class Estimator:
             (act_corners, np.zeros((act_corners.shape[0], 1))))
         act_corners = pose.from_frame(act_corners)[:, :2]
 
+        if self.corners is None:
+            self.corners = corners
+            self.act_corners = act_corners
+        else:
+            self.corners = np.vstack((self.corners, corners))
+            self.act_corners = np.vstack((self.act_corners, act_corners))
+
         # calculate homography matrix
-        hmat_calib = cv2.findHomography(corners, act_corners)[0]
+        hmat_calib = cv2.findHomography(self.corners, self.act_corners, cv2.RANSAC)[0]
         print('hmat_calib', hmat_calib)
         print('hmat_calc', hmat_calc)
         error = (hmat_calib - hmat_calc) / np.max(np.abs(hmat_calc)) * 100

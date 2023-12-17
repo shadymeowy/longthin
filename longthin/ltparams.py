@@ -1,6 +1,8 @@
-from dataclasses import dataclass, field
 import numpy as np
-from distortion import Distortion
+from dataclasses import dataclass, field
+
+from .distortion import Distortion
+from .marker import marker_distribute
 
 
 @dataclass
@@ -37,15 +39,16 @@ class LTParams:
     camera_width: int = 1280  # width of image
     camera_height: int = 720  # height of image
 
-    distort_enable: bool = True  # whether to apply distortion to camera
-    distort_path: str = 'other/calibration.txt'  # distortion parameters
-    distort_params: Distortion = None
+    distort_enable: bool = False  # whether to apply distortion to camera
+    distort_path: str = ''  # path to distortion parameters
+    distort_params: Distortion = None  # distortion parameters data
 
     marker_w: float = 19e-2  # width of marker
     marker_h: float = 19e-2  # height of marker
     marker_alt: float = -0e-2  # from ground
     marker_n: int = 2  # per side
     marker_pitch: float = 1.  # degrees
+    markers: np.ndarray = None
 
     checker_enable: bool = False
     checker_size: float = 22.5e-3  # size of checker
@@ -55,10 +58,10 @@ class LTParams:
     checker_pitch: float = -90.  # degrees
     checker_offset: float = 15.e-2  # offset from center of vehicle
 
-    homography_calibration: bool = False
-    homography_calib_enable: bool = True
-    homography_calib_path: str = 'other/hcalib.txt'
-    homography_calib_data: np.ndarray = None
+    homography_calibration: bool = False  # enable homography calibration mode
+    homography_calib_enable: bool = False  # use homography calibration data
+    homography_calib_path: str = ''  # path to homography calibration data
+    homography_calib_data: np.ndarray = None  # homography calibration data
 
     def __post_init__(self):
         if self.spot_w is None:
@@ -85,3 +88,8 @@ class LTParams:
             self.distort_params = None
         if self.homography_calib_enable:
             self.homography_calib_data = np.loadtxt(self.homography_calib_path)
+        if self.markers is None:
+            w = self.area_w + 2 * self.strip_w
+            h = self.area_h + 2 * self.strip_w
+            self.markers = marker_distribute(
+                self.marker_n, w, h, self.marker_alt)

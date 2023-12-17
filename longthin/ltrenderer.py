@@ -1,15 +1,14 @@
-import drawing3d
-import numpy as np
 import cv2
-from scipy.spatial.transform import Rotation as R
+import numpy as np
+import drawing3d
 
-from ltdrawlist import LTDrawList
-from ltparams import LTParams
-from marker import *
-from geometry import *
-from pose import Pose
-from camera import CameraParams
-from estimator import Estimator
+from .ltdrawlist import LTDrawList
+from .ltparams import LTParams
+from .marker import *
+from .geometry import *
+from .pose import Pose
+from .camera import CameraParams
+from .estimator import Estimator
 
 
 class LTRenderer:
@@ -111,14 +110,9 @@ class LTRenderer:
         self.drawlist_area.plane(
             spot_x, strip_w+spot_y+spot_w/2, 0, spot_w, spot_l-spot_w, spot_w, 0.1)
 
-        w = self.params.area_w + 2 * self.params.strip_w
-        h = self.params.area_h + 2 * self.params.strip_w
         # markers
-        marker_n = self.params.marker_n
-        markers = marker_gen(marker_n*4 + 4)
-        # marker locations and orientations
-        marker_dist = marker_distribute(marker_n, w, h, self.params.marker_alt)
-        for p, data in zip(marker_dist, markers):
+        markers = marker_gen(len(self.params.markers))
+        for p, data in zip(self.params.markers, markers):
             pose = Pose(p[:3], [0., self.params.marker_pitch, p[3]])
             self.draw_marker(pose, data)
         self.drawlist_area.save()
@@ -210,7 +204,7 @@ class LTRenderer:
         self.drawlist_vehicle.save()
 
     def render_image(self):
-        img = renderer.drawlist_area.save_buffer(self.camera_vehicle)
+        img = self.drawlist_area.save_buffer(self.camera_vehicle)
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
         if self.params.distort_enable:
             img = self.params.distort_params.distort(img)
@@ -220,50 +214,13 @@ class LTRenderer:
 if __name__ == '__main__':
     params = LTParams()
     renderer = LTRenderer(params)
-    estimator = Estimator(params)
 
     while not renderer.draw():
-        if not params.checker_enable:
-            angle = np.deg2rad(renderer.vehicle_pose.att[2])
-            renderer.vehicle_pose.pos = np.array(
-                [np.sin(angle), -np.cos(angle), 0.]) * 1
-            renderer.vehicle_pose.att += np.array([0., 0., 0.23])
-
-        vehicle_pose = renderer.vehicle_pose
-        camera_pose = vehicle_pose.from_frame(renderer.camera_pose)
-        camera_params = renderer.camera_params
+        angle = np.deg2rad(renderer.vehicle_pose.att[2])
+        renderer.vehicle_pose.pos = np.array(
+            [np.sin(angle), -np.cos(angle), 0.]) * 1
+        renderer.vehicle_pose.att += np.array([0., 0., 0.23])
 
         img = renderer.render_image()
-        compound = estimator.estimate(img)
-        if compound is None:
-            continue
-        est, corners, ids, actual_corners, calculated_corners = compound
-        print('est', *est)
-        print('act', *camera_pose.pos[:2], camera_pose.att[2])
-
-        renderer.drawlist_area.style2(0., 0., 1., 1., 4.)
-        for x, y in actual_corners:
-            renderer.drawlist_area.point(x, y, 0)
-        rays = camera_params.rays(camera_pose.att, corners)
-        renderer.drawlist_area.style2(1., 0., 1., 0.2, 2.)
-        for ray in rays:
-            ray *= 4
-            renderer.drawlist_area.line(camera_pose.pos[0], camera_pose.pos[1], camera_pose.pos[2],
-                                        camera_pose.pos[0] + ray[0], camera_pose.pos[1] + ray[1], camera_pose.pos[2] + ray[2])
-        renderer.drawlist_area.style2(1., 0., 1., 1., 4.)
-        for ray in rays:
-            # find intersection with ground
-            pg = np.array([0., 0., params.marker_alt])
-            ng = np.array([0., 0., 1.])
-            p = intersection_plane_line((pg, ng), (camera_pose.pos, ray))
-            renderer.drawlist_area.point(p[0], p[1], p[2])
-
-        renderer.drawlist_area.style2(0., 1., 0., 1., 4.)
-        for corner in calculated_corners:
-            corner = np.array([corner[0], corner[1], 0])
-            corner[:2] += renderer.camera_pose.pos[:2]
-            corner = vehicle_pose.from_frame(corner)
-            renderer.drawlist_area.point(corner[0], corner[1], corner[2])
-
         cv2.imshow("Image", img)
         cv2.waitKey(1)

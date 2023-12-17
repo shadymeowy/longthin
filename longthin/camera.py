@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 
-from geometry import *
+from .geometry import *
 
 
 @dataclass(frozen=True)
