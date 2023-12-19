@@ -46,7 +46,7 @@ class Estimator:
         if params.homography_calibration:
             self.calibrate_homography(img_gray)
 
-        corners, ids = marker_detect(img_gray)
+        corners, ids = marker_detect_opt(img_gray)
         img_markers = marker_draw(img_ud, corners, ids)
         cv2.imshow('markers', img_markers)
         if ids is None:
@@ -56,7 +56,6 @@ class Estimator:
         ids = ids[mask]
         if corners.size == 0:
             return None
-        corners = corners.reshape((-1, 4, 2))
         corners = corners[:, 2:, :].reshape((-1, 2))
         ids = ids.reshape((-1))
         actual_corners = self.corner_position(ids)[:, 2:, :2]
