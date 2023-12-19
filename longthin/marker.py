@@ -34,6 +34,8 @@ def marker_detect_opt(img_gray, downscale=2, threshold=1/16):
     height, width = img_gray.shape
     img_down = cv2.resize(img_gray, (width//downscale, height//downscale))
     corners, ids = marker_detect(img_down)
+    if ids is None:
+        return None, None
     corners = corners * downscale
     area_thresh = (width * height) * threshold
 
