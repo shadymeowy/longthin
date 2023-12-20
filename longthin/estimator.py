@@ -48,7 +48,7 @@ class Estimator:
 
         corners, ids = marker_detect_opt(img_gray)
         img_markers = marker_draw(img_ud, corners, ids)
-        cv2.imshow('markers', img_markers)
+        cv2.imshow('markers', cv2.resize(img_markers, (1280, 720)))
         if ids is None:
             return None
         mask = ids < len(params.markers)
