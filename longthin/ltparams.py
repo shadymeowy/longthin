@@ -51,14 +51,14 @@ class LTParams:
     markers: np.ndarray = None
 
     checker_enable: bool = False
-    checker_size: float = 22.5e-3  # size of checker
+    checker_size: float = 4e-2  # size of checker
     checker_alt: float = -1e-2  # from ground
     checker_nw: int = 7  # number of checkers in width
-    checker_nh: int = 10  # number of checkers in height
+    checker_nh: int = 9  # number of checkers in height
     checker_pitch: float = -90.  # degrees
-    checker_offset: float = 15.e-2  # offset from center of vehicle
+    checker_offset: float = 25.e-2  # offset from center of vehicle
 
-    homography_calibration: bool = False  # enable homography calibration mode
+    homography_calibration: bool = False   # enable homography calibration mode
     homography_calib_enable: bool = False  # use homography calibration data
     homography_calib_path: str = ''  # path to homography calibration data
     homography_calib_data: np.ndarray = None  # homography calibration data
