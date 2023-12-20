@@ -40,15 +40,15 @@ class PiCam:
 
 if __name__ == "__main__":
     distortion = Distortion.from_file("other/calibration.txt")
-    cam = PiCam()
+    cam = PiCam(distortion.width, distortion.height)
     cam.print_info()
-    
+
     while True:
         img = cam.capture()
         img = distortion.undistort(img)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        corners, ids = marker_detect(img_gray)
+        corners, ids = marker_detect_opt(img_gray)
         print(corners)
         img_markers = marker_draw(img, corners, ids)
-        cv2.imshow("image", cv2.resize(img_markers, (640, 360)))
+        cv2.imshow("image", img_markers)
         cv2.waitKey(1)
