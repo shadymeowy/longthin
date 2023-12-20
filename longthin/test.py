@@ -7,17 +7,13 @@ from .ltparams import LTParams
 
 
 def main():
-    markers = np.array([0, 0, params.marker_alt, 0])
-
     params = LTParams(
         distort_enable=True,
         distort_path='other/calibration.txt',
-        homography_calib_enable=True,
-        homography_calib_path='other/hcalib.txt',
-        homography_calibration=False,
-        markers=markers)
+        homography_calib_path='other/hcalib.txt')
+    params.markers = np.array([[0, 0, params.marker_alt, 0]])
 
-    cam = PiCam()
+    cam = PiCam(params.camera_width, params.camera_height)
     estimator = Estimator(params)
     while True:
         img = cam.capture()
@@ -27,7 +23,14 @@ def main():
             est = compound[0]
             est[:2] *= 100
             print('est', est)
-        cv2.waitKey(1)
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            break
+        if key == ord(' '):
+            print('Writing log')
+            with open('/tmp/log.txt', 'a') as f:
+                f.write(' '.join(map(str, est)))
+                f.write('\n')
 
 
 if __name__ == "__main__":
