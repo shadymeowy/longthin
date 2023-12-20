@@ -30,7 +30,7 @@ def marker_detect(img_gray):
     return corners, ids
 
 
-def marker_detect_opt(img_gray, downscale=2, threshold=1/16):
+def marker_detect_opt(img_gray, downscale=3, threshold=1/16):
     height, width = img_gray.shape
     img_down = cv2.resize(img_gray, (width//downscale, height//downscale))
     corners, ids = marker_detect(img_down)
@@ -61,6 +61,8 @@ def marker_detect_opt(img_gray, downscale=2, threshold=1/16):
         y_min = max(0, y_min - h // 2)
         y_max = min(height, y_max + h // 2)
         roi = img_gray[y_min:y_max, x_min:x_max]
+        if roi.shape[0] == 0 or roi.shape[1] == 0:
+            continue
         roi_corners, ids_roi = marker_detect(roi)
         if ids_roi is None:
             continue
