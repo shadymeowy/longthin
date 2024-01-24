@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from .ltparams import LTParams
 from .geometry import *
 from .pose import Pose
-from .marker import *
+from .marker import MarkerHelper
 from .camera import CameraParams
 
 
@@ -15,6 +15,7 @@ class Estimator:
     camera_pose: Pose = None
     vehicle_pose: Pose = None
     hmat: np.ndarray = None
+    markerhelper: MarkerHelper = None
 
     def __post_init__(self):
         params = self.params
@@ -33,6 +34,8 @@ class Estimator:
         else:
             self.hmat = self.calculate_homography()
 
+        self.markerhelper = MarkerHelper.from_type()
+
         self.corners = None
         self.act_corners = None
 
@@ -46,8 +49,8 @@ class Estimator:
         if params.homography_calibration:
             self.calibrate_homography(img_gray)
 
-        corners, ids = marker_detect_opt(img_gray)
-        img_markers = marker_draw(img_ud, corners, ids)
+        corners, ids = self.markerhelper.detect_opt(img_gray)
+        img_markers = self.markerhelper.draw(img_ud, corners, ids)
         cv2.imshow('markers', cv2.resize(img_markers, (1280, 720)))
         if ids is None:
             return None

@@ -2,7 +2,7 @@ import numpy as np
 from dataclasses import dataclass, field
 
 from .distortion import Distortion
-from .marker import marker_distribute
+from .marker import MarkerHelper
 
 
 @dataclass
@@ -91,5 +91,5 @@ class LTParams:
         if self.markers is None:
             w = self.area_w + 2 * self.strip_w
             h = self.area_h + 2 * self.strip_w
-            self.markers = marker_distribute(
+            self.markers = MarkerHelper.distribute(
                 self.marker_n, w, h, self.marker_alt)

@@ -42,13 +42,14 @@ if __name__ == "__main__":
     distortion = Distortion.from_file("other/calibration.txt")
     cam = PiCam(distortion.width, distortion.height)
     cam.print_info()
+    marker_helper = MarkerHelper.from_type()
 
     while True:
         img = cam.capture()
         img = distortion.undistort(img)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        corners, ids = marker_detect_opt(img_gray)
+        corners, ids = marker_helper.detect_opt(img_gray)
         print(corners)
-        img_markers = marker_draw(img, corners, ids)
+        img_markers = marker_helper.draw(img, corners, ids)
         cv2.imshow("image", img_markers)
         cv2.waitKey(1)

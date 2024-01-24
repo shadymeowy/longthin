@@ -4,7 +4,7 @@ import drawing3d
 
 from .ltdrawlist import LTDrawList
 from .ltparams import LTParams
-from .marker import *
+from .marker import MarkerHelper
 from .geometry import *
 from .pose import Pose
 from .camera import CameraParams
@@ -111,7 +111,8 @@ class LTRenderer:
             spot_x, strip_w+spot_y+spot_w/2, 0, spot_w, spot_l-spot_w, spot_w, 0.1)
 
         # markers
-        markers = marker_gen(len(self.params.markers))
+        marker_helper = MarkerHelper.from_type()
+        markers = marker_helper.generate(len(self.params.markers))
         for p, data in zip(self.params.markers, markers):
             pose = Pose(p[:3], [0., self.params.marker_pitch, p[3]])
             self.draw_marker(pose, data)
