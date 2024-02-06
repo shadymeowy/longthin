@@ -18,7 +18,7 @@ int ltpacket_read_buffer(struct ltpacket_t *packet, uint8_t *buffer, uint16_t bu
 	if (buffer_length < 1) {
 		return -1;
 	}
-	packet->type = (ltpacket_type_t)buffer[0];
+	packet->type = (enum ltpacket_type_t)buffer[0];
 	switch (packet->type) {
 	case LTPACKET_TYPE_RESERVED:
 		return -1;
@@ -41,11 +41,11 @@ int ltpacket_read_buffer(struct ltpacket_t *packet, uint8_t *buffer, uint16_t bu
 
 #define _WRITECASE(typ, strt_t, prop)                              \
 	case typ:                                                  \
-		if (buffer_length < sizeof(strt_t)) {              \
+		if (buffer_length < sizeof(struct strt_t)) {              \
 			return -1;                                 \
 		}                                                  \
-		memcpy(buffer + 1, &packet->prop, sizeof(strt_t)); \
-		return 1 + sizeof(strt_t);
+		memcpy(buffer + 1, &packet->prop, sizeof(struct strt_t)); \
+		return 1 + sizeof(struct strt_t);
 
 int ltpacket_write_buffer(struct ltpacket_t *packet, uint8_t *buffer, uint16_t buffer_length)
 {
