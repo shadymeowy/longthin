@@ -130,6 +130,7 @@ struct ltpacket_t {
 
 int ltpacket_read_buffer(struct ltpacket_t *packet, uint8_t *buffer, uint16_t buffer_length);
 int ltpacket_write_buffer(struct ltpacket_t *packet, uint8_t *buffer, uint16_t buffer_length);
+int ltpacket_size(struct ltpacket_t *packet);
 
 #ifdef __cplusplus
 }

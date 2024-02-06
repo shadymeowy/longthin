@@ -78,3 +78,37 @@ int ltpacket_write_buffer(struct ltpacket_t *packet, uint8_t *buffer,
 		return -1;
 	}
 }
+
+int ltpacket_size(struct ltpacket_t *packet)
+{
+	switch (packet->type) {
+	case LTPACKET_TYPE_RESERVED:
+		return -1;
+	case LTPACKET_TYPE_IMU:
+		return 1 + sizeof(struct ltpacket_imu_t);
+	case LTPACKET_TYPE_IMU_RAW:
+		return 1 + sizeof(struct ltpacket_imu_raw_t);
+	case LTPACKET_TYPE_ADC:
+		return 1 + sizeof(struct ltpacket_adc_t);
+	case LTPACKET_TYPE_ADC_RAW:
+		return 1 + sizeof(struct ltpacket_adc_raw_t);
+	case LTPACKET_TYPE_VISO:
+		return 1 + sizeof(struct ltpacket_viso_t);
+	case LTPACKET_TYPE_MOTOR:
+		return 1 + sizeof(struct ltpacket_motor_t);
+	case LTPACKET_TYPE_MOTOR_RAW:
+		return 1 + sizeof(struct ltpacket_motor_raw_t);
+	case LTPACKET_TYPE_SETPOINT:
+		return 1 + sizeof(struct ltpacket_setpoint_t);
+	case LTPACKET_TYPE_EVISO:
+		return 1 + sizeof(struct ltpacket_eviso_t);
+	case LTPACKET_TYPE_SETPARAM:
+		return 1 + sizeof(struct ltpacket_setparam_t);
+	case LTPACKET_TYPE_LED:
+		return 1 + sizeof(struct ltpacket_led_t);
+	case LTPACKET_TYPE_CONTROL_DEBUG:
+		return 1 + sizeof(struct ltpacket_control_debug_t);
+	default:
+		return -1;
+	}
+}

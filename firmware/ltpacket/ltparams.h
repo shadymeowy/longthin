@@ -22,6 +22,7 @@ extern "C" {
 #define LTPARAMS_WDESIRED_KI 0x0a
 #define LTPARAMS_WHEEL_RADIUS 0x0b
 #define LTPARAMS_WHEEL_DISTANCE 0x0c
+#define LTPARAMS_BLINK_PERIOD 0x0d
 
 extern float ltparams[LTPARAMS_COUNT];
 
@@ -41,6 +42,7 @@ static inline void ltparams_load_defaults()
 	ltparams[LTPARAMS_WDESIRED_KI] = 0.;
 	ltparams[LTPARAMS_WHEEL_RADIUS] = 1.; //1.75e-2;
 	ltparams[LTPARAMS_WHEEL_DISTANCE] = 1.; //10e-2;
+	ltparams[LTPARAMS_BLINK_PERIOD] = 0.;
 }
 
 static inline float ltparams_get(uint8_t index)

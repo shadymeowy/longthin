@@ -22,22 +22,12 @@ void listen_helper()
 	if (c == -1) {
 		return;
 	}
-	if (packet_reader_put(&reader, c) < 0) {
-		packet_reader_start(&reader);
+	int ret = packet_reader_push(&reader, c);
+	if (ret < 0) {
 		return;
 	}
-	if (packet_reader_available(&reader) < 0) {
-		return;
-	}
-	int packet_len = packet_reader_end(&reader);
-	if (packet_len < 0) {
-		packet_reader_start(&reader);
-		return;
-	}
-	size_t data_size = packet_reader_data_length(&reader);
-	uint8_t *data = packet_reader_data(&reader);
 	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, data, data_size);
+	ltpacket_read_buffer(&packet, packet_reader_head(&reader), ret);
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
 		digitalWrite(LED_BUILTIN, packet.led.state);
@@ -48,7 +38,6 @@ void listen_helper()
 	default:
 		break;
 	}
-	packet_reader_start(&reader);
 }
 
 void listen_process()
@@ -56,6 +45,25 @@ void listen_process()
 	while (Serial2.available()) {
 		listen_helper();
 	}
+}
+
+void send_packet(struct ltpacket_t *packet)
+{
+	uint8_t magic = PACKET_MAGIC;
+	Serial2.write((uint8_t *)&magic, 1);
+
+	uint16_t packet_length = ltpacket_size(packet);
+	uint16_t length = 5 + packet_length;
+	Serial2.write((uint8_t *)&length, 2);
+
+	uint8_t type = (uint8_t)packet->type;
+	uint16_t checksum = crc16(&type, 1);
+	Serial2.write((uint8_t *)&type, 1);
+
+	crc16_continue(&checksum, (uint8_t *)&packet->reserved, packet_length - 1);
+	Serial2.write((uint8_t *)&packet->reserved, packet_length - 1);
+
+	Serial2.write((uint8_t *)&checksum, 2);
 }
 
 float imu_raw[9] = { 0, 0, 1, 0, 0, 0, 1, 1, 0 };
@@ -123,23 +131,13 @@ void imu_publish()
 	last_time = now;
 	float euler[3] = { 0 };
 	euler_from_quat(q_est, euler);
-	struct ltpacket_imu_t packet;
-	packet.roll = euler[0];
-	packet.pitch = euler[1];
-	packet.yaw = euler[2];
-	packet.vel = dt;
-	uint8_t buffer[100];
-	struct packet_writer_t writer;
-	packet_writer_init(&writer, buffer, sizeof(buffer));
-	packet_writer_start(&writer);
-	packet_writer_put(&writer, (uint8_t)LTPACKET_TYPE_IMU);
-	packet_writer_write(&writer, (uint8_t *)&packet, sizeof(packet));
-	packet_writer_end(&writer);
-	size_t packet_size = packet_writer_packet_length(&writer);
-	uint8_t *packet_buffer = packet_writer_packet(&writer);
-	if (Serial2.availableForWrite()) {
-		Serial2.write(packet_buffer, packet_size);
-	}
+	struct ltpacket_t packet;
+	packet.type = LTPACKET_TYPE_IMU;
+	packet.imu.roll = euler[0];
+	packet.imu.pitch = euler[1];
+	packet.imu.yaw = euler[2];
+	packet.imu.vel = dt;
+	send_packet(&packet);
 }
 
 void setup()

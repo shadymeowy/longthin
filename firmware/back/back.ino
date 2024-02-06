@@ -27,6 +27,25 @@ float u_w = 0;
 float u_r = 0;
 float u_l = 0;
 
+void send_packet(struct ltpacket_t *packet)
+{
+	uint8_t magic = PACKET_MAGIC;
+	Serial1.write((uint8_t *)&magic, 1);
+
+	uint16_t packet_length = ltpacket_size(packet);
+	uint16_t length = 5 + packet_length;
+	Serial1.write((uint8_t *)&length, 2);
+
+	uint8_t type = (uint8_t)packet->type;
+	uint16_t checksum = crc16(&type, 1);
+	Serial1.write((uint8_t *)&type, 1);
+
+	crc16_continue(&checksum, (uint8_t *)&packet->reserved, packet_length - 1);
+	Serial1.write((uint8_t *)&packet->reserved, packet_length - 1);
+
+	Serial1.write((uint8_t *)&checksum, 2);
+}
+
 void motor_init()
 {
 	pinMode(MOTOR_LEFT_FORWARD, OUTPUT);
@@ -136,32 +155,22 @@ void motor_publish()
 		return;
 	}
 	last_time = now;
-	struct ltpacket_control_debug_t packet;
-	packet.current_d = current_d;
-	packet.current_yaw = current_yaw;
-	packet.desired_d = desired_d;
-	packet.desired_yaw = desired_yaw;
-	packet.current_vel = current_vel;
-	packet.current_w = current_w;
-	packet.desired_v = desired_v;
-	packet.desired_w = desired_w;
-	packet.u_v = u_v;
-	packet.u_w = u_w;
-	packet.u_r = u_r;
-	packet.u_l = u_l;
-
-	uint8_t buffer[100];
-	struct packet_writer_t writer;
-	packet_writer_init(&writer, buffer, sizeof(buffer));
-	packet_writer_start(&writer);
-	packet_writer_put(&writer, (uint8_t)LTPACKET_TYPE_CONTROL_DEBUG);
-	packet_writer_write(&writer, (uint8_t *)&packet, sizeof(packet));
-	packet_writer_end(&writer);
-	size_t packet_size = packet_writer_packet_length(&writer);
-	uint8_t *packet_buffer = packet_writer_packet(&writer);
-	if (Serial1.availableForWrite()) {
-		Serial1.write(packet_buffer, packet_size);
-	}
+	struct ltpacket_t packet;
+	packet.type = LTPACKET_TYPE_CONTROL_DEBUG;
+	struct ltpacket_control_debug_t *p = &packet.control_debug;
+	p->current_d = current_d;
+	p->current_yaw = current_yaw;
+	p->desired_d = desired_d;
+	p->desired_yaw = desired_yaw;
+	p->current_vel = current_vel;
+	p->current_w = current_w;
+	p->desired_v = desired_v;
+	p->desired_w = desired_w;
+	p->u_v = u_v;
+	p->u_w = u_w;
+	p->u_r = u_r;
+	p->u_l = u_l;
+	send_packet(&packet);
 }
 
 uint8_t buffer[100];
@@ -178,22 +187,12 @@ void listen_helper()
 	if (c == -1) {
 		return;
 	}
-	if (packet_reader_put(&reader, c) < 0) {
-		packet_reader_start(&reader);
+	int ret = packet_reader_push(&reader, c);
+	if (ret < 0) {
 		return;
 	}
-	if (packet_reader_available(&reader) < 0) {
-		return;
-	}
-	int packet_len = packet_reader_end(&reader);
-	if (packet_len < 0) {
-		packet_reader_start(&reader);
-		return;
-	}
-	size_t data_size = packet_reader_data_length(&reader);
-	uint8_t *data = packet_reader_data(&reader);
 	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, data, data_size);
+	ltpacket_read_buffer(&packet, packet_reader_head(&reader), ret);
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
 		digitalWrite(LED_BUILTIN, packet.led.state);
@@ -221,7 +220,6 @@ void listen_helper()
 	default:
 		break;
 	}
-	packet_reader_start(&reader);
 }
 
 void listen_process()
