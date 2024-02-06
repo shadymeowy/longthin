@@ -1,12 +1,9 @@
 #include "packet.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <string.h>
 
-int packet_reader_init(struct packet_reader_t *reader, uint8_t *buffer, uint16_t buffer_length)
+int packet_reader_init(struct packet_reader_t *reader, uint8_t *buffer,
+		       uint16_t buffer_length)
 {
 	reader->buffer = buffer;
 	reader->buffer_length = buffer_length;
@@ -32,7 +29,8 @@ int packet_reader_put(struct packet_reader_t *reader, uint8_t byte)
 	return 0;
 }
 
-int packet_reader_write(struct packet_reader_t *reader, uint8_t *data, uint16_t data_length)
+int packet_reader_write(struct packet_reader_t *reader, uint8_t *data,
+			uint16_t data_length)
 {
 	if (reader->buffer_index + data_length >= reader->buffer_length) {
 		return PACKET_BUFFER_OVERFLOW;
@@ -71,7 +69,8 @@ int packet_reader_end(struct packet_reader_t *reader)
 		return PACKET_INCOMPLETE;
 	}
 	uint16_t crc = crc16(reader->buffer, packet_len - 2);
-	uint16_t packet_crc = reader->buffer[packet_len - 2] | (reader->buffer[packet_len - 1] << 8);
+	uint16_t packet_crc = reader->buffer[packet_len - 2] |
+			      (reader->buffer[packet_len - 1] << 8);
 	if (crc != packet_crc) {
 		return PACKET_INVALID_CRC;
 	}
@@ -88,7 +87,8 @@ uint8_t *packet_reader_data(struct packet_reader_t *reader)
 	return reader->buffer + 3;
 }
 
-int packet_writer_init(struct packet_writer_t *writer, uint8_t *buffer, uint16_t buffer_length)
+int packet_writer_init(struct packet_writer_t *writer, uint8_t *buffer,
+		       uint16_t buffer_length)
 {
 	writer->buffer = buffer;
 	writer->buffer_length = buffer_length;
@@ -114,7 +114,8 @@ int packet_writer_put(struct packet_writer_t *writer, uint8_t byte)
 	return 0;
 }
 
-int packet_writer_write(struct packet_writer_t *writer, uint8_t *data, uint16_t data_length)
+int packet_writer_write(struct packet_writer_t *writer, uint8_t *data,
+			uint16_t data_length)
 {
 	if (writer->buffer_index + data_length >= writer->buffer_length) {
 		return PACKET_BUFFER_OVERFLOW;
@@ -145,7 +146,8 @@ int packet_writer_packet_length(struct packet_writer_t *reader)
 	return reader->buffer_index;
 }
 
-int packet_write(uint8_t *buffer, uint16_t buffer_length, uint8_t *data, uint16_t data_length)
+int packet_write(uint8_t *buffer, uint16_t buffer_length, uint8_t *data,
+		 uint16_t data_length)
 {
 	if (buffer_length < data_length + 5) {
 		return PACKET_BUFFER_OVERFLOW;
@@ -176,14 +178,16 @@ int packet_check(uint8_t *buffer, uint16_t buffer_length)
 		return PACKET_INVALID_LENGTH;
 	}
 	uint16_t crc = crc16(buffer, packet_len - 2);
-	uint16_t packet_crc = buffer[packet_len - 2] | (buffer[packet_len - 1] << 8);
+	uint16_t packet_crc = buffer[packet_len - 2] |
+			      (buffer[packet_len - 1] << 8);
 	if (crc != packet_crc) {
 		return PACKET_INVALID_CRC;
 	}
 	return packet_len;
 }
 
-int packet_read(uint8_t *buffer, uint16_t buffer_length, uint8_t *data, uint16_t data_length)
+int packet_read(uint8_t *buffer, uint16_t buffer_length, uint8_t *data,
+		uint16_t data_length)
 {
 	int packet_len = packet_check(buffer, buffer_length);
 	if (packet_len < 0) {
@@ -213,7 +217,3 @@ uint16_t crc16(uint8_t *data, uint16_t length)
 	}
 	return crc;
 }
-
-#ifdef __cplusplus
-}
-#endif
