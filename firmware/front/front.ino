@@ -10,24 +10,45 @@
 
 uint8_t buffer[100];
 struct packet_reader_t reader;
+uint8_t buffer2[100];
+struct packet_reader_t reader2;
+
+int serial_write(const uint8_t *buffer, uint16_t size)
+{
+	Serial.write(buffer, size);
+	Serial2.write(buffer, size);
+	return 0;
+}
 
 void listen_init()
 {
 	packet_reader_init(&reader, buffer, sizeof(buffer));
+	packet_reader_init(&reader2, buffer2, sizeof(buffer2));
 }
 
-void listen_helper()
+void listen_process()
 {
-	int c = Serial2.read();
-	if (c == -1) {
-		return;
+	int ret;
+	while (Serial.available()) {
+		int c = Serial.read();
+		if ((ret = packet_reader_push(&reader, c)) < 0) {
+			continue;
+		}
+		listen_handle(ret);
 	}
-	int ret = packet_reader_push(&reader, c);
-	if (ret < 0) {
-		return;
+	while (Serial2.available()) {
+		int c = Serial2.read();
+		if ((ret = packet_reader_push(&reader2, c)) < 0) {
+			continue;
+		}
+		listen_handle(ret);
 	}
+}
+
+void listen_handle(int data_length)
+{
 	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, packet_reader_head(&reader), ret);
+	ltpacket_read_buffer(&packet, packet_reader_head(&reader), data_length);
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
 		digitalWrite(LED_BUILTIN, packet.led.state);
@@ -38,32 +59,6 @@ void listen_helper()
 	default:
 		break;
 	}
-}
-
-void listen_process()
-{
-	while (Serial2.available()) {
-		listen_helper();
-	}
-}
-
-void send_packet(struct ltpacket_t *packet)
-{
-	uint8_t magic = PACKET_MAGIC;
-	Serial2.write((uint8_t *)&magic, 1);
-
-	uint16_t packet_length = ltpacket_size(packet);
-	uint16_t length = 5 + packet_length;
-	Serial2.write((uint8_t *)&length, 2);
-
-	uint8_t type = (uint8_t)packet->type;
-	uint16_t checksum = crc16(&type, 1);
-	Serial2.write((uint8_t *)&type, 1);
-
-	crc16_continue(&checksum, (uint8_t *)&packet->reserved, packet_length - 1);
-	Serial2.write((uint8_t *)&packet->reserved, packet_length - 1);
-
-	Serial2.write((uint8_t *)&checksum, 2);
 }
 
 float imu_raw[9] = { 0, 0, 1, 0, 0, 0, 1, 1, 0 };
@@ -137,7 +132,15 @@ void imu_publish()
 	packet.imu.pitch = euler[1];
 	packet.imu.yaw = euler[2];
 	packet.imu.vel = dt;
-	send_packet(&packet);
+	ltpacket_send(&packet, serial_write);
+
+	packet.type = LTPACKET_TYPE_IMU_RAW;
+	for (int i = 0; i < 3; i++) {
+		packet.imu_raw.accel[i] = imu_raw[i];
+		packet.imu_raw.gyro[i] = imu_raw[i + 3];
+		packet.imu_raw.mag[i] = imu_raw[i + 6];
+	}
+	ltpacket_send(&packet, serial_write);
 }
 
 void setup()

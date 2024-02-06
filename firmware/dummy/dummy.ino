@@ -4,25 +4,49 @@
 #include "ltpacket.h"
 #include "ltparams.h"
 
+bool blink = false;
+
 uint8_t buffer[100];
 struct packet_reader_t reader;
+uint8_t buffer1[100];
+struct packet_reader_t reader1;
 
-bool blink = false;
+int serial_write(const uint8_t *buffer, uint16_t size)
+{
+	Serial.write(buffer, size);
+	Serial1.write(buffer, size);
+	return 0;
+}
 
 void listen_init()
 {
 	packet_reader_init(&reader, buffer, sizeof(buffer));
+	packet_reader_init(&reader1, buffer1, sizeof(buffer1));
 }
 
-void listen_helper()
+void listen_process()
 {
-	int c = Serial.read();
-	int ret = packet_reader_push(&reader, c);
-	if (ret < 0) {
-		return;
+	int ret;
+	while (Serial.available()) {
+		int c = Serial.read();
+		if ((ret = packet_reader_push(&reader, c)) < 0) {
+			continue;
+		}
+		listen_handle(ret);
 	}
+	while (Serial1.available()) {
+		int c = Serial1.read();
+		if ((ret = packet_reader_push(&reader1, c)) < 0) {
+			continue;
+		}
+		listen_handle(ret);
+	}
+}
+
+void listen_handle(int data_length)
+{
 	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, packet_reader_head(&reader), ret);
+	ltpacket_read_buffer(&packet, packet_reader_head(&reader), data_length);
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
 		blink = packet.led.state;
@@ -33,32 +57,6 @@ void listen_helper()
 	default:
 		break;
 	}
-}
-
-void listen_process()
-{
-	while (Serial.available()) {
-		listen_helper();
-	}
-}
-
-void send_packet(struct ltpacket_t *packet)
-{
-	uint8_t magic = PACKET_MAGIC;
-	Serial.write((uint8_t *)&magic, 1);
-
-	uint16_t packet_length = ltpacket_size(packet);
-	uint16_t length = 5 + packet_length;
-	Serial.write((uint8_t *)&length, 2);
-
-	uint8_t type = (uint8_t)packet->type;
-	uint16_t checksum = crc16(&type, 1);
-	Serial.write((uint8_t *)&type, 1);
-
-	crc16_continue(&checksum, (uint8_t *)&packet->reserved, packet_length - 1);
-	Serial.write((uint8_t *)&packet->reserved, packet_length - 1);
-
-	Serial.write((uint8_t *)&checksum, 2);
 }
 
 void publish_dt()
@@ -78,7 +76,7 @@ void publish_dt()
 	packet.imu.pitch = 0;
 	packet.imu.yaw = micros() / 1e6 * 90;
 	packet.imu.vel = dt;
-	send_packet(&packet);
+	ltpacket_send(&packet, serial_write);
 }
 
 void led_init()
@@ -108,6 +106,7 @@ void led_process()
 void setup()
 {
 	Serial.begin(115200);
+	Serial1.begin(115200);
 
 	listen_init();
 	led_init();

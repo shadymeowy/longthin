@@ -27,23 +27,11 @@ float u_w = 0;
 float u_r = 0;
 float u_l = 0;
 
-void send_packet(struct ltpacket_t *packet)
+int serial_write(const uint8_t *buffer, uint16_t size)
 {
-	uint8_t magic = PACKET_MAGIC;
-	Serial1.write((uint8_t *)&magic, 1);
-
-	uint16_t packet_length = ltpacket_size(packet);
-	uint16_t length = 5 + packet_length;
-	Serial1.write((uint8_t *)&length, 2);
-
-	uint8_t type = (uint8_t)packet->type;
-	uint16_t checksum = crc16(&type, 1);
-	Serial1.write((uint8_t *)&type, 1);
-
-	crc16_continue(&checksum, (uint8_t *)&packet->reserved, packet_length - 1);
-	Serial1.write((uint8_t *)&packet->reserved, packet_length - 1);
-
-	Serial1.write((uint8_t *)&checksum, 2);
+	Serial.write(buffer, size);
+	Serial1.write(buffer, size);
+	return 0;
 }
 
 void motor_init()
@@ -170,29 +158,43 @@ void motor_publish()
 	p->u_w = u_w;
 	p->u_r = u_r;
 	p->u_l = u_l;
-	send_packet(&packet);
+	ltpacket_send(&packet, serial_write);
 }
 
 uint8_t buffer[100];
 struct packet_reader_t reader;
+uint8_t buffer1[100];
+struct packet_reader_t reader1;
 
 void listen_init()
 {
 	packet_reader_init(&reader, buffer, sizeof(buffer));
+	packet_reader_init(&reader1, buffer1, sizeof(buffer1));
 }
 
-void listen_helper()
+void listen_process()
 {
-	int c = Serial1.read();
-	if (c == -1) {
-		return;
+	int ret;
+	while (Serial.available()) {
+		int c = Serial.read();
+		if ((ret = packet_reader_push(&reader, c)) < 0) {
+			continue;
+		}
+		listen_handle(ret);
 	}
-	int ret = packet_reader_push(&reader, c);
-	if (ret < 0) {
-		return;
+	while (Serial1.available()) {
+		int c = Serial1.read();
+		if ((ret = packet_reader_push(&reader1, c)) < 0) {
+			continue;
+		}
+		listen_handle(ret);
 	}
+}
+
+void listen_handle(int data_length)
+{
 	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, packet_reader_head(&reader), ret);
+	ltpacket_read_buffer(&packet, packet_reader_head(&reader), data_length);
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
 		digitalWrite(LED_BUILTIN, packet.led.state);
@@ -219,13 +221,6 @@ void listen_helper()
 		break;
 	default:
 		break;
-	}
-}
-
-void listen_process()
-{
-	while (Serial1.available()) {
-		listen_helper();
 	}
 }
 
