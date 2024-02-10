@@ -21,13 +21,13 @@ def main():
             packet = ser.read()
             conn.send(packet)
             if args.debug:
-                print(str(type(packet)), time.time())
+                print(packet.type, time.time())
                 print(yaml.dump(asdict(packet)), end='')
         packet = conn.read()
         if packet is not None:
             ser.write(packet)
             if args.debug:
-                print(str(type(packet)), time.time())
+                print(packet.type, time.time())
                 print(yaml.dump(asdict(packet)), end='')
         time.sleep(0)
 

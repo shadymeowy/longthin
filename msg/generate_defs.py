@@ -103,7 +103,10 @@ def generate_py(defs):
         def1_lines.append(f'        return {typl}_struct.pack(')
         for field in value['fields']:
             def1_lines.append(f'            self.{field},')
-        def1_lines.append(f'        )')
+        def1_lines.append(f'        )\n')
+        def1_lines.append(f'    @property')
+        def1_lines.append(f'    def type(self):')
+        def1_lines.append(f'        return LTPACKET_TYPE.{typu}\n')
         def1_lines.append('\n')
         def3_lines.append(f'    {typu} = {int(value["id"])}')
         def4_lines.append(f'    LTPACKET_TYPE.{typu}: {camel},')

@@ -16,7 +16,7 @@ def main():
         packet = conn.read()
         if packet is not None:
             conn.send(packet)
-            print(str(type(packet)), time.time())
+            print(packet.type)
             print(yaml.dump(asdict(packet)), end='')
         time.sleep(0)
 

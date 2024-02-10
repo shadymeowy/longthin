@@ -16,6 +16,11 @@ class Reserved:
             self.reserved,
         )
 
+    @property
+    def type(self):
+        return LTPACKET_TYPE.RESERVED
+
+
 
 @dataclass
 class Imu:
@@ -35,6 +40,11 @@ class Imu:
             self.yaw,
             self.vel,
         )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.IMU
+
 
 
 @dataclass
@@ -66,6 +76,11 @@ class ImuRaw:
             self.mag_z,
         )
 
+    @property
+    def type(self):
+        return LTPACKET_TYPE.IMU_RAW
+
+
 
 @dataclass
 class Motor:
@@ -81,6 +96,11 @@ class Motor:
             self.left,
             self.right,
         )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.MOTOR
+
 
 
 @dataclass
@@ -98,6 +118,11 @@ class MotorRaw:
             self.right,
         )
 
+    @property
+    def type(self):
+        return LTPACKET_TYPE.MOTOR_RAW
+
+
 
 @dataclass
 class Setpoint:
@@ -113,6 +138,11 @@ class Setpoint:
             self.vel,
             self.yaw,
         )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.SETPOINT
+
 
 
 @dataclass
@@ -130,6 +160,11 @@ class Setparam:
             self.value,
         )
 
+    @property
+    def type(self):
+        return LTPACKET_TYPE.SETPARAM
+
+
 
 @dataclass
 class Led:
@@ -145,6 +180,11 @@ class Led:
             self.index,
             self.state,
         )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.LED
+
 
 
 @dataclass
@@ -181,6 +221,11 @@ class ControlDebug:
             self.u_r,
             self.u_l,
         )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.CONTROL_DEBUG
+
 
 
 reserved_struct = struct.Struct('B')

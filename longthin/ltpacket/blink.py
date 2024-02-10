@@ -18,7 +18,7 @@ def main():
     while True:
         conn.send(led)
         if args.debug:
-            print(time.time())
+            print(led.type, time.time())
             print(yaml.dump(asdict(led)), end='')
         led.state = not led.state
         time.sleep(args.period)
