@@ -14,6 +14,7 @@ setup(
             'longthin-sim = longthin.sim:main',
             'longthin-test = longthin.test:main',
             'longthin-bridge = longthin.ltpacket.bridge:main',
+            'longthin-blink = longthin.ltpacket.blink:main',
         ],
     },
 )
