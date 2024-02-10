@@ -1,0 +1,71 @@
+reserved:
+  id: 0x0
+  fields:
+    reserved: u8
+
+imu:
+  id: 0x1
+  fields:
+    roll: f32
+    pitch: f32
+    yaw: f32
+    vel: f32
+
+imu_raw:
+  id: 0x2
+  fields:
+    accel_x: f32
+    accel_y: f32
+    accel_z: f32
+    gyro_x: f32
+    gyro_y: f32
+    gyro_z: f32
+    mag_x: f32
+    mag_y: f32
+    mag_z: f32
+
+motor:
+  id: 0x6
+  fields:
+    left: f32
+    right: f32
+
+motor_raw:
+  id: 0x7
+  fields:
+    left: i16
+    right: i16
+
+setpoint:
+  id: 0x8
+  fields:
+    vel: f32
+    yaw: f32
+
+setparam:
+  id: 0xa
+  fields:
+    param: i32
+    value: f32
+
+led:
+  id: 0xb
+  fields:
+    index: u8
+    state: u8
+
+control_debug:
+  id: 0xc
+  fields:
+    current_d: f32
+    current_yaw: f32
+    desired_d: f32
+    desired_yaw: f32
+    current_vel: f32
+    current_w: f32
+    desired_vel: f32
+    desired_w: f32
+    u_v: f32
+    u_w: f32
+    u_r: f32
+    u_l: f32
