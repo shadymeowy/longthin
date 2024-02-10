@@ -8,7 +8,6 @@ class LTZmq:
         self.context = zmq.Context()
         self.socket_pub = self.context.socket(zmq.PUB)
         if server:
-            print(f"tcp://*:{port}")
             self.socket_pub.bind(f"tcp://*:{port}")
         else:
             self.socket_pub.connect(f"tcp://localhost:{port2}")

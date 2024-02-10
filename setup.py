@@ -8,11 +8,12 @@ setup(
     url='https://github.com/shadymeowy/longthin',
     setup_requires=[],
     install_requires=['drawing3d'],
-    packages=['longthin'],
+    packages=['longthin', 'longthin.ltpacket'],
     entry_points={
         'console_scripts': [
             'longthin-sim = longthin.sim:main',
             'longthin-test = longthin.test:main',
+            'longthin-bridge = longthin.ltpacket.bridge:main',
         ],
     },
 )
