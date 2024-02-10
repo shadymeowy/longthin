@@ -1,4 +1,3 @@
-from .ltserial import LTSerial
 from .ltzmq import LTZmq
 from .ltpacket_def import *
 import time

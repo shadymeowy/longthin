@@ -15,6 +15,7 @@ setup(
             'longthin-test = longthin.test:main',
             'longthin-bridge = longthin.ltpacket.bridge:main',
             'longthin-blink = longthin.ltpacket.blink:main',
+            'longthin-echo = longthin.ltpacket.echo:main',
         ],
     },
 )
