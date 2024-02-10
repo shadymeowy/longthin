@@ -61,6 +61,7 @@ void listen_handle(int data_length)
 
 void publish_dt()
 {
+	static int counter = 0;
 	static uint32_t last_time = 0;
 	uint32_t now = millis();
 	// 10 Hz
@@ -74,7 +75,7 @@ void publish_dt()
 	packet.type = LTPACKET_TYPE_IMU;
 	packet.imu.roll = 0;
 	packet.imu.pitch = 0;
-	packet.imu.yaw = micros() / 1e6 * 90;
+	packet.imu.yaw = counter++;
 	packet.imu.vel = dt;
 	ltpacket_send(&packet, serial_write);
 }
