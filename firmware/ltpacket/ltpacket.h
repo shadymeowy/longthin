@@ -9,60 +9,7 @@ extern "C" {
 #include <stdbool.h>
 #include "packet.h"
 
-struct ltpacket_reserved_t {};
-
-struct ltpacket_imu_t {
-	float roll;
-	float pitch;
-	float yaw;
-	float vel;
-};
-
-struct ltpacket_imu_raw_t {
-	float accel[3];
-	float gyro[3];
-	float mag[3];
-};
-
-struct ltpacket_motor_t {
-	float motor_left;
-	float motor_right;
-};
-
-struct ltpacket_motor_raw_t {
-	int16_t motor_left;
-	int16_t motor_right;
-};
-
-struct ltpacket_setpoint_t {
-	float vel;
-	float yaw;
-};
-
-struct ltpacket_setparam_t {
-	int32_t param;
-	float value;
-};
-
-struct ltpacket_led_t {
-	uint8_t led;
-	uint8_t state;
-};
-
-struct ltpacket_control_debug_t {
-	float current_d;
-	float current_yaw;
-	float desired_d;
-	float desired_yaw;
-	float current_vel;
-	float current_w;
-	float desired_v;
-	float desired_w;
-	float u_v;
-	float u_w;
-	float u_r;
-	float u_l;
-};
+#include "ltpacket_type.h"
 
 #define LTMESSAGE(id, idn, typ, prop) idn = id,
 enum ltpacket_type_t {
