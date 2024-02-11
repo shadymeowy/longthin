@@ -17,19 +17,21 @@ def main():
     ser = LTSerial(args.serial, baudrate=args.baudrate)
     conn = LTZmq(args.zmq, args.zmq2, server=True)
     while True:
-        if ser.is_available():
+        while ser.is_available():
             packet = ser.read()
             conn.send(packet)
             if args.debug:
                 print(packet.type, time.time())
                 print(yaml.dump(asdict(packet)), end='')
-        packet = conn.read()
-        if packet is not None:
+        while True:
+            packet = conn.read()
+            if packet is None:
+                break
             ser.write(packet)
             if args.debug:
                 print(packet.type, time.time())
                 print(yaml.dump(asdict(packet)), end='')
-        time.sleep(0)
+        time.sleep(1e-4)
 
 
 if __name__ == "__main__":
