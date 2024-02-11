@@ -16,6 +16,7 @@ setup(
             'longthin-bridge = longthin.ltpacket.bridge:main',
             'longthin-blink = longthin.ltpacket.blink:main',
             'longthin-echo = longthin.ltpacket.echo:main',
+            'longthin-plot = longthin.ltpacket.plot:main',
         ],
     },
 )
