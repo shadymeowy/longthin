@@ -59,7 +59,29 @@ void listen_handle(int data_length)
 	}
 }
 
-void publish_dt()
+void publish_imu()
+{
+	static int counter = 0;
+	static uint32_t last_time = 0;
+	uint32_t now = millis();
+	// 30 Hz
+	if (now - last_time < 1000 / 30) {
+		return;
+	}
+	float dt = (now - last_time) / 1000.0f;
+	last_time = now;
+
+	struct ltpacket_t packet;
+	packet.type = LTPACKET_TYPE_IMU;
+	packet.imu.roll = cos(counter * 5 * M_PI / 180) * 45;
+	packet.imu.pitch = sin(counter * 5 * M_PI / 180) * 45;
+	packet.imu.yaw = (counter * 5) % 360;
+	counter++;
+	packet.imu.vel = dt;
+	ltpacket_send(&packet, serial_write);
+}
+
+void publish_motor()
 {
 	static int counter = 0;
 	static uint32_t last_time = 0;
@@ -72,11 +94,10 @@ void publish_dt()
 	last_time = now;
 
 	struct ltpacket_t packet;
-	packet.type = LTPACKET_TYPE_IMU;
-	packet.imu.roll = 0;
-	packet.imu.pitch = 0;
-	packet.imu.yaw = counter++;
-	packet.imu.vel = dt;
+	packet.type = LTPACKET_TYPE_MOTOR;
+	packet.motor.left = -cos(counter * 5 * M_PI / 180);
+	packet.motor.right = -sin(counter * 5 * M_PI / 180);
+	counter++;
 	ltpacket_send(&packet, serial_write);
 }
 
@@ -117,5 +138,6 @@ void loop()
 {
 	listen_process();
 	led_process();
-	publish_dt();
+	publish_imu();
+	publish_motor();
 }
