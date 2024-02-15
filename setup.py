@@ -11,7 +11,7 @@ setup(
     packages=['longthin', 'longthin.ltpacket', 'longthin.sim'],
     entry_points={
         'console_scripts': [
-            'longthin-sim = longthin.sim:main',
+            'longthin-sim = longthin.basic_sim:main',
             'longthin-test = longthin.test:main',
             'longthin-bridge = longthin.ltpacket.bridge:main',
             'longthin-blink = longthin.ltpacket.blink:main',
