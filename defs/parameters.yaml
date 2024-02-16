@@ -1,0 +1,79 @@
+reserved:
+  id: 0x00
+  type: i32
+  default: 0
+
+qcomp_alpha:
+  id: 0x01
+  type: f32
+  default: 0.05
+
+qcomp_beta:
+  id: 0x02
+  type: f32
+  default: 0.05
+
+theta_kp:
+  id: 0x03
+  type: f32
+  default: 0.05
+
+theta_ki:
+  id: 0x04
+  type: f32
+  default: 0.0
+
+ed_kp:
+  id: 0x05
+  type: f32
+  default: 0.8
+
+ed_ki:
+  id: 0x06
+  type: f32
+  default: 0.0
+
+vdesired_kp:
+  id: 0x07
+  type: f32
+  default: 1.0
+
+vdesired_ki:
+  id: 0x08
+  type: f32
+  default: 0.0
+
+wdesired_kp:
+  id: 0x09
+  type: f32
+  default: 1.0
+
+wdesired_ki:
+  id: 0x0a
+  type: f32
+  default: 0.0
+
+wheel_radius:
+  id: 0x0b
+  type: f32
+  default: 1.0
+
+wheel_distance:
+  id: 0x0c
+  type: f32
+  default: 1.0
+
+blink_period:
+  id: 0x0d
+  type: f32
+  default: 0.0
+
+madgwick_beta:
+  id: 0x0e
+  type: f32
+  default: 0.1
+
+imu_filter_type:
+  id: 0x0f
+  type: u32
+  default: 0
