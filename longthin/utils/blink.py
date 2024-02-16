@@ -13,7 +13,7 @@ def main():
     parser.add_argument('--debug', action='store_true', help='Print debug messages')
     args = parser.parse_args()
     conn = LTZmq(args.zmq, args.zmq2, server=False)
-    led = Led(0, 0)
+    led = Led(0, 1)
     while True:
         conn.send(led)
         if args.debug:
