@@ -81,6 +81,17 @@ void motor_update()
 	static float last_time = 0;
 	float current_time = micros();
 	float dt = (current_time - last_time) / 1e6;
+	
+	float ed_kp = ltparams_get(LTPARAMS_ED_KP);
+	float ed_ki = ltparams_get(LTPARAMS_ED_KI);
+	float theta_kp = ltparams_get(LTPARAMS_THETA_KP);
+	float theta_ki = ltparams_get(LTPARAMS_THETA_KI);
+	float vdesired_kp = ltparams_get(LTPARAMS_VDESIRED_KP);
+	float vdesired_ki = ltparams_get(LTPARAMS_VDESIRED_KI);
+	float wdesired_kp = ltparams_get(LTPARAMS_WDESIRED_KP);
+	float wdesired_ki = ltparams_get(LTPARAMS_WDESIRED_KI);
+	float wheel_distance = ltparams_get(LTPARAMS_WHEEL_DISTANCE);
+	float wheel_radius = ltparams_get(LTPARAMS_WHEEL_RADIUS);
 
 	if (!manual_mode) {
 		float e_d = desired_d - current_d;
@@ -89,23 +100,28 @@ void motor_update()
 		if (e_theta > 180) {
 			e_theta -= 360;
 		}
+
 		static float e_d_sum = 0;
 		e_d_sum += e_d * dt;
-		desired_v = ltparams_get(LTPARAMS_ED_KP) * e_d + ltparams_get(LTPARAMS_ED_KI) * e_d_sum;
+		desired_v = ed_kp * e_d + ed_ki * e_d_sum;
+
 		static float e_theta_sum = 0;
 		e_theta_sum += e_theta * dt;
-		desired_w = ltparams_get(LTPARAMS_THETA_KP) * e_theta + ltparams_get(LTPARAMS_THETA_KI) * e_theta_sum;
+		desired_w = theta_kp * e_theta + theta_ki * e_theta_sum;
+		
 		static float e_v_sum = 0;
 		float e_v = desired_v - current_vel;
 		e_v_sum += e_v * dt;
+
 		static float e_w_sum = 0;
 		float e_w = desired_w - current_w;
 		e_w_sum += e_w * dt;
-		u_v = ltparams_get(LTPARAMS_VDESIRED_KP) * e_v + ltparams_get(LTPARAMS_VDESIRED_KI) * e_v_sum;
-		u_w = ltparams_get(LTPARAMS_WDESIRED_KP) * e_w + ltparams_get(LTPARAMS_WDESIRED_KI) * e_w_sum;
 
-		u_l = (u_v - ltparams_get(LTPARAMS_WHEEL_DISTANCE) * u_w / 2) / ltparams_get(LTPARAMS_WHEEL_RADIUS);
-		u_r = (u_v + ltparams_get(LTPARAMS_WHEEL_DISTANCE) * u_w / 2) / ltparams_get(LTPARAMS_WHEEL_RADIUS);
+		u_v = vdesired_kp * e_v + vdesired_ki * e_v_sum;
+		u_w = wdesired_kp * e_w + wdesired_ki * e_w_sum;
+
+		u_l = (u_v - wheel_distance * u_w / 2) / wheel_radius;
+		u_r = (u_v + wheel_distance * u_w / 2) / wheel_radius;
 		if (desired_d == 0) {
 			u_l = 0;
 			u_r = 0;
@@ -128,6 +144,7 @@ void motor_update()
 	if (now - last_refresh_time < 10000) { // 100 Hz
 		return;
 	}
+
 	analogWrite(MOTOR_LEFT_FORWARD, motor_left > 0 ? motor_left : 0);
 	analogWrite(MOTOR_LEFT_BACKWARD, motor_left < 0 ? -motor_left : 0);
 	analogWrite(MOTOR_RIGHT_FORWARD, motor_right > 0 ? motor_right : 0);

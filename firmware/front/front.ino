@@ -135,11 +135,15 @@ void imu_publish()
 	ltpacket_send(&packet, serial_write);
 
 	packet.type = LTPACKET_TYPE_IMU_RAW;
-	for (int i = 0; i < 3; i++) {
-		packet.imu_raw.accel[i] = imu_raw[i];
-		packet.imu_raw.gyro[i] = imu_raw[i + 3];
-		packet.imu_raw.mag[i] = imu_raw[i + 6];
-	}
+	packet.imu_raw.accel_x = imu_raw[0];
+	packet.imu_raw.accel_y = imu_raw[1];
+	packet.imu_raw.accel_z = imu_raw[2];
+	packet.imu_raw.gyro_x = imu_raw[3];
+	packet.imu_raw.gyro_y = imu_raw[4];
+	packet.imu_raw.gyro_z = imu_raw[5];
+	packet.imu_raw.mag_x = imu_raw[6];
+	packet.imu_raw.mag_y = imu_raw[7];
+	packet.imu_raw.mag_z = imu_raw[8];
 	ltpacket_send(&packet, serial_write);
 }
 
@@ -153,7 +157,6 @@ void setup()
 	Serial.begin(115200);
 	Serial2.begin(115200);
 
-	ltparams_load_defaults();
 	listen_init();
 }
 

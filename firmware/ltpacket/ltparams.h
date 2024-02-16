@@ -7,52 +7,71 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
-#define LTPARAMS_COUNT 0x16
-#define LTPARAMS_RESERVED 0x00
-#define LTPARAMS_QCOMP_ALPHA 0x01
-#define LTPARAMS_QCOMP_BETA 0x02
-#define LTPARAMS_THETA_KP 0x03
-#define LTPARAMS_THETA_KI 0x04
-#define LTPARAMS_ED_KP 0x05
-#define LTPARAMS_ED_KI 0x06
-#define LTPARAMS_VDESIRED_KP 0x07
-#define LTPARAMS_VDESIRED_KI 0x08
-#define LTPARAMS_WDESIRED_KP 0x09
-#define LTPARAMS_WDESIRED_KI 0x0a
-#define LTPARAMS_WHEEL_RADIUS 0x0b
-#define LTPARAMS_WHEEL_DISTANCE 0x0c
-#define LTPARAMS_BLINK_PERIOD 0x0d
+enum ltparams_type_t {
+	LTPARAMS_TYPE_FLOAT,
+	LTPARAMS_TYPE_UINT32,
+	LTPARAMS_TYPE_INT32
+};
 
-extern float ltparams[LTPARAMS_COUNT];
+// Some bold assumptions about the target platform
+union ltparam_t {
+	float f;
+	uint32_t ui;
+	int32_t i;
+	uint8_t b[4];
+};
+// Raise an error if the assumption is wrong
+static_assert(sizeof(float) == 4, "float is not 4 bytes long");
+static_assert(sizeof(uint32_t) == 4, "uint32_t is not 4 bytes long");
+static_assert(sizeof(int32_t) == 4, "int32_t is not 4 bytes long");
+static_assert(sizeof(uint8_t) == 1, "uint8_t is not 1 byte long");
+static_assert(sizeof(union ltparam_t) == 4,
+	      "union ltparam_t is not 4 bytes long");
 
-static inline void ltparams_load_defaults()
-{
-    ltparams[LTPARAMS_RESERVED] = 0;
-	ltparams[LTPARAMS_QCOMP_ALPHA] = 0.05;
-	ltparams[LTPARAMS_QCOMP_BETA] = 0.97;
-	
-	ltparams[LTPARAMS_THETA_KP] = 0.05;
-	ltparams[LTPARAMS_THETA_KI] = 0.;
-	ltparams[LTPARAMS_ED_KP] = 0.8;
-	ltparams[LTPARAMS_ED_KI] = 0.;
-	ltparams[LTPARAMS_VDESIRED_KP] = 1.;
-	ltparams[LTPARAMS_VDESIRED_KI] = 0.;
-	ltparams[LTPARAMS_WDESIRED_KP] = 1.;
-	ltparams[LTPARAMS_WDESIRED_KI] = 0.;
-	ltparams[LTPARAMS_WHEEL_RADIUS] = 1.; //1.75e-2;
-	ltparams[LTPARAMS_WHEEL_DISTANCE] = 1.; //10e-2;
-	ltparams[LTPARAMS_BLINK_PERIOD] = 0.;
-}
+#include "ltparams_def.h"
 
 static inline float ltparams_get(uint8_t index)
 {
-	return ltparams[index];
+	if (index >= LTPARAMS_COUNT)
+		return 0;
+	return ltparams[index].f;
 }
 
 static inline void ltparams_set(uint8_t index, float value)
 {
-	ltparams[index] = value;
+	if (index >= LTPARAMS_COUNT)
+		return;
+	ltparams[index].f = value;
+}
+
+static inline void ltparams_setu(uint8_t index, uint32_t value)
+{
+	if (index >= LTPARAMS_COUNT)
+		return;
+	ltparams[index].ui = value;
+}
+
+static inline uint32_t ltparams_getu(uint8_t index)
+{
+	if (index >= LTPARAMS_COUNT)
+		return 0;
+	return ltparams[index].ui;
+}
+
+static inline void ltparams_seti(uint8_t index, int32_t value)
+{
+	if (index >= LTPARAMS_COUNT)
+		return;
+	ltparams[index].i = value;
+}
+
+static inline int32_t ltparams_geti(uint8_t index)
+{
+	if (index >= LTPARAMS_COUNT)
+		return 0;
+	return ltparams[index].i;
 }
 
 #ifdef __cplusplus
