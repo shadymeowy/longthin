@@ -11,7 +11,7 @@ qcomp_alpha:
 qcomp_beta:
   id: 0x02
   type: f32
-  default: 0.05
+  default: 0.97
 
 theta_kp:
   id: 0x03
