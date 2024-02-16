@@ -17,6 +17,7 @@ setup(
             'longthin-blink = longthin.utils.blink:main',
             'longthin-echo = longthin.utils.echo:main',
             'longthin-plot = longthin.utils.plot:main',
+            'longthin-params = longthin.utils.params:main',
         ],
     },
 )
