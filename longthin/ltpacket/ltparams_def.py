@@ -1,0 +1,68 @@
+from enum import Enum
+
+
+LTPARAMS_COUNT = 0x10
+
+
+class LTParamType(Enum):
+    LTPARAMS_TYPE_FLOAT = 0
+    LTPARAMS_TYPE_UINT32 = 1
+    LTPARAMS_TYPE_INT32 = 2
+
+
+class LTParams(Enum):
+    RESERVED = 0x0
+    QCOMP_ALPHA = 0x1
+    QCOMP_BETA = 0x2
+    THETA_KP = 0x3
+    THETA_KI = 0x4
+    ED_KP = 0x5
+    ED_KI = 0x6
+    VDESIRED_KP = 0x7
+    VDESIRED_KI = 0x8
+    WDESIRED_KP = 0x9
+    WDESIRED_KI = 0xa
+    WHEEL_RADIUS = 0xb
+    WHEEL_DISTANCE = 0xc
+    BLINK_PERIOD = 0xd
+    MADGWICK_BETA = 0xe
+    IMU_FILTER_TYPE = 0xf
+
+
+param_type_dict = {
+    LTParams.RESERVED: LTParamType.LTPARAMS_TYPE_INT32,
+    LTParams.QCOMP_ALPHA: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.QCOMP_BETA: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.THETA_KP: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.THETA_KI: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.ED_KP: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.ED_KI: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.VDESIRED_KP: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.VDESIRED_KI: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.WDESIRED_KP: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.WDESIRED_KI: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.WHEEL_RADIUS: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.WHEEL_DISTANCE: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.BLINK_PERIOD: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.MADGWICK_BETA: LTParamType.LTPARAMS_TYPE_FLOAT,
+    LTParams.IMU_FILTER_TYPE: LTParamType.LTPARAMS_TYPE_UINT32,
+}
+
+param_default_dict = {
+    LTParams.RESERVED: 0,
+    LTParams.QCOMP_ALPHA: 0.05,
+    LTParams.QCOMP_BETA: 0.97,
+    LTParams.THETA_KP: 0.05,
+    LTParams.THETA_KI: 0.0,
+    LTParams.ED_KP: 0.8,
+    LTParams.ED_KI: 0.0,
+    LTParams.VDESIRED_KP: 1.0,
+    LTParams.VDESIRED_KI: 0.0,
+    LTParams.WDESIRED_KP: 1.0,
+    LTParams.WDESIRED_KI: 0.0,
+    LTParams.WHEEL_RADIUS: 1.0,
+    LTParams.WHEEL_DISTANCE: 1.0,
+    LTParams.BLINK_PERIOD: 0.0,
+    LTParams.MADGWICK_BETA: 0.1,
+    LTParams.IMU_FILTER_TYPE: 0,
+}
