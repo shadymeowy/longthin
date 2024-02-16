@@ -12,7 +12,7 @@ uint8_t mac_self[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 uint8_t mac_receiver[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 #define BUFFER_SIZE 256
 #define SERIAL_BAUD 115200
-#define SERIAL Serial
+#define SERIAL_INST Serial
 
 #define LCG_A 1664525
 #define LCG_C 1013904223
@@ -44,7 +44,7 @@ void on_data_recv(uint8_t *mac_addr, uint8_t *buffer, uint8_t buffer_length)
 		return;
 	}
 	// Relay the packet
-	SERIAL.write(buffer + 8, buffer_length - 8);
+	SERIAL_INST.write(buffer + 8, buffer_length - 8);
 }
 
 uint8_t buffer[BUFFER_SIZE];
@@ -52,7 +52,7 @@ struct packet_reader_t reader;
 
 void setup()
 {
-	SERIAL.begin(SERIAL_BAUD);
+	SERIAL_INST.begin(SERIAL_BAUD);
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect();
 	if (esp_now_init() != 0) {
@@ -74,7 +74,7 @@ void setup()
 
 void loop()
 {
-	int c = SERIAL.read();
+	int c = SERIAL_INST.read();
 	int ret;
 	if ((ret = packet_reader_push(&reader, c)) < 0) {
 		return;
