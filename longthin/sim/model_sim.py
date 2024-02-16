@@ -7,7 +7,7 @@ from .rk4 import RK4
 a, b = 10e-2, 60e-2
 max_rpm = 140
 max_rot = max_rpm * 2 * np.pi / 60
-max_volt = 12
+max_volt = 12 / 12  # to be in the range [0, 1]
 max_current = 0.8
 max_torque = 3.6 / 100 * 10
 
@@ -38,20 +38,20 @@ print(f"Rs = {Rs}")
 model = ddmr_dynamic_model(R, L, M, d, J, B, h, Kb, Ki, Rs)
 solver = RK4(model, 0, [0, 0, 0, 0, 0], 1e-3)
 t = np.arange(0, 10, 1e-3)
-y1 = np.array([solver.step((12, 6)) if t < 5 else solver.step((12, 12)) for i, t in enumerate(t)])
+y1 = np.array([solver.step((1, 0.5)) if t < 5 else solver.step((0.5, 0.5)) for i, t in enumerate(t)])
 w_r1 = (1/R)*(y1[:, 1]+L*y1[:, 0])
 w_l1 = (1/R)*(y1[:, 1]-L*y1[:, 0])
 
 B = 1.
 model = ddmr_dynamic_model(R, L, M, d, J, B, h, Kb, Ki, Rs)
 solver = RK4(model, 0, [0, 0, 0, 0, 0], 1e-3)
-y2 = np.array([solver.step((12, 6)) if t < 5 else solver.step((12, 12)) for i, t in enumerate(t)])
+y2 = np.array([solver.step((1, 0.5)) if t < 5 else solver.step((0.5, 0.5)) for i, t in enumerate(t)])
 w_r2 = (1/R)*(y2[:, 1]+L*y2[:, 0])
 w_l2 = (1/R)*(y2[:, 1]-L*y2[:, 0])
 
 model = ddmr_kinematic_model(R, L, d)
 solver = RK4(model, 0, [0, 0, 0], 1e-3)
-y3 = np.array([solver.step((14.66, 14.66/2)) if t < 5 else solver.step((14.66, 14.66)) for i, t in enumerate(t)])
+y3 = np.array([solver.step((14.66, 14.66/2)) if t < 5 else solver.step((14.66/2, 14.66/2)) for i, t in enumerate(t)])
 # np.savetxt("model_sim.csv", y, delimiter=",")
 plt.figure()
 plt.plot(y1[:, 3], y1[:, 4], label="B = 0")
