@@ -41,7 +41,7 @@ struct ltpacket_setpoint_t {
 
 struct ltpacket_setparam_t {
     int32_t param;
-    float value;
+    uint32_t value;
 };
 
 struct ltpacket_led_t {

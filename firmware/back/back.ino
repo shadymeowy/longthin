@@ -217,7 +217,7 @@ void listen_handle(int data_length)
 		digitalWrite(LED_BUILTIN, packet.led.state);
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		ltparams_set((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
+		ltparams_setu((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
 		break;
 	case LTPACKET_TYPE_MOTOR_RAW:
 		motor_set_raw(packet.motor_raw.left, packet.motor_raw.right);

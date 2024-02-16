@@ -54,7 +54,7 @@ void listen_handle(int data_length)
 		digitalWrite(LED_BUILTIN, packet.led.state);
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		ltparams_set((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
+		ltparams_setu((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
 		break;
 	default:
 		break;

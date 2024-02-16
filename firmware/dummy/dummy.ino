@@ -52,7 +52,7 @@ void listen_handle(int data_length)
 		blink = packet.led.state;
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		ltparams_set((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
+		ltparams_setu((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
 		break;
 	default:
 		break;
@@ -109,7 +109,7 @@ void led_init()
 void led_process()
 {
 	static unsigned long last_blink = 0;
-	float period = 0;
+	float period = ltparams_get(LTPARAMS_BLINK_PERIOD);
 	if (blink) {
 		unsigned long now = millis();
 		if (period == 0) {

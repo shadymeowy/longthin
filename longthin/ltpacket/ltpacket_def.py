@@ -148,7 +148,7 @@ class Setpoint:
 @dataclass
 class Setparam:
     param: int
-    value: float
+    value: int
 
     @staticmethod
     def from_bytes(data):
@@ -234,7 +234,7 @@ imu_raw_struct = struct.Struct('fffffffff')
 motor_struct = struct.Struct('ff')
 motor_raw_struct = struct.Struct('hh')
 setpoint_struct = struct.Struct('ff')
-setparam_struct = struct.Struct('if')
+setparam_struct = struct.Struct('iI')
 led_struct = struct.Struct('BB')
 control_debug_struct = struct.Struct('ffffffffffff')
 

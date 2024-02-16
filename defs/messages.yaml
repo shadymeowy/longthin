@@ -46,7 +46,7 @@ setparam:
   id: 0xa
   fields:
     param: i32
-    value: f32
+    value: u32
 
 led:
   id: 0xb
