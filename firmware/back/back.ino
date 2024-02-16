@@ -169,7 +169,7 @@ void motor_publish()
 	p->desired_yaw = desired_yaw;
 	p->current_vel = current_vel;
 	p->current_w = current_w;
-	p->desired_v = desired_v;
+	p->desired_vel = desired_v;
 	p->desired_w = desired_w;
 	p->u_v = u_v;
 	p->u_w = u_w;
@@ -217,14 +217,14 @@ void listen_handle(int data_length)
 		digitalWrite(LED_BUILTIN, packet.led.state);
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		ltparams_set(packet.setparam.param, packet.setparam.value);
+		ltparams_set((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
 		break;
 	case LTPACKET_TYPE_MOTOR_RAW:
-		motor_set_raw(packet.motor_raw.motor_left, packet.motor_raw.motor_right);
+		motor_set_raw(packet.motor_raw.left, packet.motor_raw.right);
 		manual_mode = 1;
 		break;
 	case LTPACKET_TYPE_MOTOR:
-		motor_set(packet.motor.motor_left, packet.motor.motor_right);
+		motor_set(packet.motor.left, packet.motor.right);
 		manual_mode = 1;
 		break;
 	case LTPACKET_TYPE_SETPOINT:
@@ -248,7 +248,6 @@ void setup()
 	Serial.begin(115200);
 	Serial1.begin(115200);
 
-	ltparams_load_defaults();
 	listen_init();
 	motor_init();
 }

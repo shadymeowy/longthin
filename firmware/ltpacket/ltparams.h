@@ -32,42 +32,42 @@ static_assert(sizeof(union ltparam_t) == 4,
 
 #include "ltparams_def.h"
 
-static inline float ltparams_get(uint8_t index)
+static inline float ltparams_get(enum ltparams_index_t index)
 {
 	if (index >= LTPARAMS_COUNT)
 		return 0;
 	return ltparams[index].f;
 }
 
-static inline void ltparams_set(uint8_t index, float value)
+static inline void ltparams_set(enum ltparams_index_t index, float value)
 {
 	if (index >= LTPARAMS_COUNT)
 		return;
 	ltparams[index].f = value;
 }
 
-static inline void ltparams_setu(uint8_t index, uint32_t value)
+static inline void ltparams_setu(enum ltparams_index_t index, uint32_t value)
 {
 	if (index >= LTPARAMS_COUNT)
 		return;
 	ltparams[index].ui = value;
 }
 
-static inline uint32_t ltparams_getu(uint8_t index)
+static inline uint32_t ltparams_getu(enum ltparams_index_t index)
 {
 	if (index >= LTPARAMS_COUNT)
 		return 0;
 	return ltparams[index].ui;
 }
 
-static inline void ltparams_seti(uint8_t index, int32_t value)
+static inline void ltparams_seti(enum ltparams_index_t index, int32_t value)
 {
 	if (index >= LTPARAMS_COUNT)
 		return;
 	ltparams[index].i = value;
 }
 
-static inline int32_t ltparams_geti(uint8_t index)
+static inline int32_t ltparams_geti(enum ltparams_index_t index)
 {
 	if (index >= LTPARAMS_COUNT)
 		return 0;
