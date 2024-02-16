@@ -52,7 +52,7 @@ void listen_handle(int data_length)
 		blink = packet.led.state;
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		ltparams_set(packet.setparam.param, packet.setparam.value);
+		ltparams_set((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
 		break;
 	default:
 		break;
