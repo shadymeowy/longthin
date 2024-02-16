@@ -1,5 +1,6 @@
 import struct
 from .ltparams_def import *
+from .helpers import *
 
 float_struct = struct.Struct('f')
 uint32_struct = struct.Struct('I')
@@ -13,7 +14,7 @@ param_struct_dict = {
 }
 
 
-def encode_value(param, value):
+def encode_param(param, value):
     if not isinstance(param, LTParams):
         raise ValueError('param must be an LTParams')
     if param not in param_type_dict:
@@ -24,7 +25,7 @@ def encode_value(param, value):
     return param_struct_dict[param_type].pack(value)
 
 
-def decode_value(param, data):
+def decode_param(param, data):
     if not isinstance(param, LTParams):
         raise ValueError('param must be an LTParams')
     if param not in param_type_dict:
@@ -33,6 +34,20 @@ def decode_value(param, data):
     if param_type not in param_struct_dict:
         raise ValueError('param_type not found in param_struct_dict')
     return param_struct_dict[param_type].unpack(data)[0]
+
+
+def setparam_to_packet(param, value):
+    byts = encode_param(param, value)
+    value = int.from_bytes(byts, byteorder='little', signed=False)
+    packet = Setparam(param.value, value)
+    return packet
+
+
+def packet_to_setparam(packet):
+    byts = packet.value.to_bytes(4, byteorder='little', signed=False)
+    param = LTParams(packet.param)
+    value = decode_param(param, byts)
+    return param, value
 
 
 def default_params():
@@ -61,14 +76,14 @@ if __name__ == '__main__':
     pprint.pprint(params)
     print('parameter', LTParams.QCOMP_ALPHA)
     print('default', default_param(LTParams.QCOMP_ALPHA))
-    byts = encode_value(LTParams.QCOMP_ALPHA, 0.15)
+    byts = encode_param(LTParams.QCOMP_ALPHA, 0.15)
     print('encoded', byts)
-    print('decoded', decode_value(LTParams.QCOMP_ALPHA, byts))
+    print('decoded', decode_param(LTParams.QCOMP_ALPHA, byts))
     print('type', get_param_type(LTParams.QCOMP_ALPHA))
 
     print('parameter', LTParams.IMU_FILTER_TYPE)
     print('default', default_param(LTParams.IMU_FILTER_TYPE))
-    byts = encode_value(LTParams.IMU_FILTER_TYPE, 3)
+    byts = encode_param(LTParams.IMU_FILTER_TYPE, 3)
     print('encoded', byts)
-    print('decoded', decode_value(LTParams.IMU_FILTER_TYPE, byts))
+    print('decoded', decode_param(LTParams.IMU_FILTER_TYPE, byts))
     print('type', get_param_type(LTParams.IMU_FILTER_TYPE))
