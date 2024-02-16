@@ -27,6 +27,7 @@ def main():
             if packet is None:
                 break
             ser.write(packet)
+            conn.send(packet)
             if args.debug:
                 print(packet.type, time.time())
                 print(yaml.dump(asdict(packet)), end='')
