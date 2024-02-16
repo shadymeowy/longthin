@@ -1,6 +1,4 @@
 import yaml
-import struct
-from dataclasses import dataclass
 
 types_c = {
     'i8': 'int8_t',

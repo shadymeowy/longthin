@@ -30,7 +30,22 @@ static_assert(sizeof(uint8_t) == 1, "uint8_t is not 1 byte long");
 static_assert(sizeof(union ltparam_t) == 4,
 	      "union ltparam_t is not 4 bytes long");
 
+#define LTDEF(...)
 #include "ltparams_def.h"
+#undef LTDEF
+extern union ltparam_t ltparams[LTPARAMS_COUNT];
+
+#define LTDEF(id, name, type, field, value) name = id,
+enum ltparams_index_t {
+#include "ltparams_def.h"
+};
+#undef LTDEF
+
+#define LTDEF(id, name, type, field, value) [name] = type,
+static const enum ltparams_type_t ltparams_types[LTPARAMS_COUNT] = {
+#include "ltparams_def.h"
+};
+#undef LTDEF
 
 static inline float ltparams_get(enum ltparams_index_t index)
 {
