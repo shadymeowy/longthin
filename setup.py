@@ -13,10 +13,10 @@ setup(
         'console_scripts': [
             'longthin-sim = longthin.basic_sim:main',
             'longthin-test = longthin.test:main',
-            'longthin-bridge = longthin.ltpacket.bridge:main',
-            'longthin-blink = longthin.ltpacket.blink:main',
-            'longthin-echo = longthin.ltpacket.echo:main',
-            'longthin-plot = longthin.ltpacket.plot:main',
+            'longthin-bridge = longthin.utils.bridge:main',
+            'longthin-blink = longthin.utils.blink:main',
+            'longthin-echo = longthin.utils.echo:main',
+            'longthin-plot = longthin.utils.plot:main',
         ],
     },
 )
