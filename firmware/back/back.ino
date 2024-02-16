@@ -81,7 +81,7 @@ void motor_update()
 	static float last_time = 0;
 	float current_time = micros();
 	float dt = (current_time - last_time) / 1e6;
-	
+
 	float ed_kp = ltparams_get(LTPARAMS_ED_KP);
 	float ed_ki = ltparams_get(LTPARAMS_ED_KI);
 	float theta_kp = ltparams_get(LTPARAMS_THETA_KP);
@@ -108,7 +108,7 @@ void motor_update()
 		static float e_theta_sum = 0;
 		e_theta_sum += e_theta * dt;
 		desired_w = theta_kp * e_theta + theta_ki * e_theta_sum;
-		
+
 		static float e_v_sum = 0;
 		float e_v = desired_v - current_vel;
 		e_v_sum += e_v * dt;
@@ -178,6 +178,8 @@ void motor_publish()
 	ltpacket_send(&packet, serial_write);
 }
 
+bool blink = false;
+
 uint8_t buffer[100];
 struct packet_reader_t reader;
 uint8_t buffer1[100];
@@ -214,7 +216,7 @@ void listen_handle(int data_length)
 	ltpacket_read_buffer(&packet, packet_reader_head(&reader), data_length);
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
-		digitalWrite(LED_BUILTIN, packet.led.state);
+		blink = packet.led.state;
 		break;
 	case LTPACKET_TYPE_SETPARAM:
 		ltparams_setu((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
@@ -241,13 +243,36 @@ void listen_handle(int data_length)
 	}
 }
 
-void setup()
+void led_init()
 {
 	pinMode(LED_BUILTIN, OUTPUT);
+}
 
+void led_process()
+{
+	static unsigned long last_blink = 0;
+	float period = ltparams_get(LTPARAMS_BLINK_PERIOD);
+	if (blink) {
+		unsigned long now = millis();
+		if (period == 0) {
+			digitalWrite(LED_BUILTIN, HIGH);
+			return;
+		}
+		if (now - last_blink > period * 1000) {
+			digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+			last_blink = now;
+		}
+	} else {
+		digitalWrite(LED_BUILTIN, LOW);
+	}
+}
+
+void setup()
+{
 	Serial.begin(115200);
 	Serial1.begin(115200);
 
+	led_init();
 	listen_init();
 	motor_init();
 }
@@ -255,6 +280,7 @@ void setup()
 void loop()
 {
 	listen_process();
+	led_process();
 	motor_update();
 	motor_publish();
 }
