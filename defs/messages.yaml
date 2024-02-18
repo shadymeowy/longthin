@@ -81,3 +81,9 @@ setparami:
   fields:
     param: i32
     value: i32
+
+motor_output:
+  id: 0xf
+  fields:
+    left: f32
+    right: f32

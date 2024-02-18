@@ -151,7 +151,7 @@ void motor_update()
 	analogWrite(MOTOR_RIGHT_BACKWARD, motor_right < 0 ? -motor_right : 0);
 }
 
-void motor_publish()
+void motor_debug()
 {
 	static uint32_t last_time = 0;
 	uint32_t now = millis();
@@ -175,6 +175,22 @@ void motor_publish()
 	p->u_w = u_w;
 	p->u_r = u_r;
 	p->u_l = u_l;
+	ltpacket_send(&packet, serial_write);
+}
+
+void motor_publish()
+{
+	static uint32_t last_time = 0;
+	uint32_t now = millis();
+	// 30 Hz
+	if (now - last_time < 33) {
+		return;
+	}
+	last_time = now;
+	struct ltpacket_t packet;
+	packet.type = LTPACKET_TYPE_MOTOR_OUTPUT;
+	packet.motor.left = motor_left / 2048.0;
+	packet.motor.right = motor_right / 2048.0;
 	ltpacket_send(&packet, serial_write);
 }
 
@@ -292,6 +308,7 @@ void loop()
 	listen_process();
 	led_process();
 	motor_update();
+	motor_debug();
 	motor_publish();
 }
 

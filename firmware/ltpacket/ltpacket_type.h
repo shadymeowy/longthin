@@ -73,3 +73,8 @@ struct ltpacket_setparami_t {
     int32_t param;
     int32_t value;
 };
+
+struct ltpacket_motor_output_t {
+    float left;
+    float right;
+};

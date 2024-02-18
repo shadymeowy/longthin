@@ -270,6 +270,27 @@ class Setparami:
 
 
 
+@dataclass
+class MotorOutput:
+    left: float
+    right: float
+
+    @staticmethod
+    def from_bytes(data):
+        return MotorOutput(*motor_output_struct.unpack(data))
+
+    def to_bytes(self):
+        return motor_output_struct.pack(
+            self.left,
+            self.right,
+        )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.MOTOR_OUTPUT
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -281,6 +302,7 @@ led_struct = struct.Struct('BB')
 control_debug_struct = struct.Struct('ffffffffffff')
 setparamu_struct = struct.Struct('iI')
 setparami_struct = struct.Struct('ii')
+motor_output_struct = struct.Struct('ff')
 
 class LTPACKET_TYPE(Enum):
     RESERVED = 0
@@ -294,6 +316,7 @@ class LTPACKET_TYPE(Enum):
     CONTROL_DEBUG = 12
     SETPARAMU = 13
     SETPARAMI = 14
+    MOTOR_OUTPUT = 15
 
 type_map = {
     LTPACKET_TYPE.RESERVED: Reserved,
@@ -307,5 +330,6 @@ type_map = {
     LTPACKET_TYPE.CONTROL_DEBUG: ControlDebug,
     LTPACKET_TYPE.SETPARAMU: Setparamu,
     LTPACKET_TYPE.SETPARAMI: Setparami,
+    LTPACKET_TYPE.MOTOR_OUTPUT: MotorOutput,
 }
 type_map_rev = {v: k for k, v in type_map.items()}
