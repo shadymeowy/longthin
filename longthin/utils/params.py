@@ -7,7 +7,7 @@ from dataclasses import asdict
 
 def main():
     parser = argparse.ArgumentParser(description='A parameter utility client')
-    parser.add_argument('param_name', type=str, help='Parameter name')
+    parser.add_argument('param_name', type=str, help='Parameter name', nargs='?')
     parser.add_argument('--set', type=float, help='Parameter value to set')
     parser.add_argument('--default', action='store_true', help='Print default value of parameter')
     parser.add_argument('--type', action='store_true', help='Print type of parameter')
@@ -16,6 +16,12 @@ def main():
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     args = parser.parse_args()
 
+    if args.param_name is None:
+        print('Available parameters:')
+        print('name', 'index', 'default')
+        for param, value in default_params().items():
+            print(hex(param.value), param.name, value)
+        return
     param_name = args.param_name.upper()
     param = LTParams[param_name]
     if args.debug:
