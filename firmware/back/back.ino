@@ -214,12 +214,22 @@ void listen_handle(int data_length)
 {
 	struct ltpacket_t packet;
 	ltpacket_read_buffer(&packet, packet_reader_head(&reader), data_length);
+	enum ltparams_index_t index;
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
 		blink = packet.led.state;
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		ltparams_setu((enum ltparams_index_t)packet.setparam.param, packet.setparam.value);
+		index = (enum ltparams_index_t)packet.setparam.param;
+		ltparams_set(index, packet.setparam.value);
+		break;
+	case LTPACKET_TYPE_SETPARAMU:
+		index = (enum ltparams_index_t)packet.setparamu.param;
+		ltparams_setu(index, packet.setparamu.value);
+		break;
+	case LTPACKET_TYPE_SETPARAMI:
+		index = (enum ltparams_index_t)packet.setparami.param;
+		ltparams_seti(index, packet.setparami.value);
 		break;
 	case LTPACKET_TYPE_MOTOR_RAW:
 		motor_set_raw(packet.motor_raw.left, packet.motor_raw.right);

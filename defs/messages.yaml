@@ -46,7 +46,7 @@ setparam:
   id: 0xa
   fields:
     param: i32
-    value: u32
+    value: f32
 
 led:
   id: 0xb
@@ -69,3 +69,15 @@ control_debug:
     u_w: f32
     u_r: f32
     u_l: f32
+
+setparamu:
+  id: 0xd
+  fields:
+    param: i32
+    value: u32
+
+setparami:
+  id: 0xe
+  fields:
+    param: i32
+    value: i32

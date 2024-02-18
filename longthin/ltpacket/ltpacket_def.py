@@ -148,7 +148,7 @@ class Setpoint:
 @dataclass
 class Setparam:
     param: int
-    value: int
+    value: float
 
     @staticmethod
     def from_bytes(data):
@@ -228,15 +228,59 @@ class ControlDebug:
 
 
 
+@dataclass
+class Setparamu:
+    param: int
+    value: int
+
+    @staticmethod
+    def from_bytes(data):
+        return Setparamu(*setparamu_struct.unpack(data))
+
+    def to_bytes(self):
+        return setparamu_struct.pack(
+            self.param,
+            self.value,
+        )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.SETPARAMU
+
+
+
+@dataclass
+class Setparami:
+    param: int
+    value: int
+
+    @staticmethod
+    def from_bytes(data):
+        return Setparami(*setparami_struct.unpack(data))
+
+    def to_bytes(self):
+        return setparami_struct.pack(
+            self.param,
+            self.value,
+        )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.SETPARAMI
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffff')
 imu_raw_struct = struct.Struct('fffffffff')
 motor_struct = struct.Struct('ff')
 motor_raw_struct = struct.Struct('hh')
 setpoint_struct = struct.Struct('ff')
-setparam_struct = struct.Struct('iI')
+setparam_struct = struct.Struct('if')
 led_struct = struct.Struct('BB')
 control_debug_struct = struct.Struct('ffffffffffff')
+setparamu_struct = struct.Struct('iI')
+setparami_struct = struct.Struct('ii')
 
 class LTPACKET_TYPE(Enum):
     RESERVED = 0
@@ -248,6 +292,8 @@ class LTPACKET_TYPE(Enum):
     SETPARAM = 10
     LED = 11
     CONTROL_DEBUG = 12
+    SETPARAMU = 13
+    SETPARAMI = 14
 
 type_map = {
     LTPACKET_TYPE.RESERVED: Reserved,
@@ -259,5 +305,7 @@ type_map = {
     LTPACKET_TYPE.SETPARAM: Setparam,
     LTPACKET_TYPE.LED: Led,
     LTPACKET_TYPE.CONTROL_DEBUG: ControlDebug,
+    LTPACKET_TYPE.SETPARAMU: Setparamu,
+    LTPACKET_TYPE.SETPARAMI: Setparami,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

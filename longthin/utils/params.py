@@ -25,11 +25,10 @@ def main():
         raise ValueError('No action specified')
 
     if args.set is not None:
-        packet = setparam_to_packet(param, args.set)
+        packet = Setparam(param.value, args.set)
         if args.debug:
             print('packet:', packet)
             print('asbytes:', packet.to_bytes())
-            print('decoded:', packet_to_setparam(packet))
         conn = LTZmq(args.zmq, args.zmq2, server=False)
         while conn.read() is None:
             time.sleep(1e-4)
