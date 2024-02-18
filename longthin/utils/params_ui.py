@@ -1,3 +1,4 @@
+import yaml
 from PySide6 import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -23,8 +24,14 @@ class ParamsUI(QWidget):
             self.add_param(param.value, param.name, value, get_param_type(param).name)
         self.table.itemChanged.connect(self.changed)
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.table)
         self.setLayout(self.layout)
+        self.layout.addWidget(self.table)
+        self.save_button = QPushButton('Save')
+        self.save_button.clicked.connect(self.save)
+        self.layout.addWidget(self.save_button)
+        self.load_button = QPushButton('Load')
+        self.load_button.clicked.connect(self.load)
+        self.layout.addWidget(self.load_button)
 
     def add_param(self, id_, name, value, type):
         index = self.table.rowCount()
@@ -44,10 +51,58 @@ class ParamsUI(QWidget):
     def changed(self, item):
         id_ = int(self.table.item(item.row(), 0).text(), 16)
         param = LTParams(id_)
-        value = float(self.table.item(item.row(), 3).text())
+        value = self.table.item(item.row(), 3).text()
+        try:
+            value = int(value)
+        except ValueError:
+            value = float(value)
         packet = setparam(param, value)
         print('packet', packet)
         self.conn.send(packet)
+        print('sent')
+
+    def save(self):
+        filename, _ = QFileDialog.getSaveFileName(self, 'Save File', '', 'YAML Files (*.yaml)')
+        if filename:
+            self.save_params(filename)
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText('Filename not specified')
+            msg.setWindowTitle('Error')
+            msg.exec_()
+            return
+
+    def load(self):
+        filename, _ = QFileDialog.getOpenFileName(self, 'Open File', '', 'YAML Files (*.yaml)')
+        if filename:
+            self.load_params(filename)
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText('Filename not specified')
+            msg.setWindowTitle('Error')
+            msg.exec_()
+            return
+
+    def save_params(self, filename):
+        # TODO: make it more type safe
+        params = {}
+        for row in range(self.table.rowCount()):
+            name = self.table.item(row, 1).text()
+            value = self.table.item(row, 3).text()
+            params[name] = {'name': name, 'value': value}
+        with open(filename, 'w') as f:
+            yaml.dump(params, f)
+
+    def load_params(self, filename):
+        with open(filename, 'r') as f:
+            params = yaml.load(f, Loader=yaml.FullLoader)
+        for name, param in params.items():
+            for row in range(self.table.rowCount()):
+                if self.table.item(row, 1).text() == name:
+                    self.table.item(row, 3).setText(str(param['value']))
+                    break
 
 
 def main():
