@@ -19,6 +19,7 @@ setup(
             'longthin-plot = longthin.utils.plot:main',
             'longthin-params = longthin.utils.params:main',
             'longthin-params-ui = longthin.utils.params_ui:main',
+            'longthin-pfd = longthin.utils.pfd:main',
         ],
     },
 )
