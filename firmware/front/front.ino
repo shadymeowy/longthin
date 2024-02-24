@@ -132,7 +132,7 @@ void imu_filter()
 	float qcomp_alpha = ltparams_get(LTPARAMS_QCOMP_ALPHA);
 	float qcomp_beta = ltparams_get(LTPARAMS_QCOMP_BETA);
 	float madgwick_beta = ltparams_get(LTPARAMS_MADGWICK_BETA);
-	
+
 	struct quaternion q_;
 	switch (ltparams_getu(LTPARAMS_IMU_FILTER_TYPE)) {
 	case 0: // QCOMP
@@ -150,10 +150,10 @@ void imu_filter()
 		q_est[3] = q_.z;
 		break;
 	case 2: // Madgwick AHRS
-		madgwick_ahrs_update(q_est, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt, madgwick_beta);
+		madgwick_ahrs_update(q_est, &imu_raw[3], &imu_raw[0], &imu_raw[6], dt, madgwick_beta);
 		break;
 	case 3: // Mahony AHRS
-		mahony_ahrs_update(q_est, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt, madgwick_beta);
+		mahony_ahrs_update(q_est, &imu_raw[3], &imu_raw[0], &imu_raw[6], dt, madgwick_beta);
 		break;
 	default:
 		break;
