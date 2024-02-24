@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-LTPARAMS_COUNT = 0x10
+LTPARAMS_COUNT = 0x11
 
 
 class LTParamType(Enum):
@@ -27,6 +27,7 @@ class LTParams(Enum):
     BLINK_PERIOD = 0xd
     MADGWICK_BETA = 0xe
     IMU_FILTER_TYPE = 0xf
+    MAHONY_KP = 0x10
 
 
 param_type_dict = {
@@ -46,6 +47,7 @@ param_type_dict = {
     LTParams.BLINK_PERIOD: LTParamType.LTPARAMS_TYPE_FLOAT,
     LTParams.MADGWICK_BETA: LTParamType.LTPARAMS_TYPE_FLOAT,
     LTParams.IMU_FILTER_TYPE: LTParamType.LTPARAMS_TYPE_UINT32,
+    LTParams.MAHONY_KP: LTParamType.LTPARAMS_TYPE_FLOAT,
 }
 
 param_default_dict = {
@@ -65,4 +67,5 @@ param_default_dict = {
     LTParams.BLINK_PERIOD: 0.0,
     LTParams.MADGWICK_BETA: 0.1,
     LTParams.IMU_FILTER_TYPE: 0,
+    LTParams.MAHONY_KP: 1.0,
 }

@@ -3,10 +3,14 @@
 
 #include "mpu6050.h"
 #include "hmc5883l.h"
-#include "qcomp.h"
 #include "packet.h"
 #include "ltpacket.h"
 #include "ltparams.h"
+
+#include "qcomp.h"
+#include "madgwick.h"
+#include "madgwick_ahrs.h"
+#include "mahony_ahrs.h"
 
 bool blink = false;
 
@@ -77,6 +81,7 @@ struct mpu6050 imu = { 0 };
 struct hmc5883l mag = { 0 };
 float dt = 0;
 quat_t q_est = { 1, 0, 0, 0 };
+bool filter_init_done = false;
 
 void imu_init()
 {
@@ -107,24 +112,52 @@ void imu_filter()
 	if (!rp2040.fifo.pop_nb(&dummy)) {
 		return;
 	}
-	if (last_time == 0) {
+	bool need_reset = false;
+	for (int i = 0; i < 4; i++) {
+		if (isnan(q_est[i]) || isinf(q_est[i])) {
+			need_reset = true;
+			break;
+		}
+	}
+	if (!filter_init_done || need_reset) {
+		filter_init_done = true;
 		qcomp_init(&imu_raw[0], &imu_raw[6], q_est);
 		last_time = micros();
 		return;
 	}
-	for (int i = 0; i < 4; i++) {
-		if (isnan(q_est[i]) || isinf(q_est[i])) {
-			qcomp_init(&imu_raw[0], &imu_raw[6], q_est);
-			last_time = micros();
-			return;
-		}
-	}
 	uint32_t now = micros();
 	dt = (now - last_time) / 1e6;
 	last_time = now;
-	float alpha = ltparams_get(LTPARAMS_QCOMP_ALPHA);
-	float beta = ltparams_get(LTPARAMS_QCOMP_BETA);
-	qcomp_update(q_est, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt, alpha, beta);
+
+	float qcomp_alpha = ltparams_get(LTPARAMS_QCOMP_ALPHA);
+	float qcomp_beta = ltparams_get(LTPARAMS_QCOMP_BETA);
+	float madgwick_beta = ltparams_get(LTPARAMS_MADGWICK_BETA);
+	
+	struct quaternion q_;
+	switch (ltparams_getu(LTPARAMS_IMU_FILTER_TYPE)) {
+	case 0: // QCOMP
+		qcomp_update(q_est, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt, qcomp_alpha, qcomp_beta);
+		break;
+	case 1: // Madgwick
+		q_.w = q_est[0];
+		q_.x = q_est[1];
+		q_.y = q_est[2];
+		q_.z = q_est[3];
+		madgwick_filter(&q_, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt);
+		q_est[0] = q_.w;
+		q_est[1] = q_.x;
+		q_est[2] = q_.y;
+		q_est[3] = q_.z;
+		break;
+	case 2: // Madgwick AHRS
+		madgwick_ahrs_update(q_est, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt, madgwick_beta);
+		break;
+	case 3: // Mahony AHRS
+		mahony_ahrs_update(q_est, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt, madgwick_beta);
+		break;
+	default:
+		break;
+	}
 }
 
 void imu_publish()
@@ -135,6 +168,7 @@ void imu_publish()
 		return;
 	}
 	last_time = now;
+
 	float euler[3] = { 0 };
 	euler_from_quat(q_est, euler);
 	struct ltpacket_t packet;
@@ -190,7 +224,7 @@ void setup()
 	Serial2.setRX(5);
 	Serial.begin(115200);
 	Serial2.begin(115200);
-	
+
 	led_init();
 	listen_init();
 }
