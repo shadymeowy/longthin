@@ -210,26 +210,25 @@ void listen_init()
 void listen_process()
 {
 	int ret;
+	int c;
 	while (Serial.available()) {
-		int c = Serial.read();
-		if ((ret = packet_reader_push(&reader, c)) < 0) {
-			continue;
+		c = Serial.read();
+		if ((ret = packet_reader_push(&reader, c)) >= 0) {
+			listen_handle(packet_reader_head(&reader), ret);
 		}
-		listen_handle(ret);
 	}
 	while (Serial1.available()) {
-		int c = Serial1.read();
-		if ((ret = packet_reader_push(&reader1, c)) < 0) {
-			continue;
+		c = Serial1.read();
+		if ((ret = packet_reader_push(&reader1, c)) >= 0) {
+			listen_handle(packet_reader_head(&reader1), ret);
 		}
-		listen_handle(ret);
 	}
 }
 
-void listen_handle(int data_length)
+void listen_handle(uint8_t *data, int data_length)
 {
 	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, packet_reader_head(&reader), data_length);
+	ltpacket_read_buffer(&packet, data, data_length);
 	enum ltparams_index_t index;
 	switch (packet.type) {
 	case LTPACKET_TYPE_LED:
