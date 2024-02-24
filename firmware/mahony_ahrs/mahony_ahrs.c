@@ -129,6 +129,11 @@ void mahony_ahrs_update(float q[4], float g[3], float a[3], float m[3], float dt
 	q1 *= recipNorm;
 	q2 *= recipNorm;
 	q3 *= recipNorm;
+
+	q[0] = q0;
+	q[1] = q1;
+	q[2] = q2;
+	q[3] = q3;
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -189,6 +194,11 @@ void mahony_ahrs_update_imu(float q[4], float g[3], float a[3], float dt, float 
 	q1 *= recipNorm;
 	q2 *= recipNorm;
 	q3 *= recipNorm;
+
+	q[0] = q0;
+	q[1] = q1;
+	q[2] = q2;
+	q[3] = q3;
 }
 
 //====================================================================================================
