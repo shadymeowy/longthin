@@ -13,13 +13,16 @@ class Estimator:
     vehicle_pose: Pose = None
     markerhelper: MarkerHelper = None
 
-    def __post_init__(self):
+    def __post_init__(self, median_num=3):
         params = self.params
         self.camera_params = CameraParams(params.camera_hfov, params.camera_vfov,
                                           params.camera_width, params.camera_height)
         self.markerhelper = MarkerHelper.from_type()
+        self.history_pos = []
+        self.history_att = []
+        self.median_num = median_num
 
-    def estimate(self, img):
+    def estimate(self, img, draw=False):
         params = self.params
         if params.distort_enable:
             img_ud = params.distort_params.undistort(img)
@@ -28,8 +31,10 @@ class Estimator:
         img_gray = cv2.cvtColor(img_ud, cv2.COLOR_BGR2GRAY)
 
         corners, ids = self.markerhelper.detect(img_gray)
-        img_markers = self.markerhelper.draw(img_ud, corners, ids)
-        cv2.imshow('markers', cv2.resize(img_markers, (1280, 720)))
+        if draw:
+            img_markers = self.markerhelper.draw(img_ud, corners, ids)
+        else:
+            img_markers = None
         if ids is None:
             return None
         mask = ids < len(params.markers)
@@ -60,7 +65,16 @@ class Estimator:
         rmat = rmat.T
         tvec = -rmat @ tvec
         est_pose = Pose(tvec.flatten(), rmat)
-        return est_pose, corners, ids, corners_pos
+
+        self.history_pos.append(est_pose.pos)
+        self.history_att.append(est_pose.att)
+        if len(self.history_pos) > self.median_num:
+            self.history_pos.pop(0)
+            self.history_att.pop(0)
+            est_pose.pos = np.median(self.history_pos, axis=0)
+            est_pose.att = np.median(self.history_att, axis=0)
+
+        return est_pose, corners_pos, img_markers
 
     def corner_position(self, id_):
         if isinstance(id_, (list, tuple, np.ndarray)):
