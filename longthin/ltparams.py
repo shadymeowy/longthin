@@ -1,7 +1,7 @@
 import numpy as np
 from dataclasses import dataclass, field
 
-from .distortion import Distortion
+from .geometry import Distortion
 from .marker import MarkerHelper
 
 

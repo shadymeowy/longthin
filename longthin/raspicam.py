@@ -5,7 +5,7 @@ from picamera2 import Picamera2
 from libcamera import controls
 
 from .marker import *
-from .distortion import Distortion
+from .geometry import Distortion
 
 
 class PiCam:
