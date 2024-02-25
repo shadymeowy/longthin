@@ -3,7 +3,7 @@ import numpy as np
 
 from .raspicam import PiCam
 from .estimator import Estimator
-from .ltparams import LTParams
+from .graphics import LTParams
 
 
 def main():

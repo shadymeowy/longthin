@@ -2,7 +2,7 @@ import drawing3d
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from .geometry import *
+from ..geometry import *
 
 
 class LTDrawList(drawing3d.DrawList):

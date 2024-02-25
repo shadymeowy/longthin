@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from dataclasses import dataclass
 
-from .ltparams import LTParams
+from .graphics import LTParams
 from .geometry import *
 from .marker import MarkerHelper
 
