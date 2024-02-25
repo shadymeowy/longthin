@@ -30,6 +30,42 @@ class CameraParams:
     def cy(self):
         return self.height / 2
 
+    @property
+    def image_size(self):
+        return np.array([self.width, self.height])
+
+    @staticmethod
+    def from_params(fx, fy, cx, cy, width=None, height=None):
+        if width is None:
+            width = cx * 2
+        if height is None:
+            height = cy * 2
+
+        hfov = np.rad2deg(2 * np.arctan(width / (2 * fx)))
+        vfov = np.rad2deg(2 * np.arctan(height / (2 * fy)))
+        return CameraParams(hfov, vfov, width, height)
+
+    @staticmethod
+    def from_matrix(mat, width=None, height=None):
+        fx = mat[0, 0]
+        fy = mat[1, 1]
+        cx = mat[0, 2]
+        cy = mat[1, 2]
+        return CameraParams.from_params(fx, fy, cx, cy, width, height)
+
+    def scale(self, scale):
+        return CameraParams(self.hfov, self.vfov, int(self.width * scale), int(self.height * scale))
+
+    def to_params(self):
+        return self.fx, self.fy, self.cx, self.cy
+
+    def to_matrix(self):
+        return np.array([
+            [self.fx, 0, self.cx],
+            [0, self.fy, self.cy],
+            [0, 0, 1]
+        ])
+
     def image_plane_vecs(self, att, vec=E_X, vec_h=E_Y, vec_v=E_Z):
         vfovh = np.deg2rad(self.vfov) / 2
         hfovh = np.deg2rad(self.hfov) / 2
