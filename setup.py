@@ -11,7 +11,7 @@ setup(
     packages=[
         'longthin',
         'longthin.ltpacket',
-        'longthin.sim',
+        'longthin.model',
         'longthin.geometry',
         'longthin.graphics',
     ],
