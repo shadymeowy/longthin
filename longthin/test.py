@@ -9,8 +9,7 @@ from .graphics import LTParams
 def main():
     params = LTParams(
         distort_enable=True,
-        distort_path='other/calibration.txt',
-        homography_calib_path='other/hcalib.txt')
+        distort_path='other/calibration.txt')
     params.markers = np.array([[0, 0, params.marker_alt, 0]])
 
     cam = PiCam(params.camera_width, params.camera_height)
