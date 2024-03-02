@@ -27,6 +27,7 @@ setup(
             'longthin-params-ui = longthin.utils.params_ui:main',
             'longthin-pfd = longthin.utils.pfd:main',
             'longthin-sim = longthin.utils.sim:main',
+            'longthin-reboot = longthin.utils.reboot:main',
         ],
     },
 )

@@ -291,6 +291,25 @@ class MotorOutput:
 
 
 
+@dataclass
+class Reboot:
+    reserved: int
+
+    @staticmethod
+    def from_bytes(data):
+        return Reboot(*reboot_struct.unpack(data))
+
+    def to_bytes(self):
+        return reboot_struct.pack(
+            self.reserved,
+        )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.REBOOT
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -303,6 +322,7 @@ control_debug_struct = struct.Struct('ffffffffffff')
 setparamu_struct = struct.Struct('iI')
 setparami_struct = struct.Struct('ii')
 motor_output_struct = struct.Struct('ff')
+reboot_struct = struct.Struct('B')
 
 class LTPACKET_TYPE(Enum):
     RESERVED = 0
@@ -317,6 +337,7 @@ class LTPACKET_TYPE(Enum):
     SETPARAMU = 13
     SETPARAMI = 14
     MOTOR_OUTPUT = 15
+    REBOOT = 16
 
 type_map = {
     LTPACKET_TYPE.RESERVED: Reserved,
@@ -331,5 +352,6 @@ type_map = {
     LTPACKET_TYPE.SETPARAMU: Setparamu,
     LTPACKET_TYPE.SETPARAMI: Setparami,
     LTPACKET_TYPE.MOTOR_OUTPUT: MotorOutput,
+    LTPACKET_TYPE.REBOOT: Reboot,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

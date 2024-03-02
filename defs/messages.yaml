@@ -87,3 +87,8 @@ motor_output:
   fields:
     left: f32
     right: f32
+
+reboot:
+  id: 0x10
+  fields:
+    reserved: u8

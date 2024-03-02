@@ -263,6 +263,9 @@ void listen_handle(uint8_t *data, int data_length)
 		current_yaw = packet.imu.yaw;
 		current_d = packet.imu.vel; // TODO: Fix later
 		break;
+	case LTPACKET_TYPE_REBOOT:
+		rp2040.reboot();
+		break;
 	default:
 		break;
 	}

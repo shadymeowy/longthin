@@ -64,6 +64,9 @@ void listen_handle(int data_length)
 		index = (enum ltparams_index_t)packet.setparami.param;
 		ltparams_seti(index, packet.setparami.value);
 		break;
+	case LTPACKET_TYPE_REBOOT:
+		rp2040.reboot();
+		break;
 	default:
 		break;
 	}
