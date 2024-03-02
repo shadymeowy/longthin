@@ -16,12 +16,15 @@ bool blink = false;
 
 uint8_t buffer[100];
 struct packet_reader_t reader;
+uint8_t buffer1[100];
+struct packet_reader_t reader1;
 uint8_t buffer2[100];
 struct packet_reader_t reader2;
 
 int serial_write(const uint8_t *buffer, uint16_t size)
 {
 	Serial.write(buffer, size);
+	Serial1.write(buffer, size);
 	Serial2.write(buffer, size);
 	return 0;
 }
@@ -34,42 +37,60 @@ void listen_init()
 
 void listen_process()
 {
-	int ret;
-	int c;
+	int ret, c;
+	struct ltpacket_t packet;
+	uint8_t *data;
+
 	while (Serial.available()) {
 		c = Serial.read();
 		if ((ret = packet_reader_push(&reader, c)) >= 0) {
-			listen_handle(packet_reader_head(&reader), ret);
+			data = packet_reader_head(&reader);
+			ltpacket_read_buffer(&packet, data, ret);
+			listen_handle(&packet);
+			Serial1.write(data - 3, ret + 5);
+			Serial2.write(data - 3, ret + 5);
+		}
+	}
+	while (Serial1.available()) {
+		c = Serial1.read();
+		if ((ret = packet_reader_push(&reader1, c)) >= 0) {
+			data = packet_reader_head(&reader1);
+			ltpacket_read_buffer(&packet, data, ret);
+			listen_handle(&packet);
+			Serial.write(data - 3, ret + 5);
+			Serial2.write(data - 3, ret + 5);
 		}
 	}
 	while (Serial2.available()) {
 		c = Serial2.read();
 		if ((ret = packet_reader_push(&reader2, c)) >= 0) {
-			listen_handle(packet_reader_head(&reader2), ret);
+			data = packet_reader_head(&reader2);
+			ltpacket_read_buffer(&packet, data, ret);
+			listen_handle(&packet);
+			Serial.write(data - 3, ret + 5);
+			Serial1.write(data - 3, ret + 5);
 		}
 	}
 }
 
-void listen_handle(uint8_t *data, int data_length)
+void listen_handle(struct ltpacket_t *packet)
 {
-	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, data, data_length);
 	enum ltparams_index_t index;
-	switch (packet.type) {
+	switch (packet->type) {
 	case LTPACKET_TYPE_LED:
-		blink = packet.led.state;
+		blink = packet->led.state;
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		index = (enum ltparams_index_t)packet.setparam.param;
-		ltparams_set(index, packet.setparam.value);
+		index = (enum ltparams_index_t)packet->setparam.param;
+		ltparams_set(index, packet->setparam.value);
 		break;
 	case LTPACKET_TYPE_SETPARAMU:
-		index = (enum ltparams_index_t)packet.setparamu.param;
-		ltparams_setu(index, packet.setparamu.value);
+		index = (enum ltparams_index_t)packet->setparamu.param;
+		ltparams_setu(index, packet->setparamu.value);
 		break;
 	case LTPACKET_TYPE_SETPARAMI:
-		index = (enum ltparams_index_t)packet.setparami.param;
-		ltparams_seti(index, packet.setparami.value);
+		index = (enum ltparams_index_t)packet->setparami.param;
+		ltparams_seti(index, packet->setparami.value);
 		break;
 	case LTPACKET_TYPE_REBOOT:
 		rp2040.reboot();
@@ -223,9 +244,12 @@ void setup()
 {
 	Wire1.setSDA(18);
 	Wire1.setSCL(19);
+	Serial1.setTX(16);
+	Serial1.setRX(17);
 	Serial2.setTX(4);
 	Serial2.setRX(5);
 	Serial.begin(115200);
+	Serial1.begin(115200);
 	Serial2.begin(115200);
 
 	led_init();

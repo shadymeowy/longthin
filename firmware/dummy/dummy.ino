@@ -26,43 +26,60 @@ void listen_init()
 
 void listen_process()
 {
-	int ret;
+	int ret, c;
+	struct ltpacket_t packet;
+	uint8_t *data;
+
 	while (Serial.available()) {
-		int c = Serial.read();
-		if ((ret = packet_reader_push(&reader, c)) < 0) {
-			continue;
+		c = Serial.read();
+		if ((ret = packet_reader_push(&reader, c)) >= 0) {
+			data = packet_reader_head(&reader);
+			ltpacket_read_buffer(&packet, data, ret);
+			listen_handle(&packet);
+			Serial1.write(data - 3, ret + 5);
+			// Serial2.write(data - 3, ret + 5);
 		}
-		listen_handle(ret);
 	}
 	while (Serial1.available()) {
-		int c = Serial1.read();
-		if ((ret = packet_reader_push(&reader1, c)) < 0) {
-			continue;
+		c = Serial1.read();
+		if ((ret = packet_reader_push(&reader1, c)) >= 0) {
+			data = packet_reader_head(&reader1);
+			ltpacket_read_buffer(&packet, data, ret);
+			listen_handle(&packet);
+			Serial.write(data - 3, ret + 5);
+			// Serial2.write(data - 3, ret + 5);
 		}
-		listen_handle(ret);
 	}
+	/* while (Serial2.available()) {
+		c = Serial2.read();
+		if ((ret = packet_reader_push(&reader2, c)) >= 0) {
+			data = packet_reader_head(&reader2);
+			ltpacket_read_buffer(&packet, data, ret);
+			listen_handle(&packet);
+			Serial.write(data - 3, ret + 5);
+			Serial1.write(data - 3, ret + 5);
+		}
+	} */
 }
 
-void listen_handle(int data_length)
+void listen_handle(struct ltpacket_t *packet)
 {
-	struct ltpacket_t packet;
-	ltpacket_read_buffer(&packet, packet_reader_head(&reader), data_length);
 	enum ltparams_index_t index;
-	switch (packet.type) {
+	switch (packet->type) {
 	case LTPACKET_TYPE_LED:
-		blink = packet.led.state;
+		blink = packet->led.state;
 		break;
 	case LTPACKET_TYPE_SETPARAM:
-		index = (enum ltparams_index_t)packet.setparam.param;
-		ltparams_set(index, packet.setparam.value);
+		index = (enum ltparams_index_t)packet->setparam.param;
+		ltparams_set(index, packet->setparam.value);
 		break;
 	case LTPACKET_TYPE_SETPARAMU:
-		index = (enum ltparams_index_t)packet.setparamu.param;
-		ltparams_setu(index, packet.setparamu.value);
+		index = (enum ltparams_index_t)packet->setparamu.param;
+		ltparams_setu(index, packet->setparamu.value);
 		break;
 	case LTPACKET_TYPE_SETPARAMI:
-		index = (enum ltparams_index_t)packet.setparami.param;
-		ltparams_seti(index, packet.setparami.value);
+		index = (enum ltparams_index_t)packet->setparami.param;
+		ltparams_seti(index, packet->setparami.value);
 		break;
 	case LTPACKET_TYPE_REBOOT:
 		rp2040.reboot();
