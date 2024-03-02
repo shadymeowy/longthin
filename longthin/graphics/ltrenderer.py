@@ -14,8 +14,7 @@ class LTRenderer:
 
         self.camera_pose = Pose(params.camera_pos_rel, params.camera_att_rel)
         self.vehicle_pose = Pose(params.vehicle_pos, params.vehicle_att)
-        self.camera_params = CameraParams(params.camera_hfov, params.camera_vfov,
-                                          params.camera_width, params.camera_height)
+        self.camera_params = params.camera_params
 
         self.windows = dict()
         self.window_free = self.add_window(720, 720, b"Free")
@@ -45,6 +44,8 @@ class LTRenderer:
         self.windows[self.window_vehicle].append(self.drawlist_area)
         self.windows[self.window_top].append(self.drawlist_area)
         self.windows[self.window_top].append(self.drawlist_vehicle)
+
+        self.marker_corners = None
         self.draw_area()
         self.draw_vehicle()
 
@@ -108,11 +109,30 @@ class LTRenderer:
             spot_x, strip_w+spot_y+spot_w/2, 0, spot_w, spot_l-spot_w, spot_w, 0.1)
 
         # markers
-        marker_helper = MarkerHelper.from_type()
-        markers = marker_helper.generate(len(self.params.markers))
-        for p, data in zip(self.params.markers, markers):
-            pose = Pose(p[:3], [0., self.params.marker_pitch, p[3]])
+        marker_helper = MarkerHelper.default()
+        marker_ids = self.params.markers_ids
+        marker_datas = marker_helper.generate(marker_ids)
+        marker_poses = self.params.markers_poses
+
+        w = self.params.marker_w
+        h = self.params.marker_h
+        corners_local = np.array([
+            [0, -w/2, -h],
+            [0, w/2, -h],
+            [0, w/2, 0],
+            [0, -w/2, 0]
+        ])
+
+        self.marker_corners = []
+        for pose, data, id in zip(marker_poses, marker_datas, marker_ids):
+            pos = pose[:3]
+            yaw = pose[3]
+            pose = Pose(pos, [0., self.params.marker_pitch, yaw])
+            corners = pose.from_frame(corners_local)
+            self.marker_corners.append(corners)
             self.draw_marker(pose, data)
+        self.marker_corners = np.array(self.marker_corners)
+
         self.drawlist_area.save()
 
         if self.params.checker_enable:
