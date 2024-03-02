@@ -3,7 +3,7 @@ import cv2
 from dataclasses import dataclass
 from typing import Dict
 
-from .graphics import LTParams
+from .graphics import LTRendererParams
 from .geometry import *
 from .marker import MarkerHelper
 

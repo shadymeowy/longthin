@@ -3,13 +3,13 @@ import numpy as np
 import drawing3d
 
 from .ltdrawlist import LTDrawList
-from .ltparams import LTParams
+from .ltparams import LTRendererParams
 from ..marker import MarkerHelper
 from ..geometry import *
 
 
 class LTRenderer:
-    def __init__(self, params: LTParams):
+    def __init__(self, params: LTRendererParams):
         self.params = params
 
         self.camera_pose = Pose(params.camera_pos_rel, params.camera_att_rel)
@@ -230,7 +230,7 @@ class LTRenderer:
 
 
 if __name__ == '__main__':
-    params = LTParams()
+    params = LTRendererParams()
     renderer = LTRenderer(params)
 
     while not renderer.draw():

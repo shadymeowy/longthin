@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-from .graphics import LTParams, LTRenderer
+from .graphics import LTRendererParams, LTRenderer
 from .estimator import Estimator
 
 
 def main():
-    params = LTParams()
+    params = LTRendererParams()
     renderer = LTRenderer(params)
     estimator = Estimator(
         params.markers_ids,

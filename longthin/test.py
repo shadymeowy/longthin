@@ -3,11 +3,11 @@ import numpy as np
 
 from .raspicam import PiCam
 from .estimator import Estimator
-from .graphics import LTParams
+from .graphics import LTRendererParams
 
 
 def main():
-    params = LTParams(
+    params = LTRendererParams(
         distort_enable=True,
         distort_path='other/calibration.txt')
     params.markers = np.array([[0, 0, params.marker_alt, 0]])

@@ -6,7 +6,7 @@ from ..marker import MarkerHelper
 
 
 @dataclass
-class LTParams:
+class LTRendererParams:
     area_w: float = 3  # width of area
     area_h: float = 3  # height of area
     spot_w: float = None  # width of spot (1.5x vehicle)
