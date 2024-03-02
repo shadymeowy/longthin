@@ -32,6 +32,7 @@ int serial_write(const uint8_t *buffer, uint16_t size)
 void listen_init()
 {
 	packet_reader_init(&reader, buffer, sizeof(buffer));
+	packet_reader_init(&reader1, buffer1, sizeof(buffer1));
 	packet_reader_init(&reader2, buffer2, sizeof(buffer2));
 }
 

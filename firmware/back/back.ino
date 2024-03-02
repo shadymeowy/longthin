@@ -200,11 +200,14 @@ uint8_t buffer[100];
 struct packet_reader_t reader;
 uint8_t buffer1[100];
 struct packet_reader_t reader1;
+// uint8_t buffer2[100];
+// struct packet_reader_t reader2;
 
 void listen_init()
 {
 	packet_reader_init(&reader, buffer, sizeof(buffer));
 	packet_reader_init(&reader1, buffer1, sizeof(buffer1));
+	// packet_reader_init(&reader2, buffer2, sizeof(buffer2));
 }
 
 void listen_process()
