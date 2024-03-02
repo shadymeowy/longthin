@@ -17,7 +17,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'longthin-sim = longthin.basic_sim:main',
+            'longthin-basicsim = longthin.basic_sim:main',
             'longthin-test = longthin.test:main',
             'longthin-bridge = longthin.utils.bridge:main',
             'longthin-blink = longthin.utils.blink:main',
@@ -26,6 +26,7 @@ setup(
             'longthin-params = longthin.utils.params:main',
             'longthin-params-ui = longthin.utils.params_ui:main',
             'longthin-pfd = longthin.utils.pfd:main',
+            'longthin-sim = longthin.utils.sim:main',
         ],
     },
 )
