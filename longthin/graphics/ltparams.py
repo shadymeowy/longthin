@@ -1,7 +1,7 @@
 import numpy as np
 from dataclasses import dataclass, field
 
-from ..geometry import Distortion
+from ..geometry import Distortion, CameraParams
 from ..marker import MarkerHelper
 
 
@@ -38,6 +38,7 @@ class LTParams:
     camera_vfov: float = 67.02  # vertical field of view
     camera_width: int = 1280  # width of image
     camera_height: int = 720  # height of image
+    camera_params: CameraParams = None  # camera parameters data
 
     distort_enable: bool = False  # whether to apply distortion to camera
     distort_path: str = ''  # path to distortion parameters
@@ -48,7 +49,8 @@ class LTParams:
     marker_alt: float = -0e-2  # from ground
     marker_n: int = 2  # per side
     marker_pitch: float = 1.  # degrees
-    markers: np.ndarray = None
+    markers_poses: np.ndarray = None
+    markers_ids: np.ndarray = None
 
     checker_enable: bool = False
     checker_size: float = 4e-2  # size of checker
@@ -86,10 +88,17 @@ class LTParams:
             self.camera_height = self.distort_params.height2
         else:
             self.distort_params = None
+        if self.camera_params is None:
+            self.camera_params = CameraParams(
+                self.camera_hfov, self.camera_vfov,
+                self.camera_width, self.camera_height
+            )
         if self.homography_calib_enable:
             self.homography_calib_data = np.loadtxt(self.homography_calib_path)
-        if self.markers is None:
+        if self.markers_ids is None:
+            self.markers_ids = np.arange(self.marker_n * 4 + 4)
+        if self.markers_poses is None:
             w = self.area_w + 2 * self.strip_w
             h = self.area_h + 2 * self.strip_w
-            self.markers = MarkerHelper.distribute(
+            self.markers_poses = MarkerHelper.distribute(
                 self.marker_n, w, h, self.marker_alt)
