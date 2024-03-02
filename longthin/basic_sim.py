@@ -10,7 +10,12 @@ from .estimator import Estimator
 def main():
     params = LTParams()
     renderer = LTRenderer(params)
-    estimator = Estimator(params)
+    estimator = Estimator(
+        params.markers_ids,
+        renderer.marker_corners,
+        params.camera_params,
+        params.distort_params
+    )
 
     ts = []
     poses_ground = []

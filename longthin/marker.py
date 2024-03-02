@@ -10,7 +10,7 @@ class MarkerHelper:
     detector: any
 
     @staticmethod
-    def from_type(marker_dict_type=cv2.aruco.DICT_4X4_50):
+    def from_dict(marker_dict_type):
         marker_dict = cv2.aruco.getPredefinedDictionary(marker_dict_type)
         marker_params = cv2.aruco.DetectorParameters()
         marker_params.polygonalApproxAccuracyRate = 0.1
@@ -19,15 +19,18 @@ class MarkerHelper:
         detector = cv2.aruco.ArucoDetector(marker_dict, marker_params)
         return MarkerHelper(marker_dict, marker_params, detector)
 
-    def generate(self, n, size=6):
+    @staticmethod
+    def default():
+        return MarkerHelper.from_dict(cv2.aruco.DICT_4X4_100)
+
+    def generate(self, ids, size=6):
         result = []
-        for i in range(n):
+        for i in ids:
             marker = cv2.aruco.generateImageMarker(self.marker_dict, i, size)
             marker = marker[1:-1, 1:-1] >> 7
             result.append(marker)
         result = np.array(result)
         return result
-
 
     def detect(self, img_gray):
         corners, ids, _ = self.detector.detectMarkers(img_gray)
@@ -38,7 +41,6 @@ class MarkerHelper:
         ids = np.array(ids, dtype=np.int32)
         ids = ids.reshape((-1))
         return corners, ids
-
 
     def detect_opt(self, img_gray, downscale=3, threshold=1/16):
         height, width = img_gray.shape
@@ -55,7 +57,7 @@ class MarkerHelper:
             # extract bounding box and apply detection again
             corner = corner.astype(np.int32)
             x_min = np.min(corner[:, 0])
-            x_max = np.max(corner[:, 0]) 
+            x_max = np.max(corner[:, 0])
             y_min = np.min(corner[:, 1])
             y_max = np.max(corner[:, 1])
             w = x_max - x_min
@@ -88,7 +90,6 @@ class MarkerHelper:
         high_res_ids = np.array(high_res_ids, dtype=np.int32)
         return high_res_corners, high_res_ids
 
-
     @staticmethod
     def draw(img, corners, ids):
         if ids is not None:
@@ -98,7 +99,6 @@ class MarkerHelper:
             img = cv2.aruco.drawDetectedMarkers(img, corners, ids)
             img = img.astype(np.uint8)
         return img
-
 
     @staticmethod
     def distribute(n, width, height, alt):
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     import timeit
     img = cv2.imread('sim_distort.png')
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    marker = MarkerHelper.from_type()
+    marker = MarkerHelper.default()
 
     def detect():
         marker.detect(img_gray)

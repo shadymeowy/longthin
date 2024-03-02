@@ -42,7 +42,7 @@ if __name__ == "__main__":
     distortion = Distortion.from_file("other/calibration.txt")
     cam = PiCam(distortion.width, distortion.height)
     cam.print_info()
-    marker_helper = MarkerHelper.from_type()
+    marker_helper = MarkerHelper.default()
 
     while True:
         img = cam.capture()
