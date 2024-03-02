@@ -71,7 +71,7 @@ blink_period:
 madgwick_beta:
   id: 0x0e
   type: f32
-  default: 0.1
+  default: 5
 
 imu_filter_type:
   id: 0x0f
