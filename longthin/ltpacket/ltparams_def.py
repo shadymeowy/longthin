@@ -66,6 +66,6 @@ param_default_dict = {
     LTParams.WHEEL_DISTANCE: 1.0,
     LTParams.BLINK_PERIOD: 0.0,
     LTParams.MADGWICK_BETA: 0.1,
-    LTParams.IMU_FILTER_TYPE: 1,
+    LTParams.IMU_FILTER_TYPE: 2,
     LTParams.MAHONY_KP: 1.0,
 }

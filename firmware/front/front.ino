@@ -195,6 +195,14 @@ void imu_publish()
 
 	float euler[3] = { 0 };
 	euler_from_quat(q_est, euler);
+
+	for (int i = 0; i < 3; i++) {
+		if (isnan(euler[i]) || isinf(euler[i])) {
+			filter_init_done = false;
+			return;
+		}
+	}
+
 	struct ltpacket_t packet;
 	packet.type = LTPACKET_TYPE_IMU;
 	packet.imu.roll = euler[0];
