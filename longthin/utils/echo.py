@@ -2,6 +2,7 @@ from ..ltpacket import *
 import time
 import argparse
 import yaml
+import json
 from dataclasses import asdict
 
 
@@ -9,7 +10,9 @@ def main():
     parser = argparse.ArgumentParser(description='A packet echo client')
     parser.add_argument('--zmq', default=5555, help='ZMQ port')
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
-    parser.add_argument('--filter', default=None, help='Filter packets', nargs='+')
+    parser.add_argument('--filter', '-f', default=None, help='Filter packets', nargs='+')
+    parser.add_argument('--json', '-j', action='store_true', help='Print as json')
+    parser.add_argument('--timestamp', '-t', action='store_true', help='Print timestamp')
     args = parser.parse_args()
     conn = LTZmq(args.zmq, args.zmq2, server=False)
     if args.filter is not None:
@@ -22,8 +25,18 @@ def main():
         if packet is not None:
             if args.filter is not None and packet.type not in typs:
                 continue
-            print(packet.type)
-            print(yaml.dump(asdict(packet)), end='')
+            if args.json:
+                dct = {}
+                if args.timestamp:
+                    dct['timestamp'] = time.time()
+                dct['type'] = str(packet.type)
+                dct.update(asdict(packet))
+                print(json.dumps(dct))
+            else:
+                print(packet.type)
+                if args.timestamp:
+                    print(time.time())
+                print(yaml.dump(asdict(packet)), end='')
         time.sleep(1e-4)
 
 
