@@ -22,13 +22,11 @@ class LTRenderer:
         self.camera_free.set_perspective(45.0, 45.0)
         self.camera_free.distance = 3
         self.camera_free.rotation = (0.0, -np.pi/5, np.pi/4)
-        self.window_vehicle = self.add_window(
-            self.params.camera_width, self.params.camera_height, b"Vehicle")
-        self.camera_vehicle = self.window_vehicle.get_camera()
         hfov = self.params.camera_hfov
         vfov = self.params.camera_vfov
+        self.camera_vehicle = drawing3d.Camera()
         self.camera_vehicle.set_perspective(np.deg2rad(hfov), np.deg2rad(vfov))
-        self.window_vehicle.controllable = False
+        self.camera_vehicle.viewport = self.params.camera_width, self.params.camera_height
         self.window_top = self.add_window(720, 720, b"Top")
         self.camera_top = self.window_top.get_camera()
         self.camera_top.set_orthographic(0.2, 0.2)
@@ -41,7 +39,6 @@ class LTRenderer:
         self.drawlist_vehicle = LTDrawList()
         self.windows[self.window_free].append(self.drawlist_area)
         self.windows[self.window_free].append(self.drawlist_vehicle)
-        self.windows[self.window_vehicle].append(self.drawlist_area)
         self.windows[self.window_top].append(self.drawlist_area)
         self.windows[self.window_top].append(self.drawlist_vehicle)
 
@@ -222,7 +219,8 @@ class LTRenderer:
         self.drawlist_vehicle.save()
 
     def render_image(self):
-        img = self.drawlist_area.save_buffer(self.camera_vehicle)
+        img = drawing3d.DrawList.save_buffer(self.drawlist_area, self.camera_vehicle)
+        img = img.reshape((self.params.camera_height, self.params.camera_width, 4))
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
         if self.params.distort_enable:
             img = self.params.distort_params.distort(img)
