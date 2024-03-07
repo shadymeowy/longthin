@@ -56,12 +56,12 @@ wdesired_ki:
 wheel_radius:
   id: 0x0b
   type: f32
-  default: 1.0
+  default: 1e-3
 
 wheel_distance:
   id: 0x0c
   type: f32
-  default: 1.0
+  default: 8e-2
 
 blink_period:
   id: 0x0d
@@ -82,3 +82,43 @@ mahony_kp:
   id: 0x10
   type: f32
   default: 1.0
+
+imu_calibration_samples:
+  id: 0x11
+  type: u32
+  default: 500
+
+imu_publish_period:
+  id: 0x12
+  type: u32
+  default: 33333
+
+motor_pwm_refresh_period:
+  id: 0x13
+  type: u32
+  default: 10000
+
+control_debug_enable:
+  id: 0x14
+  type: u32
+  default: 0
+
+control_debug_publish_period:
+  id: 0x15
+  type: u32
+  default: 33333
+
+imu_raw_enable:
+  id: 0x16
+  type: u32
+  default: 0
+
+motor_output_enable:
+  id: 0x17
+  type: u32
+  default: 1
+
+motor_output_publish_period:
+  id: 0x18
+  type: u32
+  default: 33333

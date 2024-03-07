@@ -96,9 +96,9 @@ void publish_imu()
 {
 	static int counter = 0;
 	static uint32_t last_time = 0;
-	uint32_t now = millis();
-	// 30 Hz
-	if (now - last_time < 1000 / 30) {
+	uint32_t now = micros();
+	uint32_t period = ltparams_getu(LTPARAMS_IMU_PUBLISH_PERIOD);
+	if (now - last_time < period) {
 		return;
 	}
 	float dt = (now - last_time) / 1000.0f;
@@ -118,12 +118,12 @@ void publish_motor()
 {
 	static int counter = 0;
 	static uint32_t last_time = 0;
-	uint32_t now = millis();
-	// 10 Hz
-	if (now - last_time < 1000 / 10) {
+	uint32_t now = micros();
+	uint32_t period = ltparams_getu(LTPARAMS_MOTOR_OUTPUT_PUBLISH_PERIOD);
+	if (now - last_time < period) {
 		return;
 	}
-	float dt = (now - last_time) / 1000.0f;
+	float dt = (now - last_time) / 1e6;
 	last_time = now;
 
 	struct ltpacket_t packet;
@@ -144,12 +144,12 @@ void led_process()
 	static unsigned long last_blink = 0;
 	float period = ltparams_get(LTPARAMS_BLINK_PERIOD);
 	if (blink) {
-		unsigned long now = millis();
+		unsigned long now = micros();
 		if (period == 0) {
 			digitalWrite(LED_BUILTIN, HIGH);
 			return;
 		}
-		if (now - last_blink > period * 1000) {
+		if (now - last_blink > period * 1e6) {
 			digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 			last_blink = now;
 		}

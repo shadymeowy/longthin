@@ -141,7 +141,8 @@ void motor_update()
 
 	static uint32_t last_refresh_time = 0;
 	uint32_t now = micros();
-	if (now - last_refresh_time < 10000) { // 100 Hz
+	uint32_t period = ltparams_getu(LTPARAMS_MOTOR_PWM_REFRESH_PERIOD);
+	if (now - last_refresh_time < period) {
 		return;
 	}
 
@@ -153,10 +154,14 @@ void motor_update()
 
 void motor_debug()
 {
+	if (!ltparams_getu(LTPARAMS_CONTROL_DEBUG_ENABLE)) {
+		return;
+	}
+
 	static uint32_t last_time = 0;
-	uint32_t now = millis();
-	// 2 Hz
-	if (now - last_time < 500) {
+	uint32_t now = micros();
+	uint32_t period = ltparams_getu(LTPARAMS_CONTROL_DEBUG_PUBLISH_PERIOD);
+	if (now - last_time < period) {
 		return;
 	}
 	last_time = now;
@@ -181,9 +186,9 @@ void motor_debug()
 void motor_publish()
 {
 	static uint32_t last_time = 0;
-	uint32_t now = millis();
-	// 30 Hz
-	if (now - last_time < 33) {
+	uint32_t now = micros();
+	uint32_t period = ltparams_getu(LTPARAMS_MOTOR_OUTPUT_PUBLISH_PERIOD);
+	if (now - last_time < period) {
 		return;
 	}
 	last_time = now;
@@ -302,12 +307,12 @@ void led_process()
 	static unsigned long last_blink = 0;
 	float period = ltparams_get(LTPARAMS_BLINK_PERIOD);
 	if (blink) {
-		unsigned long now = millis();
+		unsigned long now = micros();
 		if (period == 0) {
 			digitalWrite(LED_BUILTIN, HIGH);
 			return;
 		}
-		if (now - last_blink > period * 1000) {
+		if (now - last_blink > period * 1e6) {
 			digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 			last_blink = now;
 		}

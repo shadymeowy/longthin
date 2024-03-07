@@ -111,7 +111,8 @@ bool filter_init_done = false;
 void imu_init()
 {
 	mpu6050_init(&imu, 0x68);
-	mpu6050_calibrate(&imu, 2000);
+	uint32_t samples = ltparams_getu(LTPARAMS_IMU_CALIBRATION_SAMPLES);
+	mpu6050_calibrate(&imu, samples);
 	hmc5883l_init(&mag, 0x1E);
 }
 
@@ -189,7 +190,8 @@ void imu_publish()
 {
 	static uint32_t last_time = 0;
 	uint32_t now = micros();
-	if (now - last_time < 33333) { // 30 Hz
+	uint32_t period = ltparams_getu(LTPARAMS_IMU_PUBLISH_PERIOD);
+	if (now - last_time < period) {
 		return;
 	}
 	last_time = now;
@@ -212,6 +214,9 @@ void imu_publish()
 	packet.imu.vel = dt;
 	ltpacket_send(&packet, serial_write);
 
+	if (!ltparams_getu(LTPARAMS_IMU_RAW_ENABLE)) {
+		return;
+	}
 	packet.type = LTPACKET_TYPE_IMU_RAW;
 	packet.imu_raw.accel_x = imu_raw[0];
 	packet.imu_raw.accel_y = imu_raw[1];
@@ -235,12 +240,12 @@ void led_process()
 	static unsigned long last_blink = 0;
 	float period = ltparams_get(LTPARAMS_BLINK_PERIOD);
 	if (blink) {
-		unsigned long now = millis();
+		unsigned long now = micros();
 		if (period == 0) {
 			digitalWrite(LED_BUILTIN, HIGH);
 			return;
 		}
-		if (now - last_blink > period * 1000) {
+		if (now - last_blink > period * 1e6) {
 			digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 			last_blink = now;
 		}
