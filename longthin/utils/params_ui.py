@@ -20,7 +20,9 @@ class ParamsUI(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        for param, value in params.items():
+        items = params.items()
+        items = sorted(items, key=lambda x: x[0].name)
+        for param, value in items:
             self.add_param(param.value, param.name, value, get_param_type(param).name)
         self.table.itemChanged.connect(self.changed)
         self.layout = QVBoxLayout()
@@ -59,7 +61,6 @@ class ParamsUI(QWidget):
         packet = setparam(param, value)
         print('packet', packet)
         self.conn.send(packet)
-        print('sent')
 
     def save(self):
         filename, _ = QFileDialog.getSaveFileName(self, 'Save File', '', 'YAML Files (*.yaml)')
