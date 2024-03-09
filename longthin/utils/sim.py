@@ -40,22 +40,27 @@ def main():
                 left, right = packet.left, packet.right
 
         img = renderer.render_image()
-        writer.write(img)
-        t = time.time()
-        step_count = (t - last_time) / dt
-        step_count = int(step_count) + 1
-        last_time += step_count * dt
-        sim_time = step_count * dt
-        calc_time = time.time()
-        for _ in range(step_count):
-            y = solver.step((left, right))
-        calc_time = time.time() - calc_time
-        yaw = np.rad2deg(y[2]) % 360
-        vel = y[1]
-        conn.send(Imu(0, 0, yaw, vel))
+        if last_time + 1/30 < time.time():
+            writer.write(img)
+            t = time.time()
+            step_count = (t - last_time) / dt
+            step_count = int(step_count) + 1
+            last_time += step_count * dt
+            sim_time = step_count * dt
+            calc_time = time.time()
+            for _ in range(step_count):
+                y = solver.step((left, right))
+            calc_time = time.time() - calc_time
+            rate = sim_time / calc_time
+            yaw = np.rad2deg(y[2]) % 360
+            vel = y[1]
+            conn.send(Imu(0, 0, yaw, vel))
 
-        renderer.vehicle_pose.pos = np.array([y[3], y[4], 0.])
-        renderer.vehicle_pose.att = np.array([0., 0., yaw])
+            packet = SimState(*y, rate)
+            conn.send(packet)
+
+            renderer.vehicle_pose.pos = np.array([y[3], y[4], 0.])
+            renderer.vehicle_pose.att = np.array([0., 0., yaw])
 
         if renderer.draw():
             break

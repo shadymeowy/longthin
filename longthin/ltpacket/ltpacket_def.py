@@ -333,6 +333,35 @@ class EvPose:
 
 
 
+@dataclass
+class SimState:
+    w: float
+    v: float
+    theta: float
+    x: float
+    y: float
+    rate: float
+
+    @staticmethod
+    def from_bytes(data):
+        return SimState(*sim_state_struct.unpack(data))
+
+    def to_bytes(self):
+        return sim_state_struct.pack(
+            self.w,
+            self.v,
+            self.theta,
+            self.x,
+            self.y,
+            self.rate,
+        )
+
+    @property
+    def type(self):
+        return LTPACKET_TYPE.SIM_STATE
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -347,6 +376,7 @@ setparami_struct = struct.Struct('ii')
 motor_output_struct = struct.Struct('ff')
 reboot_struct = struct.Struct('B')
 ev_pose_struct = struct.Struct('fff')
+sim_state_struct = struct.Struct('ffffff')
 
 class LTPACKET_TYPE(Enum):
     RESERVED = 0
@@ -363,6 +393,7 @@ class LTPACKET_TYPE(Enum):
     MOTOR_OUTPUT = 15
     REBOOT = 16
     EV_POSE = 17
+    SIM_STATE = 18
 
 type_map = {
     LTPACKET_TYPE.RESERVED: Reserved,
@@ -379,5 +410,6 @@ type_map = {
     LTPACKET_TYPE.MOTOR_OUTPUT: MotorOutput,
     LTPACKET_TYPE.REBOOT: Reboot,
     LTPACKET_TYPE.EV_POSE: EvPose,
+    LTPACKET_TYPE.SIM_STATE: SimState,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

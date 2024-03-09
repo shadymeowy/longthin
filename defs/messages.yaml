@@ -99,3 +99,13 @@ ev_pose:
     x: f32
     y: f32
     yaw: f32
+
+sim_state:
+  id: 0x12
+  fields:
+    w: f32
+    v: f32
+    theta: f32
+    x: f32
+    y: f32
+    rate: f32

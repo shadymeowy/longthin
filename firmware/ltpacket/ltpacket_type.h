@@ -88,3 +88,12 @@ struct ltpacket_ev_pose_t {
     float y;
     float yaw;
 };
+
+struct ltpacket_sim_state_t {
+    float w;
+    float v;
+    float theta;
+    float x;
+    float y;
+    float rate;
+};
