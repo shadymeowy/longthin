@@ -82,3 +82,9 @@ struct ltpacket_motor_output_t {
 struct ltpacket_reboot_t {
     uint8_t reserved;
 };
+
+struct ltpacket_ev_pose_t {
+    float x;
+    float y;
+    float yaw;
+};

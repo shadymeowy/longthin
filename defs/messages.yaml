@@ -92,3 +92,10 @@ reboot:
   id: 0x10
   fields:
     reserved: u8
+
+ev_pose:
+  id: 0x11
+  fields:
+    x: f32
+    y: f32
+    yaw: f32
