@@ -13,8 +13,8 @@ class MarkerHelper:
     def from_dict(marker_dict_type):
         marker_dict = cv2.aruco.getPredefinedDictionary(marker_dict_type)
         marker_params = cv2.aruco.DetectorParameters()
-        # marker_params.polygonalApproxAccuracyRate = 0.1
-        # marker_params.minMarkerPerimeterRate = 0.01
+        marker_params.polygonalApproxAccuracyRate = 0.1
+        marker_params.minMarkerPerimeterRate = 0.01
         marker_params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
         detector = cv2.aruco.ArucoDetector(marker_dict, marker_params)
         return MarkerHelper(marker_dict, marker_params, detector)
