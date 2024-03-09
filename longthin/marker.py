@@ -13,8 +13,8 @@ class MarkerHelper:
     def from_dict(marker_dict_type):
         marker_dict = cv2.aruco.getPredefinedDictionary(marker_dict_type)
         marker_params = cv2.aruco.DetectorParameters()
-        marker_params.polygonalApproxAccuracyRate = 0.1
-        marker_params.minMarkerPerimeterRate = 0.01
+        # marker_params.polygonalApproxAccuracyRate = 0.1
+        # marker_params.minMarkerPerimeterRate = 0.01
         marker_params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
         detector = cv2.aruco.ArucoDetector(marker_dict, marker_params)
         return MarkerHelper(marker_dict, marker_params, detector)
@@ -23,14 +23,10 @@ class MarkerHelper:
     def default():
         return MarkerHelper.from_dict(cv2.aruco.DICT_4X4_100)
 
-    def generate(self, ids, size=6):
-        result = []
-        for i in ids:
-            marker = cv2.aruco.generateImageMarker(self.marker_dict, i, size)
-            marker = marker[1:-1, 1:-1] >> 7
-            result.append(marker)
-        result = np.array(result)
-        return result
+    def generate(self, id, size=6):
+        marker = cv2.aruco.generateImageMarker(self.marker_dict, id, size)
+        marker = marker[1:-1, 1:-1] >> 7
+        return marker
 
     def detect(self, img_gray):
         corners, ids, _ = self.detector.detectMarkers(img_gray)

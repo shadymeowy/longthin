@@ -1,0 +1,80 @@
+camera:
+  model:
+    width: 1280
+    height: 720
+    fx: 545.98798902771057
+    fy: 543.6599611096507
+    cx: 645.23625834586369
+    cy: 360.08728645824363
+    k1: 0.062681962274686281
+    k2: -0.069663556955777112
+    p1: 0
+    p2: 0
+    k3: 0.004866869450794095
+  pose:
+    position: [0.4, 0.0, -0.3]
+    attitude: [0.0, -30.0, 0.0]
+
+renderer:
+  area:
+    width: 3
+    height: 3
+  spot:
+    width: 0.15
+    length: 0.75
+    percent: 0.3
+  strip:
+    width: 0.1
+  chassis:
+    length: 0.5
+    width: 0.1
+    height: 0.1
+    offset: 0.1
+  wheel:
+    radius: 0.0175
+    width: 0.02
+    offset: 0.05
+  marker:
+    border: 0.02
+
+markers:
+  - id: 30
+    size: 0.2
+    pose:
+      position: [1.6, 1.6, 0.02]
+      attitude: [0.0, 0.0, 45.0]
+  - id: 38
+    size: 0.2
+    pose:
+      position: [-1.6, 1.6, 0.02]
+      attitude: [0.0, 0.0, 135.0]
+  - id: 39
+    size: 0.2
+    pose:
+      position: [-1.6, -1.6, 0.02]
+      attitude: [0.0, 0.0, 225.0]
+  - id: 44
+    size: 0.2
+    pose:
+      position: [1.6, -1.6, 0.02]
+      attitude: [0.0, 0.0, 315.0]
+  - id: 53
+    size: 0.2
+    pose:
+      position: [1.6, 0.0, 0.02]
+      attitude: [0.0, 0.0, 0.0]
+  - id: 57
+    size: 0.2
+    pose:
+      position: [0.0, 1.6, 0.02]
+      attitude: [0.0, 0.0, 90.0]
+  - id: 59
+    size: 0.2
+    pose:
+      position: [-1.6, 0.0, 0.02]
+      attitude: [0.0, 0.0, 180.0]
+  - id: 71
+    size: 0.2
+    pose:
+      position: [0.0, -1.6, 0.02]
+      attitude: [0.0, 0.0, 270.0]

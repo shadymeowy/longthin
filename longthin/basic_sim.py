@@ -3,19 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-from .graphics import LTRendererParams, LTRenderer
+from .graphics import LTRenderer
 from .estimator import Estimator
+from .config import load_config
 
 
 def main():
-    params = LTRendererParams()
-    renderer = LTRenderer(params)
-    estimator = Estimator(
-        params.markers_ids,
-        renderer.marker_corners,
-        params.camera_params,
-        params.distort_params
-    )
+    config = load_config('default.yaml')
+    renderer = LTRenderer(config)
+    estimator = Estimator.from_config(config)
 
     ts = []
     poses_ground = []
