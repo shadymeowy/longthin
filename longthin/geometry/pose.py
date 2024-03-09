@@ -62,6 +62,11 @@ class Pose:
         else:
             raise ValueError(f'Invalid type for other: {type(other)}')
 
+    def inv(self):
+        att = as_rotation(self.att).inv()
+        pos = att.apply(-self.pos)
+        return Pose(pos, att.as_euler('xyz'))
+
 
 if __name__ == '__main__':
     ref = Pose([1, 2, 3], [10, -20, 30])
