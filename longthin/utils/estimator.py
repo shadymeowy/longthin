@@ -20,9 +20,9 @@ def video_source(conn_str, width, height):
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         return cap
     elif conn_str.startswith("picam:"):
-        import raspicam
-        conn_str = conn_str[len("picam:")]
-        return raspicam.PiCam(width, height)
+        from ..raspicam import PiCam
+        conn_str = conn_str[len("picam:"):]
+        return PiCam(width, height)
     else:
         raise ValueError("Unknown video source")
 
@@ -51,6 +51,9 @@ def main():
 
         compound = estimator.estimate(img, draw=True)
         if compound is None:
+            if args.show:
+                cv2.imshow('markers', img)
+                cv2.waitKey(1)
             continue
 
         pose_est, _, img_markers = compound
@@ -58,9 +61,8 @@ def main():
         att = pose_est.att
         packet = EvPose(pos[0], pos[1], att[2] % 360)
         conn.send(packet)
+        print(packet)
 
         if args.show and img_markers is not None:
             cv2.imshow('markers', img_markers)
             cv2.waitKey(1)
-
-        time.sleep(1e-4)
