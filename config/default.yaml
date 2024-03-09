@@ -37,6 +37,20 @@ renderer:
   marker:
     border: 0.02
 
+sim:
+  model:
+    R: 0.0175
+    L: 0.05
+    M: 2.0
+    d: 0.3
+    J: 0.06167
+    B: 5.0
+    h: 0.3
+    Kb: 0.06820926132509801
+    Ki: 0.45
+    Rs: 1.25
+  dt: 1.0e-3
+
 markers:
   - id: 30
     size: 0.2

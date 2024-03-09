@@ -4,9 +4,11 @@ import matplotlib.pyplot as plt
 import time
 import argparse
 
-from ..graphics import LTRendererParams, LTRenderer
+from ..graphics import LTRenderer
+from ..config import load_config
 from ..ltpacket import *
 from ..model import ddmr_dynamic_model, RK4
+from ..shm import SHMVideoWriter
 
 
 def main():
@@ -17,21 +19,13 @@ def main():
     args = parser.parse_args()
     conn = LTZmq(args.zmq, args.zmq2, server=False)
 
-    params = LTRendererParams()
-    renderer = LTRenderer(params)
+    config = load_config('default.yaml')
+    renderer = LTRenderer(config)
+    width, height = config.camera.model.width, config.camera.model.height
+    writer = SHMVideoWriter('lt_video', width, height)
 
-    model = ddmr_dynamic_model(
-        R=0.0175,
-        L=0.05,
-        M=2.0,
-        d=0.3,
-        J=0.06166666666666666,
-        B=3.0,
-        h=0.3,
-        Kb=0.06820926132509801,
-        Ki=0.45,
-        Rs=1.25)
-    dt = 1e-3
+    model = ddmr_dynamic_model(**config.sim.model._asdict())
+    dt = config.sim.dt
     solver = RK4(model, 0, [0, 0, 0, 0, 0], dt)
     left, right = 0, 0
     last_time = time.time()
@@ -46,6 +40,7 @@ def main():
                 left, right = packet.left, packet.right
 
         img = renderer.render_image()
+        writer.write(img)
         t = time.time()
         step_count = (t - last_time) / dt
         step_count = int(step_count) + 1
@@ -55,10 +50,9 @@ def main():
         for _ in range(step_count):
             y = solver.step((left, right))
         calc_time = time.time() - calc_time
-        print("rate", sim_time / calc_time)
         yaw = np.rad2deg(y[2]) % 360
         vel = y[1]
-        conn.send(Imu(0, 0, 360-yaw, vel))
+        conn.send(Imu(0, 0, yaw, vel))
 
         renderer.vehicle_pose.pos = np.array([y[3], y[4], 0.])
         renderer.vehicle_pose.att = np.array([0., 0., yaw])
