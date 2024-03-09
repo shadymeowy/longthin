@@ -33,6 +33,7 @@ def main():
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--config', default="default.yaml", help='Config file')
     parser.add_argument('--video', default="shared:lt_video", help='Video source')
+    parser.add_argument('--show', action='store_true', help='Show camera feed')
     args = parser.parse_args()
     conn = LTZmq(args.zmq, args.zmq2, server=False)
 
@@ -58,9 +59,8 @@ def main():
         packet = EvPose(pos[0], pos[1], att[2] % 360)
         conn.send(packet)
 
-        if img_markers is not None:
+        if args.show and img_markers is not None:
             cv2.imshow('markers', img_markers)
             cv2.waitKey(1)
 
-        print(pose_est)
         time.sleep(1e-4)
