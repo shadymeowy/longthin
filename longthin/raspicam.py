@@ -4,9 +4,6 @@ from pprint import pprint
 from picamera2 import Picamera2
 from libcamera import controls
 
-from .marker import *
-from .geometry import Distortion
-
 
 class PiCam:
     def __init__(self, width=1280, height=720):
@@ -26,8 +23,8 @@ class PiCam:
             "AeExposureMode": controls.AeExposureModeEnum.Short,
         })
 
-    def capture(self):
-        return self.pc2.capture_array()
+    def read(self):
+        return True, self.pc2.capture_array()
 
     def print_info(self):
         print("conf")
@@ -39,17 +36,17 @@ class PiCam:
 
 
 if __name__ == "__main__":
-    distortion = Distortion.from_file("other/calibration.txt")
-    cam = PiCam(distortion.width, distortion.height)
+    from .config import load_config
+    config = load_config("default.yaml")
+    width, height = config.camera.model.width, config.camera.model.height
+    cam = PiCam(width, height)
     cam.print_info()
-    marker_helper = MarkerHelper.default()
 
     while True:
-        img = cam.capture()
-        img = distortion.undistort(img)
-        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        corners, ids = marker_helper.detect_opt(img_gray)
-        print(corners)
-        img_markers = marker_helper.draw(img, corners, ids)
-        cv2.imshow("image", img_markers)
-        cv2.waitKey(1)
+        ret, img = cam.read()
+        if not ret:
+            print("Failed to get frame")
+            break
+        cv2.imshow('frame', img)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
