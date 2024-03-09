@@ -3,7 +3,7 @@ import numpy as np
 import drawing3d
 
 from .ltdrawlist import LTDrawList
-from .ltparams import LTRendererParams
+from .ltrendererparams import LTRendererParams
 from ..marker import MarkerHelper
 from ..geometry import *
 
