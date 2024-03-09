@@ -29,6 +29,7 @@ setup(
             'longthin-sim = longthin.utils.sim:main',
             'longthin-reboot = longthin.utils.reboot:main',
             'longthin-estimator = longthin.utils.estimator:main',
+            'longthin-visualize = longthin.utils.visualize:main',
         ],
     },
 )
