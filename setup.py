@@ -28,6 +28,7 @@ setup(
             'longthin-pfd = longthin.utils.pfd:main',
             'longthin-sim = longthin.utils.sim:main',
             'longthin-reboot = longthin.utils.reboot:main',
+            'longthin-estimator = longthin.utils.estimator:main',
         ],
     },
 )
