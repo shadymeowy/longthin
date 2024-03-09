@@ -33,7 +33,7 @@ renderer:
     length: 0.75
     percent: 0.3
   strip:
-    width: 0.1
+    width: 0.02
   chassis:
     length: 0.5
     width: 0.1
@@ -61,43 +61,43 @@ sim:
   dt: 1.0e-3
 
 markers:
-  - id: 30
-    size: 0.2
-    pose:
-      position: [1.6, 1.6, 0.02]
-      attitude: [0.0, 0.0, 45.0]
   - id: 38
     size: 0.2
     pose:
-      position: [-1.6, 1.6, 0.02]
-      attitude: [0.0, 0.0, 135.0]
+      position: [1.50823, 1.50823, 0.02]
+      attitude: [0.0, 0.0, 45.0]
   - id: 39
     size: 0.2
     pose:
-      position: [-1.6, -1.6, 0.02]
-      attitude: [0.0, 0.0, 225.0]
-  - id: 44
-    size: 0.2
-    pose:
-      position: [1.6, -1.6, 0.02]
-      attitude: [0.0, 0.0, 315.0]
+      position: [-1.50823, 1.50823, -0.02]
+      attitude: [0.0, 0.0, 135.0]
   - id: 53
     size: 0.2
     pose:
-      position: [1.6, 0.0, 0.02]
-      attitude: [0.0, 0.0, 0.0]
-  - id: 57
-    size: 0.2
-    pose:
-      position: [0.0, 1.6, 0.02]
-      attitude: [0.0, 0.0, 90.0]
+      position: [-1.50823, -1.50823, -0.02]
+      attitude: [0.0, 0.0, 225.0]
   - id: 59
     size: 0.2
     pose:
-      position: [-1.6, 0.0, 0.02]
+      position: [1.50823, -1.50823, -0.02]
+      attitude: [0.0, 0.0, 315.0]
+  - id: 30
+    size: 0.2
+    pose:
+      position: [1.5075, 0.0, -0.02]
+      attitude: [0.0, 0.0, 0.0]
+  - id: 44
+    size: 0.2
+    pose:
+      position: [0.0, 1.5075, -0.02]
+      attitude: [0.0, 0.0, 90.0]
+  - id: 57
+    size: 0.2
+    pose:
+      position: [-1.5075, 0.0, -0.02]
       attitude: [0.0, 0.0, 180.0]
   - id: 71
     size: 0.2
     pose:
-      position: [0.0, -1.6, 0.02]
+      position: [0.0, -1.5075, -0.02]
       attitude: [0.0, 0.0, 270.0]
