@@ -6,7 +6,7 @@ from dataclasses import asdict
 
 
 def main():
-    parser = argparse.ArgumentParser(description='A simple blink example')
+    parser = argparse.ArgumentParser(description='Reboot the microcontrollers')
     parser.add_argument('--zmq', default=5555, help='ZMQ port')
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--period', default=0.2, help='Blink period', type=float)

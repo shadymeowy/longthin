@@ -12,7 +12,7 @@ from ..shm import SHMVideoWriter
 
 
 def main():
-    parser = argparse.ArgumentParser(description='A simple blink example')
+    parser = argparse.ArgumentParser(description='A simulation of the robot')
     parser.add_argument('--zmq', default=5555, help='ZMQ port')
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--debug', action='store_true', help='Print debug messages')
