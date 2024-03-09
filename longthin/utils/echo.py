@@ -37,7 +37,8 @@ def main():
                 if args.timestamp:
                     print(time.time())
                 print(yaml.dump(asdict(packet)), end='')
-        time.sleep(1e-4)
+        else:
+            time.sleep(1e-4)
 
 
 if __name__ == "__main__":

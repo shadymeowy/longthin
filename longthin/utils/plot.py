@@ -50,25 +50,28 @@ def main():
         v[2] = plots[v[3]].plot(pen=(i, len(value_dict)), name=name)
 
     while True:
-        packet = conn.read()
-        t = time.time() - start_time
+        while True:
+            packet = conn.read()
+            if packet is None:
+                break
+            t = time.time() - start_time
 
-        if packet is not None and packet.type in packets:
-            for (typ, prop), (ts, xs, curve, _) in value_dict.items():
-                if packet.type != typ:
-                    continue
-                ts.append(t)
-                xs.append(getattr(packet, prop))
-                curve.setData(ts, xs)
+            if packet.type in packets:
+                for (typ, prop), (ts, xs, curve, _) in value_dict.items():
+                    if packet.type != typ:
+                        continue
+                    ts.append(t)
+                    xs.append(getattr(packet, prop))
 
-        if args.duration is not None:
-            for (typ, prop), (ts, xs, curve, _) in value_dict.items():
-                while ts and ts[0] < t - float(args.duration):
-                    ts.pop(0)
-                    xs.pop(0)
+            if args.duration is not None:
+                for (typ, prop), (ts, xs, curve, _) in value_dict.items():
+                    while ts and ts[0] < t - float(args.duration):
+                        ts.pop(0)
+                        xs.pop(0)
 
+        for (typ, prop), (ts, xs, curve, _) in value_dict.items():
+            curve.setData(ts, xs)
         app.processEvents()
-        time.sleep(1e-4)
 
 
 if __name__ == "__main__":
