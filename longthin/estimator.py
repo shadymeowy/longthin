@@ -88,13 +88,12 @@ class Estimator:
         ids = ids.reshape((-1))
 
         # TODO check this
-        m_intrinsics_2 = self.dist_params.m_intrinsics
-        # m_distortion = self.dist_params.m_distortion
+        m_int = self.dist_params.m_intrinsics_2
         obj_points = corners3.reshape((-1, 3))[..., [1, 2, 0]]
         obj_points = obj_points.astype(np.float64)
         img_points = corners2.reshape((-1, 2))
         img_points = img_points.astype(np.float64)
-        ret, rvec, tvec = cv2.solvePnP(obj_points, img_points, m_intrinsics_2, None)
+        ret, rvec, tvec = cv2.solvePnP(obj_points, img_points, m_int, None)
         if not ret:
             return None
 
@@ -104,13 +103,7 @@ class Estimator:
         rmat = rmat.T
         tvec = -rmat @ tvec
         est_pose_cam = Pose(tvec.flatten(), rmat)
-        est_pose_cam.pos[2] = 0
-        est_pose_cam.att[0] = 0
-        est_pose_cam.att[1] = 0
         camera_rel_pose = self.camera_rel_pose
-        camera_rel_pose.pos[2] = 0
-        camera_rel_pose.att[0] = 0
-        camera_rel_pose.att[1] = 0
         est_pose = est_pose_cam.from_frame(camera_rel_pose.inv())
 
         self.history_pos.append(est_pose.pos)
