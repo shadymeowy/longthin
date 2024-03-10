@@ -6,12 +6,14 @@ from PySide6.QtCore import *
 from QPrimaryFlightDisplay import QPrimaryFlightDisplay
 
 from ..ltpacket import *
+from ..config import load_config
 
 
 class LTApp(QDialog):
-    def __init__(self, conn):
+    def __init__(self, conn, config):
         super().__init__()
         self.conn = conn
+        self.config = config
 
         self.setWindowTitle("Longthin PFD")
         self.setGeometry(100, 100, 800, 600)
@@ -96,28 +98,34 @@ class LTApp(QDialog):
     def update_motor(self):
         x = self.x
         y = self.y
+        conf = self.config.manual_control
+        f = conf.forward_backward
+        l = conf.left_right
+        m1 = conf.mixed_1
+        m2 = conf.mixed_2
+        
         if x == 0 and y == 0:
             self.set_motor(0, 0)
         elif x == 0:
             # turn left or right without moving forward
-            self.set_motor(y, -y)
+            self.set_motor(l, -l)
         elif y == 0:
             # go forward or backward without turning
-            self.set_motor(x, x)
+            self.set_motor(f, f)
         elif x > 0:
             if y > 0:
                 # go forward and turn right
-                self.set_motor(1, 0.5)
+                self.set_motor(m1, m2)
             else:
                 # go forward and turn left
-                self.set_motor(0.5, 1)
+                self.set_motor(m2, m1)
         else:
             if y > 0:
                 # go backward and turn left
-                self.set_motor(-0.5, -1)
+                self.set_motor(-m2, -m1)
             else:
                 # go backward and turn right
-                self.set_motor(-1, -0.5)
+                self.set_motor(-m1, -m2)
 
     def set_motor(self, left, right):
         packet = Motor(left, right)
@@ -158,7 +166,8 @@ class LTApp(QDialog):
 def main():
     app = QApplication(sys.argv)
     conn = LTZmq(5555, 5556, server=False)
-    window = LTApp(conn)
+    config = load_config("default.yaml")
+    window = LTApp(conn, config)
     window.show()
     sys.exit(app.exec_())
 

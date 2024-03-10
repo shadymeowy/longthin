@@ -22,7 +22,7 @@ estimator:
   att_filter:
     alpha: 0.5
     beta: 2.0
-  median: 10
+  median: 1
 
 renderer:
   area:
@@ -101,3 +101,9 @@ markers:
     pose:
       position: [0.0, -1.5075, -0.02]
       attitude: [0.0, 0.0, 270.0]
+
+manual_control:
+  forward_backward: 1.0
+  left_right: 1.0
+  mixed_1: 1.0
+  mixed_2: 0.1
