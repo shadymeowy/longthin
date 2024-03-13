@@ -44,7 +44,7 @@ for path_ in path:
 
 p = np.array([2., 0., 0.])
 p_c, _ = path.closest(p)
-t = path.param(p_c) + 0.7
+t = path.param(p_c) + 5
 p_c2 = path.point(t)
 plt.scatter(p[0], p[1], color='black')
 plt.scatter(p_c[0], p_c[1], color='yellow')

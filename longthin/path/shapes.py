@@ -181,12 +181,12 @@ class Path:
 
     def point(self, t):
         if t < 0:
-            raise None
+            return None
         for obj in self.path:
             if t < obj.length:
                 return obj.point(t)
             t -= obj.length
-        raise ValueError('t must be less than the length of the path')
+        return None
 
     def points(self, N=100, uniform=False):
         if not uniform:
