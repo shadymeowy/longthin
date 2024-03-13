@@ -16,7 +16,7 @@ def intersection_arc_line(arc, line, tol=1e-6):
         result.append(p1)
     if arc.is_on(p2, tol=tol) and line.is_on(p2, tol=tol):
         result.append(p2)
-    return result
+    return np.array(result, np.float32)
 
 
 def intersection_line_line(line1, line2):
@@ -28,7 +28,7 @@ def intersection_line_line(line1, line2):
         (1 - np.dot(line1.u1, line2.u1)**2)
     p = line1.point(t1)
     if p is not None and line2.is_on(p):
-        return [p]
+        return np.array([p], np.float32)
     else:
         return []
 
@@ -55,4 +55,4 @@ def intersection_arc_arc(arc1, arc2, tol=1e-6):
         result.append(p1)
     if arc1.is_on(p2, tol=tol) and arc2.is_on(p2, tol=tol):
         result.append(p2)
-    return result
+    return np.array(result, np.float32)

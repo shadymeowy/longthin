@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 
-from .common import angle
+from .common import *
 from .intersection import *
 
 
@@ -38,10 +38,23 @@ class Arc:
     def point(self, t):
         e1 = np.cross(self.n, self.v1)
         theta = t / self.r
-        if t < 0 or t > self.length:
-            raise None
+        if t < 0:
+            return self.q1
+        elif t > self.length:
+            return self.q2
         p = self.p + np.cos(theta) * self.v1 + np.sin(theta) * e1
         return p
+
+    def tangent(self, t):
+        e1 = np.cross(self.n, self.v1)
+        theta = t / self.r
+        if t < 0:
+            return self.u1
+        elif t > self.length:
+            return self.u2
+        v = -np.sin(theta) * self.v1 + np.cos(theta) * e1
+        v /= np.linalg.norm(v)
+        return v
 
     def points(self, N=100):
         e1 = np.cross(self.n, self.v1)
@@ -90,6 +103,13 @@ class Arc:
         else:
             raise TypeError('Intersection is only implemented for Line and Arc objects')
 
+    def path_of(self, v, E=EX, En=EZ):
+        c1 = np.dot(v, E)
+        c2 = np.dot(v, np.cross(En, E))
+        v1_ = self.v1 + c1*self.u1 + c2*np.cross(En, self.u1)
+        v2_ = self.v2 + c1*self.u2 + c2*np.cross(En, self.u2)
+        return Arc(self.p, v1_, v2_, self.n)
+
 
 @dataclass
 class Line:
@@ -110,10 +130,15 @@ class Line:
         return f'Line(q1={self.q1}, q2={self.q2})'
 
     def point(self, t):
-        if t < 0 or t > self.length:
-            return None
+        if t < 0:
+            return self.q1
+        elif t > self.length:
+            return self.q2
         p = self.q1 + t * self.u1
         return p
+
+    def tangent(self, t):
+        return self.u1
 
     def points(self, N=100):
         t = np.linspace(0, self.length, N)
@@ -161,6 +186,15 @@ class Line:
         else:
             raise TypeError('Intersection is only implemented for Line and Arc objects')
 
+    def path_of(self, v, E=EX, En=EZ):
+        c1 = np.dot(v, E)
+        c2 = np.dot(v, np.cross(En, E))
+        t = c1*self.u1 + c2*np.cross(En, self.u1)
+        return Line(self.q1 + t, self.q2 + t)
+
+    def paths_of(self, vs, E=EX, En=EZ):
+        return [self.path_of(v, E, En) for v in vs]
+
 
 class Path:
     def __init__(self, *args):
@@ -181,12 +215,21 @@ class Path:
 
     def point(self, t):
         if t < 0:
-            return None
+            return self.path[0].q1
         for obj in self.path:
-            if t < obj.length:
+            if t <= obj.length:
                 return obj.point(t)
             t -= obj.length
-        return None
+        return self.path[-1].q2
+
+    def tangent(self, t):
+        if t < 0:
+            return self.path[0].u1
+        for obj in self.path:
+            if t <= obj.length:
+                return obj.tangent(t)
+            t -= obj.length
+        return self.path[-1].u2
 
     def points(self, N=100, uniform=False):
         if not uniform:
@@ -233,4 +276,10 @@ class Path:
             intersections_ = obj.intersection(obj_)
             if intersections_ is not None:
                 intersections.extend(intersections_)
-        return intersections
+        return np.array(intersections, np.float32)
+
+    def path_of(self, v, E=EX, En=EZ):
+        return Path(*(obj.path_of(v, E, En) for obj in self.path))
+
+    def paths_of(self, vs, E=EX, En=EZ):
+        return [self.path_of(v, E, En) for v in vs]

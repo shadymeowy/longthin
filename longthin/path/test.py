@@ -4,6 +4,7 @@ import numpy as np
 from .dubins import path_rsl
 from .intersection import *
 from .shapes import *
+from .common import *
 
 
 p1 = np.array([0, 0, 0]).astype(float)
@@ -14,37 +15,14 @@ v2 = np.array([-1, 3, 0]).astype(float)
 v2 /= np.linalg.norm(v2)
 n = np.array([0, 0, 1]).astype(float)
 R = 1.5
-path = path_rsl(p1, p2, v1, v2, R, -n)
+path = path_rsl(p1, p2, v1, v2, R, n)
 
-ps = path[0].points()
+ps = path.points()
 plt.plot(ps[:, 0], ps[:, 1], color='blue')
-ps = path[1].points()
-plt.plot(ps[:, 0], ps[:, 1], color='blue')
-ps = path[2].points()
-plt.plot(ps[:, 0], ps[:, 1], color='blue')
-ps = path.points(uniform=True)
-plt.scatter(ps[:, 0], ps[:, 1], color='black', s=3)
-
-line = Line(np.array([0.5, 1., 0.]), np.array([6., -2., 0.]))
-ps = line.points()
-plt.plot(ps[:, 0], ps[:, 1], color='red', linestyle='--')
-
-for path_ in path:
-    for p in path_.intersection(line):
-        plt.scatter(p[0], p[1], color='green')
-
-arc = Arc(np.array([2., 0., 0.]), np.array([-2.2, 0, 0.]),
-          np.array([0., -2.2, 0.]), np.array([0., 0., -1.]))
-ps = arc.points()
-plt.plot(ps[:, 0], ps[:, 1], color='red', linestyle='--')
-
-for path_ in path:
-    for p in path_.intersection(arc):
-        plt.scatter(p[0], p[1], color='green')
 
 p = np.array([2., 0., 0.])
 p_c, _ = path.closest(p)
-t = path.param(p_c) + 5
+t = path.param(p_c) + 0.5
 p_c2 = path.point(t)
 plt.scatter(p[0], p[1], color='black')
 plt.scatter(p_c[0], p_c[1], color='yellow')
@@ -58,7 +36,34 @@ box = Path(
     Line(np.array([-w, h, 0.]), np.array([-w, -h, 0.]))
 )
 ps = box.points()
-plt.plot(ps[:, 0], ps[:, 1], color='black', linestyle='--')
+plt.plot(ps[:, 0], ps[:, 1], color='red', linestyle='--')
+
+vps = np.array([
+    [-0.5, 0.5, 0.],
+    [-0.5, -0.5, 0.],
+    [1.0, 0.5, 0.],
+    [1.0, -0.5, 0.]
+])
+
+for path_ in path.paths_of(vps):
+    ps = path_.points()
+    plt.plot(ps[:, 0], ps[:, 1], color='gray')
+    intr = box.intersection(path_)
+    for p in intr:
+        plt.scatter(p[0], p[1], color='red')
+
+t = 7
+point = path.point(t)
+tangent = path.tangent(t)
+plt.scatter(point[0], point[1], color='black')
+plt.plot([point[0], point[0] + tangent[0]], [point[1], point[1] + tangent[1]], color='black')
+
+for vp in vps:
+    c1 = np.dot(vp, EX)
+    c2 = np.dot(vp, np.cross(EZ, EX))
+    vp_ = point + c1*tangent + c2*np.cross(EZ, tangent)
+    plt.scatter(vp_[0], vp_[1], color='gray')
+
 
 ps = box.intersection(path)
 for p in ps:

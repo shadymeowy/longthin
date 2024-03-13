@@ -1,9 +1,10 @@
 import numpy as np
 
+from .common import EZ
 from .shapes import Arc, Line, Path
 
 
-def path_rsr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
+def path_rsr(p1, p2, v1, v2, R=1., n=EZ):
     r1 = np.cross(v1, n) * R
     r2 = np.cross(v2, n) * R
 
@@ -27,7 +28,7 @@ def path_rsr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
     return path
 
 
-def path_rsr2(p1, p2, v1, v2, R1=1., R2=1., n=np.array([0, 0, 1])):
+def path_rsr2(p1, p2, v1, v2, R1=1., R2=1., n=EZ):
     r1 = np.cross(v1, n) * R1
     r2 = np.cross(v2, n) * R2
 
@@ -56,7 +57,7 @@ def path_rsr2(p1, p2, v1, v2, R1=1., R2=1., n=np.array([0, 0, 1])):
     return path
 
 
-def path_rsl(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
+def path_rsl(p1, p2, v1, v2, R=1., n=EZ):
     r1 = np.cross(v1, n) * R
     r2 = -np.cross(v2, n) * R
 
@@ -85,7 +86,7 @@ def path_rsl(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
     return path
 
 
-def path_rsl2(p1, p2, v1, v2, R1=1., R2=1., n=np.array([0, 0, 1])):
+def path_rsl2(p1, p2, v1, v2, R1=1., R2=1., n=EZ):
     r1 = np.cross(v1, n) * R1
     r2 = -np.cross(v2, n) * R2
 
@@ -114,7 +115,7 @@ def path_rsl2(p1, p2, v1, v2, R1=1., R2=1., n=np.array([0, 0, 1])):
     return path
 
 
-def path_rrr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
+def path_rrr(p1, p2, v1, v2, R=1., n=EZ):
     r1 = np.cross(v1, n) * R
     r2 = np.cross(v2, n) * R
     c1 = p1 - r1
@@ -143,7 +144,7 @@ def path_rrr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
     return path
 
 
-def path_rrr3(p1, p2, v1, v2, R1=1., R2=1., R3=1., n=np.array([0, 0, 1])):
+def path_rrr3(p1, p2, v1, v2, R1=1., R2=1., R3=1., n=EZ):
     r1 = np.cross(v1, n) * R1
     r2 = np.cross(v2, n) * R2
     c1 = p1 - r1
@@ -174,7 +175,7 @@ def path_rrr3(p1, p2, v1, v2, R1=1., R2=1., R3=1., n=np.array([0, 0, 1])):
     return path
 
 
-def path_rs(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
+def path_rs(p1, p2, v1, v2, R=1., n=EZ):
     r1 = np.cross(v1, n) * R
 
     c1 = p1 - r1
