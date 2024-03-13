@@ -1,6 +1,6 @@
 import numpy as np
 
-from .shapes import Arc, Line
+from .shapes import Arc, Line, Path
 
 
 def path_rsr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
@@ -19,11 +19,11 @@ def path_rsr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
     q1 = c1 + rp1
     q2 = c2 + rp2
 
-    path = [
+    path = Path(
         Arc(c1, r1, rp1, n),
         Line(q1, q2),
         Arc(c2, rp2, r2, n),
-    ]
+    )
     return path
 
 
@@ -48,11 +48,11 @@ def path_rsr2(p1, p2, v1, v2, R1=1., R2=1., n=np.array([0, 0, 1])):
     q1 = c1 + rp1
     q2 = c2 + rp2
 
-    path = [
+    path = Path(
         Arc(c1, r1, rp1, n),
         Line(q1, q2),
         Arc(c2, rp2, r2, n),
-    ]
+    )
     return path
 
 
@@ -77,11 +77,11 @@ def path_rsl(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
     q1 = c1 + rp1
     q2 = c2 + rp2
 
-    path = [
+    path = Path(
         Arc(c1, r1, rp1, n),
         Line(q1, q2),
         Arc(c2, rp2, r2, -n),
-    ]
+    )
     return path
 
 
@@ -106,11 +106,11 @@ def path_rsl2(p1, p2, v1, v2, R1=1., R2=1., n=np.array([0, 0, 1])):
     q1 = c1 + rp1
     q2 = c2 + rp2
 
-    path = [
+    path = Path(
         Arc(c1, r1, rp1, n),
         Line(q1, q2),
         Arc(c2, rp2, r2, -n),
-    ]
+    )
     return path
 
 
@@ -135,11 +135,11 @@ def path_rrr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
 
     c3 = c1 + rp1 * 2
 
-    path = [
+    path = Path(
         Arc(c1, r1, rp1, n),
         Arc(c3, rp3, rp4, -n),
         Arc(c2, rp2, r2, n)
-    ]
+    )
     return path
 
 
@@ -166,11 +166,11 @@ def path_rrr3(p1, p2, v1, v2, R1=1., R2=1., R3=1., n=np.array([0, 0, 1])):
 
     c3 = c1 + rpp1
 
-    path = [
+    path = Path(
         Arc(c1, r1, rp1, n),
         Arc(c3, rp3, rp4, -n),
         Arc(c2, rp2, r2, n),
-    ]
+    )
     return path
 
 
@@ -191,10 +191,10 @@ def path_rs(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
 
     q1 = c1 + rp1
 
-    path = [
+    path = Path(
         Arc(c1, r1, rp1, n),
         Line(q1, p2),
-    ]
+    )
     return path
 
 
@@ -215,8 +215,8 @@ def path_sr(p1, p2, v1, v2, R=1., n=np.array([0, 0, -1])):
 
     q2 = c2 + rp2
 
-    path = [
+    path = Path(
         Line(p1, q2),
         Arc(c2, rp2, r2, -n)
-    ]
+    )
     return path

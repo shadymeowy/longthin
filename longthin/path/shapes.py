@@ -39,15 +39,13 @@ class Arc:
         e1 = np.cross(self.n, self.v1)
         theta = t / self.r
         if t < 0 or t > self.length:
-            raise ValueError('t must be between 0 and the length of the arc')
+            raise None
         p = self.p + np.cos(theta) * self.v1 + np.sin(theta) * e1
         return p
 
-    def points(self, t, N=100):
+    def points(self, N=100):
         e1 = np.cross(self.n, self.v1)
-        if t < 0 or t > self.length:
-            raise ValueError('t must be between 0 and the length of the arc')
-        theta = np.linspace(0, t / self.r, N)
+        theta = np.linspace(0, self.theta, N)
         ps = self.p + np.outer(np.cos(theta), self.v1) + np.outer(np.sin(theta), e1)
         return ps
 
@@ -110,10 +108,8 @@ class Line:
         p = self.q1 + t * self.u1
         return p
 
-    def points(self, t, N=100):
-        if t < 0 or t > self.length:
-            return None
-        t = np.linspace(0, t, N)
+    def points(self, N=100):
+        t = np.linspace(0, self.length, N)
         ps = self.q1 + np.outer(t, self.u1)
         return ps
 
@@ -149,3 +145,46 @@ class Line:
             return intersection_arc_line(obj, self)
         else:
             raise TypeError('Intersection is only implemented for Line and Arc objects')
+
+
+class Path:
+    def __init__(self, *args):
+        self.path = args
+        self.length = sum(obj.length for obj in self.path)
+
+    def __getitem__(self, i):
+        return self.path[i]
+
+    def __len__(self):
+        return len(self.path)
+
+    def __iter__(self):
+        return iter(self.path)
+
+    def __repr__(self):
+        return f'Path({self.path})'
+
+    def point(self, t):
+        if t < 0:
+            raise None
+        for obj in self.path:
+            if t < obj.length:
+                return obj.point(t)
+            t -= obj.length
+        raise ValueError('t must be less than the length of the path')
+
+    def points(self, N=100, uniform=False):
+        if not uniform:
+            ps = [obj.points(N) for obj in self.path]
+            return np.vstack(ps)
+        # TODO: make it efficient
+        ps = []
+        t = np.linspace(0, self.length, N)
+        acc = 0
+        i = 0
+        for t_ in t:
+            if t_ > acc + self.path[i].length:
+                acc += self.path[i].length
+                i += 1
+            ps.append(self.path[i].point(t_ - acc))
+        return np.vstack(ps)

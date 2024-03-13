@@ -16,15 +16,17 @@ n = np.array([0, 0, 1]).astype(float)
 R = 1.5
 path = path_rsl(p1, p2, v1, v2, R, -n)
 
-ps = path[0].points(path[0].length)
-plt.plot(ps[:, 0], ps[:, 1], color='blue', linestyle='--')
-ps = path[1].points(path[1].length)
-plt.plot(ps[:, 0], ps[:, 1], color='blue', linestyle='--')
-ps = path[2].points(path[2].length)
-plt.plot(ps[:, 0], ps[:, 1], color='blue', linestyle='--')
+ps = path[0].points()
+plt.plot(ps[:, 0], ps[:, 1], color='blue')
+ps = path[1].points()
+plt.plot(ps[:, 0], ps[:, 1], color='blue')
+ps = path[2].points()
+plt.plot(ps[:, 0], ps[:, 1], color='blue')
+ps = path.points(uniform=True)
+plt.scatter(ps[:, 0], ps[:, 1], color='black', s=3)
 
 line = Line(np.array([0., 1., 0.]), np.array([6., -2., 0.]))
-ps = line.points(line.length)
+ps = line.points()
 plt.plot(ps[:, 0], ps[:, 1], color='red', linestyle='--')
 
 for path_ in path:
@@ -33,7 +35,7 @@ for path_ in path:
 
 arc = Arc(np.array([2., 0., 0.]), np.array([-2.2, 0, 0.]),
           np.array([0., -2.2, 0.]), np.array([0., 0., -1.]))
-ps = arc.points(arc.length)
+ps = arc.points()
 plt.plot(ps[:, 0], ps[:, 1], color='red', linestyle='--')
 
 for path_ in path:
