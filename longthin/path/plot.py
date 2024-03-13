@@ -1,15 +1,14 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from .common import angle
-from .arc import Arc
-from .line import Line
+from .shapes import Arc, Line
 
 
 def plot_path(path, p1, p2,
               v1=None, v2=None, targets=None, outline=True,
               tangent=True, file=None, ax=None, legend=True,
               noax=False):
+    import matplotlib.pyplot as plt
     if ax is None:
         plt.figure(figsize=(5, 5))
         plt.grid()
@@ -79,6 +78,7 @@ def plot_path(path, p1, p2,
 
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
     from .dubins import path_rsr
 
     p1 = np.array([0, 0, 0]).astype(float)

@@ -1,7 +1,6 @@
 import numpy as np
 
-from .arc import Arc
-from .line import Line
+from .shapes import Arc, Line
 
 
 def path_rsr(p1, p2, v1, v2, R=1., n=np.array([0, 0, 1])):
