@@ -19,3 +19,16 @@ class Line:
 
     def __repr__(self):
         return f'Line(q1={self.q1}, q2={self.q2})'
+
+    def point(self, t):
+        if t < 0 or t > self.length:
+            raise ValueError('t must be between 0 and the length of the line')
+        p = self.q1 + t * self.u1
+        return p
+
+    def points(self, t, N=100):
+        if t < 0 or t > self.length:
+            raise ValueError('t must be between 0 and the length of the line')
+        t = np.linspace(0, t, N)
+        ps = self.q1 + np.outer(t, self.u1)
+        return ps
