@@ -58,6 +58,14 @@ class Arc:
         a = angle(self.v1, v, self.n)
         return 0 <= a <= self.theta
 
+    def param(self, p):
+        # TODO combine with is_on
+        if not self.is_on(p):
+            return None
+        v = p - self.p
+        a = angle(self.v1, v, self.n)
+        return a * self.r
+
     def _closest(self, p):
         # calculate the closest without checking if the point is on the arc
         v = p - self.p
@@ -67,13 +75,13 @@ class Arc:
     def closest(self, p):
         p_c = self.p + self._closest(p)
         if self.is_on(p_c):
-            return p_c
+            return p_c, np.linalg.norm(p - p_c)
         d1 = np.linalg.norm(p - self.q1)
         d2 = np.linalg.norm(p - self.q2)
         if d1 < d2:
-            return self.q1
+            return self.q1, d1
         else:
-            return self.q2
+            return self.q2, d2
 
     def intersection(self, obj):
         if isinstance(obj, Line):
@@ -121,6 +129,14 @@ class Line:
         dot = np.dot(v, self.u1)
         return 0 <= dot <= self.length
 
+    def param(self, p):
+        # TODO combine with is_on
+        if not self.is_on(p):
+            return None
+        v = p - self.q1
+        dot = np.dot(v, self.u1)
+        return dot
+
     def _closest(self, p):
         # calculate the closest without checking if the point is on the line
         v = p - self.q1
@@ -130,13 +146,13 @@ class Line:
     def closest(self, p):
         p_c = self.q1 + self._closest(p)
         if self.is_on(p_c):
-            return p_c
+            return p_c, np.linalg.norm(p - p_c)
         d1 = np.linalg.norm(p - self.q1)
         d2 = np.linalg.norm(p - self.q2)
         if d1 < d2:
-            return self.q1
+            return self.q1, d1
         else:
-            return self.q2
+            return self.q2, d2
 
     def intersection(self, obj):
         if isinstance(obj, Line):
@@ -188,3 +204,34 @@ class Path:
                 i += 1
             ps.append(self.path[i].point(t_ - acc))
         return np.vstack(ps)
+
+    def is_on(self, p, tol=1e-6):
+        for obj in self.path:
+            if obj.is_on(p, tol):
+                return True
+        return False
+
+    def closest(self, p):
+        p_c, d = self.path[0].closest(p)
+        for obj in self.path[1:]:
+            p_c_, d_ = obj.closest(p)
+            if d_ < d:
+                p_c = p_c_
+                d = d_
+        return p_c, d
+
+    def param(self, p):
+        acc = 0
+        for obj in self.path:
+            if obj.is_on(p):
+                return obj.param(p) + acc
+            acc += obj.length
+        return None
+    
+    def intersection(self, obj):
+        intersections = []
+        for obj_ in self.path:
+            intersections_ = obj.intersection(obj_)
+            if intersections_ is not None:
+                intersections.extend(intersections_)
+        return intersections
