@@ -3,7 +3,7 @@ import numpy as np
 
 from .dubins import path_rsl
 from .intersection import *
-from .shapes import Arc, Line
+from .shapes import *
 
 
 p1 = np.array([0, 0, 0]).astype(float)
@@ -46,10 +46,22 @@ p = np.array([2., 0., 0.])
 p_c, _ = path.closest(p)
 t = path.param(p_c) + 0.7
 p_c2 = path.point(t)
-print(p, p_c, p_c2, t)
 plt.scatter(p[0], p[1], color='black')
 plt.scatter(p_c[0], p_c[1], color='yellow')
 plt.scatter(p_c2[0], p_c2[1], color='orange')
 
+w, h = 4, 4
+box = Path(
+    Line(np.array([-w, -h, 0.]), np.array([w, -h, 0.])),
+    Line(np.array([w, -h, 0.]), np.array([w, h, 0.])),
+    Line(np.array([w, h, 0.]), np.array([-w, h, 0.])),
+    Line(np.array([-w, h, 0.]), np.array([-w, -h, 0.]))
+)
+ps = box.points()
+plt.plot(ps[:, 0], ps[:, 1], color='black', linestyle='--')
+
+ps = box.intersection(path)
+for p in ps:
+    plt.scatter(p[0], p[1], color='red')
 plt.gca().set_aspect('equal', adjustable='box')
 plt.show()

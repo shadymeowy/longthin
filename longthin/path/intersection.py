@@ -5,7 +5,10 @@ def intersection_arc_line(arc, line, tol=1e-6):
     l = arc.p - line.q1
     h = l - np.dot(l, line.u1) * line.u1
     h2 = np.dot(h, h)
-    delta = np.sqrt(arc.r**2 - h2) * line.u1
+    tmp = arc.r**2 - h2
+    if tmp < 0:
+        return []
+    delta = np.sqrt(tmp) * line.u1
     p1 = arc.p - h + delta
     p2 = arc.p - h - delta
     result = []
@@ -41,7 +44,10 @@ def intersection_arc_arc(arc1, arc2, tol=1e-6):
         return []
     d2 = d * d
     a1 = (arc1.r**2 - arc2.r**2 + d2) / (2 * d2)
-    h1 = np.sqrt((arc1.r / d)**2 - a1**2)
+    tmp = (arc1.r / d)**2 - a1**2
+    if tmp < 0:
+        return []
+    h1 = np.sqrt(tmp)
     p1 = arc1.p + a1 * l + h1 * np.cross(arc1.n, l)
     p2 = arc1.p + a1 * l - h1 * np.cross(arc1.n, l)
     result = []

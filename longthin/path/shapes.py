@@ -52,7 +52,6 @@ class Arc:
     def is_on(self, p, tol=1e-6):
         v = p - self.p
         v_closest = self._closest(p)
-        print(v_closest, v)
         if np.linalg.norm(v - v_closest) > tol:
             return False
         a = angle(self.v1, v, self.n)
@@ -227,7 +226,7 @@ class Path:
                 return obj.param(p) + acc
             acc += obj.length
         return None
-    
+
     def intersection(self, obj):
         intersections = []
         for obj_ in self.path:
