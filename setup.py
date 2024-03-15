@@ -30,6 +30,7 @@ setup(
             'longthin-reboot = longthin.utils.reboot:main',
             'longthin-estimator = longthin.utils.estimator:main',
             'longthin-visualize = longthin.utils.visualize:main',
+            'longthin-controller = longthin.utils.controller:main',
         ],
     },
 )
