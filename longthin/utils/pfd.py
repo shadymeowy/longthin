@@ -108,10 +108,10 @@ class LTApp(QDialog):
             self.set_motor(0, 0)
         elif x == 0:
             # turn left or right without moving forward
-            self.set_motor(l, -l)
+            self.set_motor(l * y, -l * y)
         elif y == 0:
             # go forward or backward without turning
-            self.set_motor(f, f)
+            self.set_motor(x * f, x * f)
         elif x > 0:
             if y > 0:
                 # go forward and turn right
