@@ -56,12 +56,12 @@ wdesired_ki:
 wheel_radius:
   id: 0x0b
   type: f32
-  default: 1e-3
+  default: 1.0
 
 wheel_distance:
   id: 0x0c
   type: f32
-  default: 8e-2
+  default: 1.0
 
 blink_period:
   id: 0x0d
