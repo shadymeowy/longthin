@@ -1,8 +1,7 @@
-import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import time
 import argparse
+from scipy.spatial.transform import Rotation as R
 
 from ..graphics import LTRenderer
 from ..config import load_config
@@ -30,6 +29,9 @@ def main():
     left, right = 0, 0
     last_time = time.time()
     y = None
+    vel_x_prev = 0
+    vel_y_prev = 0
+    t_prev = time.time()
 
     while True:
         while True:
@@ -39,8 +41,8 @@ def main():
             if isinstance(packet, MotorOutput):
                 left, right = packet.left, packet.right
 
-        img = renderer.render_image()
         if last_time + 1/30 < time.time():
+            img = renderer.render_image()
             writer.write(img)
             t = time.time()
             step_count = (t - last_time) / dt
@@ -52,15 +54,30 @@ def main():
                 y = solver.step((left, right))
             calc_time = time.time() - calc_time
             rate = sim_time / calc_time
-            yaw = np.rad2deg(y[2]) % 360
-            vel = y[1]
-            conn.send(Imu(0, 0, yaw, vel))
 
+            rot = R.from_euler('xyz', [0, 0, -y[2]], degrees=False)
+            q = rot.as_quat()
+
+            vel = y[1]
+            vel_x = vel * np.cos(y[2])
+            vel_y = vel * np.sin(y[2])
+            dvx = vel_x - vel_x_prev
+            dvy = vel_y - vel_y_prev
+            dvt = t - t_prev
+            vel_x_prev = vel_x
+            vel_y_prev = vel_y
+            t_prev = t
+            dvz = 0
+            packet = Imu(
+                q[3], q[0], q[1], q[2],
+                dvx, dvy, dvz,
+                dvt)
+            conn.send(packet)
             packet = SimState(*y, rate)
             conn.send(packet)
 
             renderer.vehicle_pose.pos = np.array([y[3], y[4], 0.])
-            renderer.vehicle_pose.att = np.array([0., 0., yaw])
+            renderer.vehicle_pose.att = np.array([0., 0., np.rad2deg(y[2])])
 
         if renderer.draw():
             break

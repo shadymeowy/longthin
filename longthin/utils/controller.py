@@ -2,6 +2,7 @@ from ..ltpacket import *
 import time
 import argparse
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 
 def make_controller(params):
@@ -62,7 +63,7 @@ def make_controller(params):
             u_r = 0
         u_l = np.clip(u_l, 0, 1)
         u_r = np.clip(u_r, 0, 1)
-        return u_l, u_r
+        return u_v, u_w, u_l, u_r
     return controller
 
 
@@ -77,12 +78,13 @@ def main():
     params = default_params()
 
     manual_mode = 0
-    motor_left, motor_right = 0, 0
+    u_l, u_r = 0, 0
     desired_d, desired_yaw = 0, 0
     current_d, current_yaw = 0, 0
     current_vel, current_w = 0, 0
     controller = make_controller(params)
-    last_refresh = time.time()
+    last_out = time.time()
+    last_debug = time.time()
     while True:
         while True:
             packet = conn.read()
@@ -96,36 +98,46 @@ def main():
             elif isinstance(packet, Setparamu):
                 params[packet.type] = packet.value
             elif isinstance(packet, Motor):
-                motor_left = packet.left
-                motor_right = packet.right
+                u_l = packet.left
+                u_r = packet.right
                 manual_mode = 1
             elif isinstance(packet, MotorRaw):
-                motor_left = packet.left / 2048
-                motor_right = packet.right / 2048
+                u_l = packet.left / 2048
+                u_r = packet.right / 2048
                 manual_mode = 1
             elif isinstance(packet, Setpoint):
                 manual_mode = 0
                 desired_d = packet.vel
                 desired_yaw = packet.yaw
             elif isinstance(packet, Imu):
-                current_d = packet.vel
-                current_yaw = packet.yaw
+                rot = R.from_quat([packet.qx, packet.qy, packet.qz, packet.qw])
+                current_yaw = rot.as_euler('xyz', degrees=True)[2]
 
-        enabled = params[LTParams.MOTOR_OUTPUT_ENABLE]
-        if not enabled:
-            continue
-        period = params[LTParams.MOTOR_OUTPUT_PUBLISH_PERIOD] / 1e6
         t = time.time()
-        if t - last_refresh > period:
-            continue
-        last_refresh = t
-
         if not manual_mode:
-            motor_left, motor_right = controller(
+            u_v, u_w, u_l, u_r = controller(
                 t, current_d, current_yaw, desired_d, desired_yaw, current_vel, current_w)
 
-        packet_out = MotorOutput(motor_left, motor_right)
-        conn.send(packet_out)
+        out_enabled = params[LTParams.MOTOR_OUTPUT_ENABLE]
+        out_period = params[LTParams.MOTOR_OUTPUT_PUBLISH_PERIOD] / 1e6
+        debug_enabled = params[LTParams.CONTROL_DEBUG_ENABLE]
+        debug_period = params[LTParams.CONTROL_DEBUG_PUBLISH_PERIOD] / 1e6
+        if out_enabled and t - last_out > out_period:
+            packet_out = MotorOutput(u_l, u_r)
+            conn.send(packet_out)
+            last_out = t
+        if debug_enabled and t - last_debug > debug_period:
+            packet_debug = ControlDebug(
+                current_d,
+                current_yaw,
+                desired_d,
+                desired_yaw,
+                current_vel,
+                current_w,
+                u_v, u_w,
+                u_l, u_r)
+            conn.send(packet_debug)
+            last_debug = t
 
 
 if __name__ == "__main__":

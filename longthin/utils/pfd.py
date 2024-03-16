@@ -158,8 +158,8 @@ class LTApp(QDialog):
             if packet is None:
                 return
             if isinstance(packet, Imu):
-                rot = Rotation.from_quat([packet.qw, packet.qx, packet.qy, packet.qz])
-                euler = rot.as_euler("zyx", degrees=False)
+                rot = Rotation.from_quat([packet.qx, packet.qy, packet.qz, packet.qw])
+                euler = rot.as_euler('xyz', degrees=False)
                 pfd.roll = euler[0]
                 pfd.pitch = euler[1]
                 pfd.heading = -np.rad2deg(euler[2])
