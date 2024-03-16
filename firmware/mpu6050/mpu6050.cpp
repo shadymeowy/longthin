@@ -5,7 +5,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-
 int mpu6050_init(struct mpu6050 *mpu, uint16_t addr)
 {
 	WIRE_INST.begin();
@@ -29,42 +28,49 @@ int mpu6050_read(struct mpu6050 *mpu)
 	WIRE_INST.endTransmission(false);
 	// request a total of 14 registers
 	WIRE_INST.requestFrom(mpu->address, 14, true);
+	int16_t raw_data[6];
 	// 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-	mpu->raw_data[0] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[0] = WIRE_INST.read() << 8 | WIRE_INST.read();
 	// 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-	mpu->raw_data[1] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[1] = WIRE_INST.read() << 8 | WIRE_INST.read();
 	// 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-	mpu->raw_data[2] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[2] = WIRE_INST.read() << 8 | WIRE_INST.read();
 	// 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
 	WIRE_INST.read();
 	WIRE_INST.read();
 	// 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-	mpu->raw_data[3] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[3] = WIRE_INST.read() << 8 | WIRE_INST.read();
 	// 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-	mpu->raw_data[4] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[4] = WIRE_INST.read() << 8 | WIRE_INST.read();
 	// 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
-	mpu->raw_data[5] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[5] = WIRE_INST.read() << 8 | WIRE_INST.read();
 	for (int i = 0; i < 3; i++) {
-		mpu->accel[i] = mpu->raw_data[i] / 16384.0;
-		mpu->accel[i] = mpu->accel[i] * 9.81;
-		mpu->gyro[i] = mpu->raw_data[i + 3] / 131.0;
-		mpu->gyro[i] = mpu->gyro[i] * (M_PI / 180.0) - mpu->bias_gyro[i];
+		mpu->accel_raw[i] = raw_data[i] / 16384.0;
+		mpu->gyro_raw[i] = raw_data[i + 3] / 131.0 * (M_PI / 180.0);
+		mpu->gyro[i] = mpu->gyro_raw[i] - mpu->bias_gyro[i];
 	}
+	float a[3] = { 0 };
+	a[0] = mpu->accel_raw[0] - mpu->bias_accel[0];
+	a[1] = mpu->accel_raw[1] - mpu->bias_accel[1];
+	a[2] = mpu->accel_raw[2] - mpu->bias_accel[2];
+	mpu->accel[0] = a[0] * mpu->mtx_accel[0] + a[1] * mpu->mtx_accel[1] + a[2] * mpu->mtx_accel[2];
+	mpu->accel[1] = a[0] * mpu->mtx_accel[3] + a[1] * mpu->mtx_accel[4] + a[2] * mpu->mtx_accel[5];
+	mpu->accel[2] = a[0] * mpu->mtx_accel[6] + a[1] * mpu->mtx_accel[7] + a[2] * mpu->mtx_accel[8];
 	return 0;
 }
 
 int mpu6050_calibrate(struct mpu6050 *mpu, uint16_t samples)
 {
-	float gyro[3] = { 0 };
+	float acc[3] = { 0 };
 	for (int i = 0; i < samples; i++) {
 		mpu6050_read(mpu);
 		for (int j = 0; j < 3; j++) {
-			gyro[j] += mpu->gyro[j];
+			acc[j] += mpu->gyro_raw[j];
 		}
 		delay(1);
 	}
 	for (int i = 0; i < 3; i++) {
-		mpu->bias_gyro[i] = gyro[i] / samples;
+		mpu->bias_gyro[i] = acc[i] / samples;
 	}
 	return 0;
 }

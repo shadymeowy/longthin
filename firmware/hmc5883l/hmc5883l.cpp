@@ -18,20 +18,21 @@ int hmc5883l_read(struct hmc5883l *hmc)
 	WIRE_INST.write(0x03);
 	WIRE_INST.endTransmission(false);
 	WIRE_INST.requestFrom(hmc->address, 6, true);
-	hmc->raw_data[0] = WIRE_INST.read() << 8 | WIRE_INST.read();
-	hmc->raw_data[2] = WIRE_INST.read() << 8 | WIRE_INST.read();
-	hmc->raw_data[1] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	int16_t raw_data[3];
+	raw_data[0] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[2] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	raw_data[1] = WIRE_INST.read() << 8 | WIRE_INST.read();
+	hmc->mag_raw[0] = raw_data[0]; // / 1090.0;
+	hmc->mag_raw[1] = raw_data[1]; // / 1090.0;
+	hmc->mag_raw[2] = raw_data[2]; // / 1090.0;
 
-	//for (int i = 0; i < 3; i++) {
-	//	hmc->mag[i] = hmc->raw_data[i] / 1090.0;
-	//}
-	float mag_offset[3] = { 0 };
-	mag_offset[0] = hmc->raw_data[0] - -0.01409842;
-	mag_offset[1] = hmc->raw_data[1] - -0.01651878;
-	mag_offset[2] = hmc->raw_data[2] - -0.15467174;
-	hmc->mag[0] = mag_offset[0] * 2248.0437349117365 + mag_offset[1] * -9.820466585653632 + mag_offset[2] * 83.5181286985458;
-	hmc->mag[1] = mag_offset[0] * -9.820466585653618 + mag_offset[1] * 2323.575656987126 + mag_offset[2] * -10.094511360510472;
-	hmc->mag[2] = mag_offset[0] * 83.51812869854605 + mag_offset[1] * -10.0945113605105 + mag_offset[2] * 2721.9289350440895;
+	float m[3] = { 0 };
+	m[0] = hmc->mag_raw[0] - hmc->bias[0];
+	m[1] = hmc->mag_raw[1] - hmc->bias[1];
+	m[2] = hmc->mag_raw[2] - hmc->bias[2];
+	hmc->mag[0] = m[0] * hmc->mtx[0] + m[1] * hmc->mtx[1] + m[2] * hmc->mtx[2];
+	hmc->mag[1] = m[0] * hmc->mtx[3] + m[1] * hmc->mtx[4] + m[2] * hmc->mtx[5];
+	hmc->mag[2] = m[0] * hmc->mtx[6] + m[1] * hmc->mtx[7] + m[2] * hmc->mtx[8];
 	return 0;
 }
 

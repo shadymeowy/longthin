@@ -7,10 +7,13 @@
 
 struct mpu6050 {
 	uint16_t address;
-	int16_t raw_data[6];
+	float accel_raw[6];
+	float gyro_raw[6];
 	float accel[3];
 	float gyro[3];
 	float bias_gyro[3];
+	float bias_accel[3];
+    float mtx_accel[9];
 };
 
 int mpu6050_init(struct mpu6050 *mpu, uint16_t addr);

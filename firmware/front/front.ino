@@ -101,11 +101,13 @@ void listen_handle(struct ltpacket_t *packet)
 	}
 }
 
-float imu_raw[9] = { 0, 0, 1, 0, 0, 0, 1, 1, 0 };
+float imu_meas[9] = { 0, 0, 1, 0, 0, 0, 1, 1, 0 };
 struct mpu6050 imu = { 0 };
 struct hmc5883l mag = { 0 };
 float dt = 0;
 quat_t q_est = { 1, 0, 0, 0 };
+vec3_t delta_vel = { 0, 0, 0 };
+float delta_vel_dt = 0;
 bool filter_init_done = false;
 
 void imu_init()
@@ -114,19 +116,48 @@ void imu_init()
 	uint32_t samples = ltparams_getu(LTPARAMS_IMU_CALIBRATION_SAMPLES);
 	mpu6050_calibrate(&imu, samples);
 	hmc5883l_init(&mag, 0x1E);
+	imu_write_calibration();
+}
+
+void imu_write_calibration()
+{
+	mag.bias[0] = ltparams_get(LTPARAMS_MAG_CALIB_B0);
+	mag.bias[1] = ltparams_get(LTPARAMS_MAG_CALIB_B1);
+	mag.bias[2] = ltparams_get(LTPARAMS_MAG_CALIB_B2);
+	mag.mtx[0] = ltparams_get(LTPARAMS_MAG_CALIB_M00);
+	mag.mtx[1] = ltparams_get(LTPARAMS_MAG_CALIB_M01);
+	mag.mtx[2] = ltparams_get(LTPARAMS_MAG_CALIB_M02);
+	mag.mtx[3] = ltparams_get(LTPARAMS_MAG_CALIB_M10);
+	mag.mtx[4] = ltparams_get(LTPARAMS_MAG_CALIB_M11);
+	mag.mtx[5] = ltparams_get(LTPARAMS_MAG_CALIB_M12);
+	mag.mtx[6] = ltparams_get(LTPARAMS_MAG_CALIB_M20);
+	mag.mtx[7] = ltparams_get(LTPARAMS_MAG_CALIB_M21);
+	mag.mtx[8] = ltparams_get(LTPARAMS_MAG_CALIB_M22);
+	imu.bias_accel[0] = ltparams_get(LTPARAMS_ACCEL_CALIB_B0);
+	imu.bias_accel[1] = ltparams_get(LTPARAMS_ACCEL_CALIB_B1);
+	imu.bias_accel[2] = ltparams_get(LTPARAMS_ACCEL_CALIB_B2);
+	imu.mtx_accel[0] = ltparams_get(LTPARAMS_ACCEL_CALIB_M00);
+	imu.mtx_accel[1] = ltparams_get(LTPARAMS_ACCEL_CALIB_M01);
+	imu.mtx_accel[2] = ltparams_get(LTPARAMS_ACCEL_CALIB_M02);
+	imu.mtx_accel[3] = ltparams_get(LTPARAMS_ACCEL_CALIB_M10);
+	imu.mtx_accel[4] = ltparams_get(LTPARAMS_ACCEL_CALIB_M11);
+	imu.mtx_accel[5] = ltparams_get(LTPARAMS_ACCEL_CALIB_M12);
+	imu.mtx_accel[6] = ltparams_get(LTPARAMS_ACCEL_CALIB_M20);
+	imu.mtx_accel[7] = ltparams_get(LTPARAMS_ACCEL_CALIB_M21);
+	imu.mtx_accel[8] = ltparams_get(LTPARAMS_ACCEL_CALIB_M22);
 }
 
 void imu_read()
 {
 	mpu6050_read(&imu);
 	for (int i = 0; i < 3; i++) {
-		imu_raw[i] = imu.accel[i];
-		imu_raw[i + 3] = imu.gyro[i];
+		imu_meas[i] = imu.accel[i];
+		imu_meas[i + 3] = imu.gyro[i];
 	}
 	rp2040.fifo.push_nb(0);
 	hmc5883l_read(&mag);
 	for (int i = 0; i < 3; i++) {
-		imu_raw[i + 6] = mag.mag[i];
+		imu_meas[i + 6] = mag.mag[i];
 	}
 	rp2040.fifo.push_nb(0);
 }
@@ -147,7 +178,7 @@ void imu_filter()
 	}
 	if (!filter_init_done || need_reset) {
 		filter_init_done = true;
-		qcomp_init(&imu_raw[0], &imu_raw[6], q_est);
+		qcomp_init(&imu_meas[0], &imu_meas[6], q_est);
 		last_time = micros();
 		return;
 	}
@@ -162,29 +193,38 @@ void imu_filter()
 	struct quaternion q_;
 	switch (ltparams_getu(LTPARAMS_IMU_FILTER_TYPE)) {
 	case 0: // QCOMP
-		qcomp_update(q_est, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt, qcomp_alpha, qcomp_beta);
+		qcomp_update(q_est, &imu_meas[0], &imu_meas[3], &imu_meas[6], dt, qcomp_alpha, qcomp_beta);
 		break;
 	case 1: // Madgwick
 		q_.w = q_est[0];
 		q_.x = q_est[1];
 		q_.y = q_est[2];
 		q_.z = q_est[3];
-		madgwick_filter(&q_, &imu_raw[0], &imu_raw[3], &imu_raw[6], dt);
+		madgwick_filter(&q_, &imu_meas[0], &imu_meas[3], &imu_meas[6], dt);
 		q_est[0] = q_.w;
 		q_est[1] = q_.x;
 		q_est[2] = q_.y;
 		q_est[3] = q_.z;
 		break;
 	case 2: // Madgwick AHRS
-		madgwick_ahrs_update(q_est, &imu_raw[3], &imu_raw[0], &imu_raw[6], dt, madgwick_beta);
+		madgwick_ahrs_update(q_est, &imu_meas[3], &imu_meas[0], &imu_meas[6], dt, madgwick_beta);
 		break;
 	case 3: // Mahony AHRS
-		mahony_ahrs_update(q_est, &imu_raw[3], &imu_raw[0], &imu_raw[6], dt, madgwick_beta);
+		mahony_ahrs_update(q_est, &imu_meas[3], &imu_meas[0], &imu_meas[6], dt, madgwick_beta);
 		break;
 	default:
 		break;
 	}
+
+	vec3_t accel = { imu_meas[0], imu_meas[1], imu_meas[2] };
+	vec3_t accel_earth;
+	rotate_with_quat(q_est, accel, accel_earth);
+	for (int i = 0; i < 3; i++) {
+		delta_vel[i] += accel_earth[i] * dt;
+	}
+	delta_vel_dt += dt;
 }
+
 
 void imu_publish()
 {
@@ -199,6 +239,7 @@ void imu_publish()
 	float euler[3] = { 0 };
 	euler_from_quat(q_est, euler);
 
+	// TODO a better way to check if the filter is working
 	for (int i = 0; i < 3; i++) {
 		if (isnan(euler[i]) || isinf(euler[i])) {
 			filter_init_done = false;
@@ -208,25 +249,46 @@ void imu_publish()
 
 	struct ltpacket_t packet;
 	packet.type = LTPACKET_TYPE_IMU;
-	packet.imu.roll = euler[0];
-	packet.imu.pitch = euler[1];
-	packet.imu.yaw = euler[2];
-	packet.imu.vel = dt;
+	packet.imu.qw = q_est[0];
+	packet.imu.qx = q_est[1];
+	packet.imu.qy = q_est[2];
+	packet.imu.qz = q_est[3];
+	packet.imu.dvx = delta_vel[0];
+	packet.imu.dvy = delta_vel[1];
+	packet.imu.dvz = delta_vel[2];
+	packet.imu.dt = delta_vel_dt;
+	delta_vel[0] = 0;
+	delta_vel[1] = 0;
+	delta_vel[2] = 0;
+	delta_vel_dt = 0;
 	ltpacket_send(&packet, serial_write);
+}
 
+void imu_publish_raw()
+{
 	if (!ltparams_getu(LTPARAMS_IMU_RAW_ENABLE)) {
 		return;
 	}
+
+	static uint32_t last_time = 0;
+	uint32_t now = micros();
+	uint32_t period = ltparams_getu(LTPARAMS_IMU_PUBLISH_PERIOD);
+	if (now - last_time < period) {
+		return;
+	}
+	last_time = now;
+
+	struct ltpacket_t packet;
 	packet.type = LTPACKET_TYPE_IMU_RAW;
-	packet.imu_raw.accel_x = imu_raw[0];
-	packet.imu_raw.accel_y = imu_raw[1];
-	packet.imu_raw.accel_z = imu_raw[2];
-	packet.imu_raw.gyro_x = imu_raw[3];
-	packet.imu_raw.gyro_y = imu_raw[4];
-	packet.imu_raw.gyro_z = imu_raw[5];
-	packet.imu_raw.mag_x = imu_raw[6];
-	packet.imu_raw.mag_y = imu_raw[7];
-	packet.imu_raw.mag_z = imu_raw[8];
+	packet.imu_raw.accel_x = imu.accel_raw[0];
+	packet.imu_raw.accel_y = imu.accel_raw[1];
+	packet.imu_raw.accel_z = imu.accel_raw[2];
+	packet.imu_raw.gyro_x = imu.gyro_raw[0];
+	packet.imu_raw.gyro_y = imu.gyro_raw[1];
+	packet.imu_raw.gyro_z = imu.gyro_raw[2];
+	packet.imu_raw.mag_x = mag.mag_raw[0];
+	packet.imu_raw.mag_y = mag.mag_raw[1];
+	packet.imu_raw.mag_z = mag.mag_raw[2];
 	ltpacket_send(&packet, serial_write);
 }
 
@@ -275,6 +337,7 @@ void loop()
 	led_process();
 	imu_filter();
 	imu_publish();
+	imu_publish_raw();
 	listen_process();
 }
 

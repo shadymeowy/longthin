@@ -7,8 +7,10 @@
 
 struct hmc5883l {
     uint16_t address;
-    int16_t raw_data[3];
+    float mag_raw[3];
     float mag[3];
+    float bias[3];
+    float mtx[9];
 };
 
 int hmc5883l_init(struct hmc5883l *hmc, uint16_t addr);
