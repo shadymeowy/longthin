@@ -126,62 +126,62 @@ motor_output_publish_period:
 mag_calib_b0:
   id: 0x19
   type: f32
-  default: -0.01409842
+  default: -157.98802123
 
 mag_calib_b1:
   id: 0x1a
   type: f32
-  default: -0.01651878
+  default: 29.90416336
 
 mag_calib_b2:
   id: 0x1b
   type: f32
-  default: -0.15467174
+  default: -170.7587217
 
 mag_calib_m00:
   id: 0x1c
   type: f32
-  default: 2248.0437349117365
+  default: 1.91202375
 
 mag_calib_m01:
   id: 0x1d
   type: f32
-  default: -9.820466585653632
+  default: 0.00451775
 
 mag_calib_m02:
   id: 0x1e
   type: f32
-  default: 83.5181286985458
+  default: -0.02390958
 
 mag_calib_m10:
   id: 0x1f
   type: f32
-  default: -9.820466585653618
+  default: 0.00451775
 
 mag_calib_m11:
   id: 0x20
   type: f32
-  default: 2323.575656987126
+  default: 1.92767187
 
 mag_calib_m12:
   id: 0x21
   type: f32
-  default: -10.094511360510472
+  default: -0.03320508
 
 mag_calib_m20:
   id: 0x22
   type: f32
-  default: 83.51812869854605
+  default: -0.02390958
 
 mag_calib_m21:
   id: 0x23
   type: f32
-  default: -10.0945113605105
+  default: -0.03320508
 
 mag_calib_m22:
   id: 0x24
   type: f32
-  default: 2721.9289350440895
+  default: 2.06441668
 
 accel_calib_b0:
   id: 0x25
