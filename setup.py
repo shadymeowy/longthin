@@ -31,6 +31,8 @@ setup(
             'longthin-estimator = longthin.utils.estimator:main',
             'longthin-visualize = longthin.utils.visualize:main',
             'longthin-controller = longthin.utils.controller:main',
+            'longthin-calibration = longthin.utils.calibration:main',
+            'longthin-record = longthin.utils.record:main',
         ],
     },
 )
