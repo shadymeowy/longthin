@@ -1,19 +1,18 @@
 import numpy as np
 
 
-def accel_calibrate(up, down, left, right, forward, backward):
+def accel_calibrate(xplus, xneg, yplus, yneg, zplus, zneg, g=9.8):
     # calculate the offset and scale
-    b = np.array([0, 0, 0])
-    A_1 = np.eye(3)
+    b = np.zeros(3)
+    A = np.eye(3)
 
     # calculate the offset
-    b[0] = (up[0] + down[0]) / 2
-    b[1] = (left[1] + right[1]) / 2
-    b[2] = (forward[2] + backward[2]) / 2
+    b[0] = (xplus + xneg) / 2
+    b[1] = (yplus + yneg) / 2
+    b[2] = (zplus + zneg) / 2
 
     # calculate the scale
-    A_1[0, 0] = (up[0] - down[0]) / 2
-    A_1[1, 1] = (left[1] - right[1]) / 2
-    A_1[2, 2] = (forward[2] - backward[2]) / 2
-
-    return A_1, b
+    A[0, 0] = 2 / (xplus - xneg) * g
+    A[1, 1] = 2 / (yplus - yneg) * g
+    A[2, 2] = 2 / (zplus - zneg) * g
+    return A, b
