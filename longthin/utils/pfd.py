@@ -1,5 +1,6 @@
 import sys
-import time
+import numpy as np
+from scipy.spatial.transform import Rotation
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -103,7 +104,7 @@ class LTApp(QDialog):
         l = conf.left_right
         m1 = conf.mixed_1
         m2 = conf.mixed_2
-        
+
         if x == 0 and y == 0:
             self.set_motor(0, 0)
         elif x == 0:
@@ -157,9 +158,11 @@ class LTApp(QDialog):
             if packet is None:
                 return
             if isinstance(packet, Imu):
-                pfd.roll = packet.roll * 3.1415926 / 180
-                pfd.pitch = packet.pitch * 3.1415926 / 180
-                pfd.heading = -packet.yaw
+                rot = Rotation.from_quat([packet.qw, packet.qx, packet.qy, packet.qz])
+                euler = rot.as_euler("zyx", degrees=False)
+                pfd.roll = euler[0]
+                pfd.pitch = euler[1]
+                pfd.heading = -np.rad2deg(euler[2])
                 pfd.update()
 
 
