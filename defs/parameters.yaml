@@ -186,22 +186,22 @@ mag_calib_m22:
 accel_calib_b0:
   id: 0x25
   type: f32
-  default: 0.0
+  default: 0.00770027
 
 accel_calib_b1:
   id: 0x26
   type: f32
-  default: 0.0
+  default: -0.00205022
 
 accel_calib_b2:
   id: 0x27
   type: f32
-  default: 0.0
+  default: -0.10933483
 
 accel_calib_m00:
   id: 0x28
   type: f32
-  default: 9.80665
+  default: 9.80959641
 
 accel_calib_m01:
   id: 0x29
@@ -221,7 +221,7 @@ accel_calib_m10:
 accel_calib_m11:
   id: 0x2c
   type: f32
-  default: 9.80665
+  default: 9.77402776
 
 accel_calib_m12:
   id: 0x2d
@@ -241,4 +241,4 @@ accel_calib_m21:
 accel_calib_m22:
   id: 0x30
   type: f32
-  default: 9.80665
+  default: 9.72531012
