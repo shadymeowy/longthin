@@ -122,3 +122,123 @@ motor_output_publish_period:
   id: 0x18
   type: u32
   default: 33333
+
+mag_calib_b0:
+  id: 0x19
+  type: f32
+  default: -0.01409842
+
+mag_calib_b1:
+  id: 0x1a
+  type: f32
+  default: -0.01651878
+
+mag_calib_b2:
+  id: 0x1b
+  type: f32
+  default: -0.15467174
+
+mag_calib_m00:
+  id: 0x1c
+  type: f32
+  default: 2248.0437349117365
+
+mag_calib_m01:
+  id: 0x1d
+  type: f32
+  default: -9.820466585653632
+
+mag_calib_m02:
+  id: 0x1e
+  type: f32
+  default: 83.5181286985458
+
+mag_calib_m10:
+  id: 0x1f
+  type: f32
+  default: -9.820466585653618
+
+mag_calib_m11:
+  id: 0x20
+  type: f32
+  default: 2323.575656987126
+
+mag_calib_m12:
+  id: 0x21
+  type: f32
+  default: -10.094511360510472
+
+mag_calib_m20:
+  id: 0x22
+  type: f32
+  default: 83.51812869854605
+
+mag_calib_m21:
+  id: 0x23
+  type: f32
+  default: -10.0945113605105
+
+mag_calib_m22:
+  id: 0x24
+  type: f32
+  default: 2721.9289350440895
+
+accel_calib_b0:
+  id: 0x25
+  type: f32
+  default: 0.0
+
+accel_calib_b1:
+  id: 0x26
+  type: f32
+  default: 0.0
+
+accel_calib_b2:
+  id: 0x27
+  type: f32
+  default: 0.0
+
+accel_calib_m00:
+  id: 0x28
+  type: f32
+  default: 9.80665
+
+accel_calib_m01:
+  id: 0x29
+  type: f32
+  default: 0.0
+
+accel_calib_m02:
+  id: 0x2a
+  type: f32
+  default: 0.0
+
+accel_calib_m10:
+  id: 0x2b
+  type: f32
+  default: 0.0
+
+accel_calib_m11:
+  id: 0x2c
+  type: f32
+  default: 9.80665
+
+accel_calib_m12:
+  id: 0x2d
+  type: f32
+  default: 0.0
+
+accel_calib_m20:
+  id: 0x2e
+  type: f32
+  default: 0.0
+
+accel_calib_m21:
+  id: 0x2f
+  type: f32
+  default: 0.0
+
+accel_calib_m22:
+  id: 0x30
+  type: f32
+  default: 9.80665
