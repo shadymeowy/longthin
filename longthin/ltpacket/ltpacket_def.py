@@ -24,10 +24,14 @@ class Reserved:
 
 @dataclass
 class Imu:
-    roll: float
-    pitch: float
-    yaw: float
-    vel: float
+    qw: float
+    qx: float
+    qy: float
+    qz: float
+    dvx: float
+    dvy: float
+    dvz: float
+    dt: float
 
     @staticmethod
     def from_bytes(data):
@@ -35,10 +39,14 @@ class Imu:
 
     def to_bytes(self):
         return imu_struct.pack(
-            self.roll,
-            self.pitch,
-            self.yaw,
-            self.vel,
+            self.qw,
+            self.qx,
+            self.qy,
+            self.qz,
+            self.dvx,
+            self.dvy,
+            self.dvz,
+            self.dt,
         )
 
     @property
@@ -363,7 +371,7 @@ class SimState:
 
 
 reserved_struct = struct.Struct('B')
-imu_struct = struct.Struct('ffff')
+imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
 motor_struct = struct.Struct('ff')
 motor_raw_struct = struct.Struct('hh')

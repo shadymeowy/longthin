@@ -6,10 +6,14 @@ reserved:
 imu:
   id: 0x1
   fields:
-    roll: f32
-    pitch: f32
-    yaw: f32
-    vel: f32
+    qw: f32
+    qx: f32
+    qy: f32
+    qz: f32
+    dvx: f32
+    dvy: f32
+    dvz: f32
+    dt: f32
 
 imu_raw:
   id: 0x2

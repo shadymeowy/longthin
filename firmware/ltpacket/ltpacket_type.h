@@ -6,10 +6,14 @@ struct ltpacket_reserved_t {
 };
 
 struct ltpacket_imu_t {
-    float roll;
-    float pitch;
-    float yaw;
-    float vel;
+    float qw;
+    float qx;
+    float qy;
+    float qz;
+    float dvx;
+    float dvy;
+    float dvz;
+    float dt;
 };
 
 struct ltpacket_imu_raw_t {
