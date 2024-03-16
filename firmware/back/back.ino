@@ -2,6 +2,7 @@
 #include "packet.h"
 #include "ltpacket.h"
 #include "ltparams.h"
+#include "qmath.h"
 
 #define MOTOR_LEFT_FORWARD 11
 #define MOTOR_LEFT_BACKWARD 10
@@ -256,6 +257,8 @@ void listen_process()
 void listen_handle(struct ltpacket_t *packet)
 {
 	enum ltparams_index_t index;
+	quat_t q;
+	float rpy[3];
 	switch (packet->type) {
 	case LTPACKET_TYPE_LED:
 		blink = packet->led.state;
@@ -286,8 +289,13 @@ void listen_handle(struct ltpacket_t *packet)
 		manual_mode = 0;
 		break;
 	case LTPACKET_TYPE_IMU:
-		current_yaw = packet->imu.yaw;
-		current_d = packet->imu.vel; // TODO: Fix later
+		q[0] = packet->imu.qw;
+		q[1] = packet->imu.qx;
+		q[2] = packet->imu.qy;
+		q[3] = packet->imu.qz;
+		euler_from_quat(q, rpy);
+		current_yaw = rpy[2];
+		current_d = 0;
 		break;
 	case LTPACKET_TYPE_REBOOT:
 		rp2040.reboot();
