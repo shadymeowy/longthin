@@ -2,6 +2,7 @@ import time
 import argparse
 import os
 import cv2
+import struct
 
 from ..ltpacket import *
 from ..video_source import video_source
@@ -31,6 +32,9 @@ def main():
                     time.sleep(1e-4)
                     break
                 with open(args.file + ".lt", "ab") as f:
+                    t = time.time()
+                    byts = struct.pack("d", t)
+                    f.write(byts)
                     f.write(encode(packet))
             if cap is not None:
                 ret, img = cap.read()
