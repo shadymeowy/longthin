@@ -15,13 +15,17 @@ def main():
     parser.add_argument('--zmq', default=5555, help='ZMQ port')
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--debug', action='store_true', help='Print debug messages')
+    parser.add_argument('--video', default='shared:lt_video', help='Video sink')
     args = parser.parse_args()
     conn = LTZmq(args.zmq, args.zmq2, server=False)
 
     config = load_config('default.yaml')
     renderer = LTRenderer(config)
     width, height = config.camera.model.width, config.camera.model.height
-    writer = SHMVideoWriter('lt_video', width, height)
+    if not args.video.startswith('shared:'):
+        raise ValueError('Only shared memory video is supported')
+    sink = args.video.strip('shared:')
+    sink = SHMVideoWriter(sink, width, height)
 
     model = ddmr_dynamic_model(**config.sim.model._asdict())
     dt = config.sim.dt
@@ -43,7 +47,7 @@ def main():
 
         if last_time + 1/30 < time.time():
             img = renderer.render_image()
-            writer.write(img)
+            sink.write(img)
             t = time.time()
             step_count = (t - last_time) / dt
             step_count = int(step_count) + 1
