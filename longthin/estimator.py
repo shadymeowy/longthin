@@ -69,15 +69,20 @@ class Estimator:
         img_gray = cv2.cvtColor(img_ud, cv2.COLOR_BGR2GRAY)
 
         corners2, ids = self.marker_helper.detect(img_gray)
+        if ids is None:
+            return None
+        mask = np.isin(ids, self.marker_ids)
+        # remove markers that have corners too close to the edges
+        mask &= np.all(corners2[:, :, 0] > 32, axis=1)
+        mask &= np.all(corners2[:, :, 0] < img_gray.shape[1] - 32, axis=1)
+        mask &= np.all(corners2[:, :, 1] > 32, axis=1)
+        mask &= np.all(corners2[:, :, 1] < img_gray.shape[0] - 32, axis=1)
+        ids = ids[mask]
+        corners2 = corners2[mask]
         if draw:
             img_markers = self.marker_helper.draw(img_ud, corners2, ids)
         else:
             img_markers = None
-        if ids is None:
-            return None
-        mask = np.isin(ids, self.marker_ids)
-        ids = ids[mask]
-        corners2 = corners2[mask]
         sorter = np.argsort(self.marker_ids)
         idx = sorter[np.searchsorted(self.marker_ids, ids, sorter=sorter)]
         if not (ids == self.marker_ids[idx]).all():
