@@ -21,6 +21,9 @@ class SHMVideoWriter:
             raise ValueError('frame size does not match')
         self.memory.buf[:len(frame)] = frame
 
+    def close(self):
+        self.memory.close()
+
 
 class SHMVideoCapture:
     def __init__(self, name, width, height):
@@ -39,3 +42,6 @@ class SHMVideoCapture:
         frame = np.frombuffer(frame, dtype=np.uint8).reshape((self.height, self.width, 3))
         time.sleep(1/30)
         return True, frame
+
+    def close(self):
+        self.memory.close()
