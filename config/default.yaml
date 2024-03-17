@@ -17,12 +17,12 @@ camera:
 
 estimator:
   pos_filter:
-    alpha: 0.9
-    beta: 2.0
+    alpha: 0.5
+    beta: 0.7
   att_filter:
     alpha: 0.5
     beta: 2.0
-  median: 1
+  median: 8
 
 renderer:
   area:
@@ -101,6 +101,11 @@ markers:
     pose:
       position: [0.0, -1.5075, -0.02]
       attitude: [0.0, 0.0, 270.0]
+# - id: 20
+#    size: 0.27
+#    pose:
+#      position: [0.81, 2.4575, -0.02]
+#      attitude: [0.0, 0.0, 90.0]
 
 manual_control:
   forward_backward: 1.0
