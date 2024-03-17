@@ -2,10 +2,10 @@ import time
 import argparse
 import os
 import cv2
-import struct
 
 from ..ltpacket import *
 from ..video_source import video_source
+from ..config import load_config
 
 
 def main():
@@ -16,12 +16,15 @@ def main():
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     args = parser.parse_args()
     conn = LTZmq(args.zmq, args.zmq2, server=False)
+    conf = load_config("default.yaml")
+    file = LTFileWriter(args.file + ".lt")
 
     if args.video is not None:
-        cap = video_source(args.video, 1280, 720)
+        cap = video_source(
+            args.video,
+            conf.camera.model.width,
+            conf.camera.model.height)
         os.makedirs(args.file, exist_ok=True)
-        with open(args.file + ".lt", "wb") as f:
-            pass
     else:
         cap = None
     try:
@@ -31,11 +34,7 @@ def main():
                 if packet is None:
                     time.sleep(1e-4)
                     break
-                with open(args.file + ".lt", "ab") as f:
-                    t = time.time()
-                    byts = struct.pack("d", t)
-                    f.write(byts)
-                    f.write(encode(packet))
+                file.write(packet)
             if cap is not None:
                 ret, img = cap.read()
                 if not ret:
