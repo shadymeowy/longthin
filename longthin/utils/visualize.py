@@ -16,6 +16,7 @@ def main():
     config = load_config('default.yaml')
     renderer = LTRenderer(config)
 
+    x, y, yaw = 0, 0, 0
     while True:
         while True:
             packet = conn.read()
