@@ -12,17 +12,17 @@ camera:
     p2: 0
     k3: 0.004866869450794095
   pose:
-    position: [0.4, 0.0, -0.3]
-    attitude: [0.0, -30.0, 0.0]
+    position: [0.5, 0.0, -0.4]
+    attitude: [0.0, -25.0, 0.0]
 
 estimator:
   pos_filter:
-    alpha: 0.5
-    beta: 0.7
+    alpha: 0.2
+    beta: 1.0e-3
   att_filter:
     alpha: 0.5
     beta: 2.0
-  median: 8
+  median: 4
 
 renderer:
   area:
