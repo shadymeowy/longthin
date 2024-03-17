@@ -33,6 +33,7 @@ setup(
             'longthin-controller = longthin.utils.controller:main',
             'longthin-calibration = longthin.utils.calibration:main',
             'longthin-record = longthin.utils.record:main',
+            'longthin-playback = longthin.utils.playback:main',
         ],
     },
 )
