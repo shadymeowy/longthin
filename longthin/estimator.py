@@ -93,7 +93,7 @@ class Estimator:
         obj_points = obj_points.astype(np.float64)
         img_points = corners2.reshape((-1, 2))
         img_points = img_points.astype(np.float64)
-        ret, rvec, tvec = cv2.solvePnP(obj_points, img_points, m_int, None)
+        ret, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, m_int, None, flags=cv2.SOLVEPNP_SQPNP)
         if not ret:
             return None
 
