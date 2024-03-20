@@ -18,14 +18,12 @@ class PiCam:
         self.pc2.configure(config)
         self.pc2.start()
         self.pc2.set_controls({
-            # disable auto focus
-            "AfMode": controls.AfModeEnum.Manual,
-            "AeEnable": False,
-            # "AeExposureMode": controls.AeExposureModeEnum.Short,
+            "AfMode": controls.AfModeEnum.Auto,
+            "AfRange": controls.AfRangeEnum.Normal,
+            "AfTrigger": controls.AfTriggerEnum.Start,
+            "AeEnable": True,
+            "AeExposureMode": controls.AeExposureModeEnum.Short,
             "AeConstraintMode": controls.AeConstraintModeEnum.Highlight,
-            "AeFlickerMode": controls.AeFlickerModeEnum.Off,
-            "ExposureTime": 3000,
-            "AnalogueGain": 16.0,
         })
 
     def read(self):
