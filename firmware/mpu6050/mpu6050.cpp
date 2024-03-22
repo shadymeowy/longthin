@@ -50,9 +50,9 @@ int mpu6050_read(struct mpu6050 *mpu)
 		mpu->gyro[i] = mpu->gyro_raw[i] - mpu->bias_gyro[i];
 	}
 	float a[3] = { 0 };
-	a[0] = mpu->accel_raw[0] - mpu->bias_accel[0];
-	a[1] = mpu->accel_raw[1] - mpu->bias_accel[1];
-	a[2] = mpu->accel_raw[2] - mpu->bias_accel[2];
+	a[0] = -mpu->accel_raw[0] + mpu->bias_accel[0];
+	a[1] = -mpu->accel_raw[1] + mpu->bias_accel[1];
+	a[2] = -mpu->accel_raw[2] + mpu->bias_accel[2];
 	mpu->accel[0] = a[0] * mpu->mtx_accel[0] + a[1] * mpu->mtx_accel[1] + a[2] * mpu->mtx_accel[2];
 	mpu->accel[1] = a[0] * mpu->mtx_accel[3] + a[1] * mpu->mtx_accel[4] + a[2] * mpu->mtx_accel[5];
 	mpu->accel[2] = a[0] * mpu->mtx_accel[6] + a[1] * mpu->mtx_accel[7] + a[2] * mpu->mtx_accel[8];
