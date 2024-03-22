@@ -67,7 +67,7 @@ def main():
             calc_time = time.time() - calc_time
             rate = sim_time / calc_time
 
-            rot = R.from_euler('xyz', [0, 0, -y[2]], degrees=False)
+            rot = R.from_euler('xyz', [0, 0, y[2]], degrees=False)
             q = rot.as_quat()
 
             vel = y[1]
