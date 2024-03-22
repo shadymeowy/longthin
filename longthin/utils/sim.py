@@ -26,6 +26,7 @@ def main():
         raise ValueError('Only shared memory video is supported')
     sink = args.video.strip('shared:')
     sink = SHMVideoWriter(sink, width, height)
+    params = default_params()
 
     model = ddmr_dynamic_model(**config.sim.model._asdict())
     dt = config.sim.dt
@@ -42,10 +43,17 @@ def main():
             packet = conn.read()
             if packet is None:
                 break
-            if isinstance(packet, MotorOutput):
+            if isinstance(packet, Setparam):
+                params[packet.type] = packet.value
+            elif isinstance(packet, Setparami):
+                params[packet.type] = packet.value
+            elif isinstance(packet, Setparamu):
+                params[packet.type] = packet.value
+            elif isinstance(packet, MotorOutput):
                 left, right = packet.left, packet.right
 
-        if last_time + 1/30 < time.time():
+        period = params[LTParams.IMU_PUBLISH_PERIOD] / 1e6
+        if last_time + period < time.time():
             img = renderer.render_image()
             sink.write(img)
             t = time.time()
