@@ -162,7 +162,7 @@ class LTApp(QDialog):
                 euler = rot.as_euler('xyz', degrees=False)
                 pfd.roll = euler[0]
                 pfd.pitch = euler[1]
-                pfd.heading = -np.rad2deg(euler[2])
+                pfd.heading = np.rad2deg(euler[2])
                 pfd.update()
 
 
