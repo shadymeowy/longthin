@@ -121,8 +121,8 @@ void motor_update()
 		u_v = vdesired_kp * e_v + vdesired_ki * e_v_sum;
 		u_w = wdesired_kp * e_w + wdesired_ki * e_w_sum;
 
-		u_l = (u_v - wheel_distance * u_w / 2) / wheel_radius;
-		u_r = (u_v + wheel_distance * u_w / 2) / wheel_radius;
+		u_l = (u_v + wheel_distance * u_w / 2) / wheel_radius;
+		u_r = (u_v - wheel_distance * u_w / 2) / wheel_radius;
 		if (desired_d == 0) {
 			u_l = 0;
 			u_r = 0;
