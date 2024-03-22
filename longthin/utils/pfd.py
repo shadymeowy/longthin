@@ -38,7 +38,9 @@ class LTApp(QDialog):
         self.input_motor_right = self.append_lineedit("Motor Right", "0")
         self.button_motor = self.append_widget(QPushButton("Motor"))
         self.button_motor.clicked.connect(self.motor_setpoint)
-
+        self.append_newline()
+        self.label = self.append_widget(QLabel(), 8, 1)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.append_newline()
         self.pfd = self.append_widget(QPrimaryFlightDisplay(), 8, 10)
         self.pfd.zoom = 1
@@ -163,6 +165,9 @@ class LTApp(QDialog):
                 pfd.roll = euler[0]
                 pfd.pitch = euler[1]
                 pfd.heading = np.rad2deg(euler[2])
+                euler = rot.as_euler('xyz', degrees=True)
+                euler = ", ".join([f"{x:.2f}" for x in euler])
+                self.label.setText(euler)
                 pfd.update()
 
 
