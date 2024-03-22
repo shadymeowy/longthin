@@ -51,7 +51,6 @@ def main():
     except KeyboardInterrupt:
         print("Exiting")
     finally:
-        file.close()
         worker.terminate()
 
 
