@@ -91,7 +91,7 @@ imu_calibration_samples:
 imu_publish_period:
   id: 0x12
   type: u32
-  default: 33333
+  default: 10000
 
 motor_pwm_refresh_period:
   id: 0x13
