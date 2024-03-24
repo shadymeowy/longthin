@@ -15,20 +15,8 @@ class Estimator:
     camera_params: CameraParams = None
     dist_params: Distortion = None
     camera_rel_pose: Pose = None
-    coeff_pos: tuple = None
-    coeff_att: tuple = None
     marker_dict = cv2.aruco.DICT_4X4_50
     marker_helper = MarkerHelper.default()
-    median_num: int = 5
-
-    def __post_init__(self):
-        self.history_pos = []
-        self.history_att = []
-        self.filter_pos = alpha_beta_filter(
-            np.zeros(3), *self.coeff_pos)
-        self.filter_att = alpha_beta_filter(
-            np.zeros(3), *self.coeff_att)
-        self.last_t = None
 
     @staticmethod
     def from_config(config):
@@ -59,9 +47,6 @@ class Estimator:
             camera_params,
             dist_params,
             camera_rel_pose,
-            (config.estimator.pos_filter.alpha, config.estimator.pos_filter.beta),
-            (config.estimator.att_filter.alpha, config.estimator.att_filter.beta),
-            config.estimator.median
         )
 
     def estimate(self, img, draw=False):
@@ -110,19 +95,4 @@ class Estimator:
         est_pose_cam = Pose(tvec.flatten(), rmat)
         camera_rel_pose = self.camera_rel_pose
         est_pose = est_pose_cam.from_frame(camera_rel_pose.inv())
-
-        self.history_pos.append(est_pose.pos)
-        self.history_att.append(est_pose.att)
-        if len(self.history_pos) > self.median_num:
-            self.history_pos.pop(0)
-            self.history_att.pop(0)
-            est_pose.pos = np.median(self.history_pos, axis=0)
-            est_pose.att = np.median(self.history_att, axis=0)
-
-        if self.last_t is not None:
-            dt = time.time() - self.last_t
-            est_pose.pos = self.filter_pos(est_pose.pos, dt)
-            # TODO fix this
-            # est_pose.att = self.filter_att(est_pose.att, dt)
-        self.last_t = time.time()
         return est_pose, corners3, img_markers
