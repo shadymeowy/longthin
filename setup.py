@@ -34,6 +34,7 @@ setup(
             'longthin-calibration = longthin.utils.calibration:main',
             'longthin-record = longthin.utils.record:main',
             'longthin-playback = longthin.utils.playback:main',
+            'longthin-hz = longthin.utils.hz:main',
         ],
     },
 )
