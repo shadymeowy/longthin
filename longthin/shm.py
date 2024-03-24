@@ -40,7 +40,7 @@ class SHMVideoCapture:
     def read(self):
         frame = self.memory.buf
         frame = np.frombuffer(frame, dtype=np.uint8).reshape((self.height, self.width, 3))
-        time.sleep(1/30)
+        time.sleep(1/10)
         return True, frame
 
     def close(self):
