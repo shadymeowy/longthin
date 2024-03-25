@@ -20,10 +20,8 @@ class EKF:
     def f(self, dt):
         px, py, vx, vy, dvelbx, dvelby, cbr, cbj = self.X
         dvelx, dvely = self.delta_v
-        ddx = dvelx - dvelbx
-        ddy = dvely - dvelby
-        vxnew = vx + cbj * ddy + cbr * ddx
-        vynew = vy + -cbj * ddx + cbr * ddy
+        vxnew = -cbj*dvely + cbr*dvelx - dvelbx + vx
+        vynew = cbj*dvelx + cbr*dvely - dvelby + vy
         pxnew = px + 0.5 * (vx + self.vxprev) * dt
         pynew = py + 0.5 * (vy + self.vyprev) * dt
         self.vxprev = vx
@@ -44,8 +42,8 @@ class EKF:
         return np.array(
             [[1, 0, dt, 0, 0, 0, 0, 0],
              [0, 1, 0, dt, 0, 0, 0, 0],
-             [0, 0, 1, 0, -cbr, -cbj, -dvelbx + dvelx, -dvelby + dvely],
-             [0, 0, 0, 1, cbj, -cbr, -dvelby + dvely, dvelbx - dvelx],
+             [0, 0, 1, 0, -1, 0, dvelx, -dvely],
+             [0, 0, 0, 1, 0, -1, dvely, dvelx],
              [0, 0, 0, 0, 1, 0, 0, 0],
              [0, 0, 0, 0, 0, 1, 0, 0],
              [0, 0, 0, 0, 0, 0, 1, 0],
@@ -151,7 +149,7 @@ class EKFAdapter:
         return self._ev_angle - self._imu_angle
 
     def step(self):
-        ret = 0, False
+        ret = 0, True
         if self.ekf is None and not self._init():
             return ret
         if self._ev_flag and self._predict_flag:
@@ -164,7 +162,7 @@ class EKFAdapter:
         if self._imu_flag:
             self._imu_flag = False
             angle_bias = np.arctan2(self.ekf.X[7], self.ekf.X[6])
-            self.angle = (self._imu_angle - angle_bias) % (2 * np.pi)
+            self.angle = (self._imu_angle + angle_bias) % (2 * np.pi)
             self.ekf.delta_v = self._imu_dvel
             self._predict_flag = True
             self.ekf.predict(self._imu_dt)

@@ -46,10 +46,9 @@ sigma_dvel = symbols('sigma_dvel', real=True)
 sigma_cbias = symbols('sigma_c', real=True)
 
 # remove bias from the rotation measurement
-c = cmul(cconj(cbias), c_meas)
+c = cmul(cbias, c_meas)
 # remove bias from the delta velocity measurement
-dvel = dvel_meas - dvelbias
-dvel = crot(cbias, dvel)
+dvel = crot(cbias, dvel_meas) - dvelbias
 
 # The state vector
 X = Matrix([p, v, dvelbias, cbias])
