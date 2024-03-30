@@ -49,8 +49,8 @@ def make_controller(params):
         u_v = vdesired_kp * e_v + vdesired_ki * e_v_sum
         u_w = wdesired_kp * e_w + wdesired_ki * e_w_sum
 
-        u_l = (u_v - wheel_distance * u_w / 2) / wheel_radius
-        u_r = (u_v + wheel_distance * u_w / 2) / wheel_radius
+        u_l = (u_v + wheel_distance * u_w / 2) / wheel_radius
+        u_r = (u_v - wheel_distance * u_w / 2) / wheel_radius
 
         if desired_d == 0:
             u_l = 0
@@ -63,7 +63,7 @@ def make_controller(params):
             u_r = 0
         u_l = np.clip(u_l, 0, 1)
         u_r = np.clip(u_r, 0, 1)
-        return u_v, u_w, u_l, u_r
+        return u_v, u_w, u_l, u_r, desired_v, desired_w
     return controller
 
 
@@ -92,11 +92,11 @@ def main():
                 time.sleep(1e-4)
                 break
             if isinstance(packet, Setparam):
-                params[packet.type] = packet.value
+                params[LTParams(packet.param)] = packet.value
             elif isinstance(packet, Setparami):
-                params[packet.type] = packet.value
+                params[LTParams(packet.param)] = packet.value
             elif isinstance(packet, Setparamu):
-                params[packet.type] = packet.value
+                params[LTParams(packet.param)] = packet.value
             elif isinstance(packet, Motor):
                 u_l = packet.left
                 u_r = packet.right
@@ -115,7 +115,7 @@ def main():
 
         t = time.time()
         if not manual_mode:
-            u_v, u_w, u_l, u_r = controller(
+            u_v, u_w, u_l, u_r, desired_vel, desired_w = controller(
                 t, current_d, current_yaw, desired_d, desired_yaw, current_vel, current_w)
 
         out_enabled = params[LTParams.MOTOR_OUTPUT_ENABLE]
@@ -129,11 +129,13 @@ def main():
         if debug_enabled and t - last_debug > debug_period:
             packet_debug = ControlDebug(
                 current_d,
-                current_yaw,
+                current_yaw%360,
                 desired_d,
-                desired_yaw,
+                desired_yaw%360,
                 current_vel,
                 current_w,
+                desired_vel,
+                desired_w,
                 u_v, u_w,
                 u_l, u_r)
             conn.send(packet_debug)
