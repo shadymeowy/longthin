@@ -44,11 +44,11 @@ def main():
             if packet is None:
                 break
             if isinstance(packet, Setparam):
-                params[packet.type] = packet.value
+                params[LTParams(packet.param)] = packet.value
             elif isinstance(packet, Setparami):
-                params[packet.type] = packet.value
+                params[LTParams(packet.param)] = packet.value
             elif isinstance(packet, Setparamu):
-                params[packet.type] = packet.value
+                params[LTParams(packet.param)] = packet.value
             elif isinstance(packet, MotorOutput):
                 left, right = packet.left, packet.right
 

@@ -8,7 +8,7 @@ from dataclasses import asdict
 def main():
     parser = argparse.ArgumentParser(description='A parameter utility client')
     parser.add_argument('param_name', type=str, help='Parameter name', nargs='?')
-    parser.add_argument('--set', type=float, help='Parameter value to set')
+    parser.add_argument('--set', type=str, help='Parameter value to set')
     parser.add_argument('--default', action='store_true', help='Print default value of parameter')
     parser.add_argument('--type', action='store_true', help='Print type of parameter')
     parser.add_argument('--debug', action='store_true', help='Print debug info')
@@ -31,7 +31,11 @@ def main():
         raise ValueError('No action specified')
 
     if args.set is not None:
-        packet = Setparam(param.value, args.set)
+        try:
+            value = int(args.set)
+        except ValueError:
+            value = float(args.set)
+        packet = setparam(param, value)
         if args.debug:
             print('packet:', packet)
             print('asbytes:', packet.to_bytes())
