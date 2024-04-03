@@ -21,7 +21,7 @@ theta_kp:
 theta_ki:
   id: 0x04
   type: f32
-  default: 0.0
+  default: 1e-12
 
 ed_kp:
   id: 0x05
@@ -76,12 +76,12 @@ madgwick_beta:
 imu_filter_type:
   id: 0x0f
   type: u32
-  default: 2
+  default: 3
 
 mahony_kp:
   id: 0x10
   type: f32
-  default: 1.0
+  default: 0.37
 
 imu_calibration_samples:
   id: 0x11
