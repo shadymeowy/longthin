@@ -17,21 +17,28 @@ def video_worker(args, conf):
         conf.camera.model.width,
         conf.camera.model.height)
     os.makedirs(args.file, exist_ok=True)
+
+    last_time = time.time()
     while True:
         ret, img = cap.read()
         if not ret:
             print("Failed to get frame")
             time.sleep(1e-4)
             continue
+        current_time = time.time()
+        if current_time - last_time < 1/args.video_freq:
+            continue
+        last_time = current_time
         filename = f"{time.time():.6f}.jpg"
         filename = os.path.join(args.file, filename)
-        cv2.imwrite(filename, img, [cv2.IMWRITE_JPEG_QUALITY, 100])
+        cv2.imwrite(filename, img)
         print("Saved", filename)
 
 
 def main():
     parser = argparse.ArgumentParser(description='A packet record client')
     parser.add_argument('file', help='File to record to')
+    parser.add_argument('--video_freq', default=20, help='Video period')
     parser.add_argument('--video', default=None, help='Video source')
     parser.add_argument('--zmq', default=5555, help='ZMQ port')
     parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
