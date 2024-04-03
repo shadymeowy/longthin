@@ -35,7 +35,7 @@ renderer:
   strip:
     width: 0.02
   chassis:
-    length: 0.5
+    length: 0.61
     width: 0.1
     height: 0.1
     offset: 0.1
