@@ -10,6 +10,8 @@ from ..config import load_config
 
 
 def video_worker(args, conf):
+    if args.video is None:
+        return
     cap = video_source(
         args.video,
         conf.camera.model.width,
