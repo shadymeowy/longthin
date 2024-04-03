@@ -26,10 +26,11 @@ class SHMVideoWriter:
 
 
 class SHMVideoCapture:
-    def __init__(self, name, width, height):
+    def __init__(self, name, width, height, delay=0.1):
         self.name = name
         self.width = width
         self.height = height
+        self.delay = delay
 
         try:
             self.memory = shared_memory.SharedMemory(name=name, create=False)
@@ -39,8 +40,11 @@ class SHMVideoCapture:
 
     def read(self):
         frame = self.memory.buf
-        frame = np.frombuffer(frame, dtype=np.uint8).reshape((self.height, self.width, 3))
-        time.sleep(1/10)
+        size = self.width*self.height*3
+        frame = frame[:size]
+        frame = np.frombuffer(frame, dtype=np.uint8)
+        frame = frame.reshape((self.height, self.width, 3))
+        time.sleep(self.delay)
         return True, frame
 
     def close(self):
