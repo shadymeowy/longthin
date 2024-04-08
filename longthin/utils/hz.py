@@ -1,4 +1,5 @@
-from ..ltpacket import *
+from ..node import LTNode
+from ..ltpacket import LTPacketType, type_map
 import time
 import argparse
 
@@ -8,26 +9,28 @@ def main():
     parser.add_argument('packet_type', default=None, help='Filter packet type')
     parser.add_argument('--refresh', default=1, help='Refresh rate')
     args = parser.parse_args()
-    conn = LTZmq()
 
-    typ = LTPACKET_TYPE[args.packet_type.upper()]
-    last_time = time.time()
+    node = LTNode()
+
     count = 0
-    while True:
-        while True:
-            packet = conn.read()
-            if packet is None:
-                time.sleep(1e-4)
-                break
-            if packet.type != typ:
-                break
-            count += 1
+    last_time = time.time()
+
+    def callback(packet):
+        nonlocal count, last_time
+        count += 1
         t = time.time()
         dt = t - last_time
         if dt > args.refresh:
             print(f"{count/dt} Hz")
             last_time = t
             count = 0
+
+    name = args.packet_type.upper()
+    typ = LTPacketType[name]
+    typ = type_map[typ]
+    print(f"Monitoring {name} packets")
+    node.subscribe(typ, callback)
+    node.spin()
 
 
 if __name__ == "__main__":
