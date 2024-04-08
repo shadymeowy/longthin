@@ -12,8 +12,20 @@ from ..shm import SHMVideoWriter
 def main():
     parser = argparse.ArgumentParser(description='A packet playback client')
     parser.add_argument('file', help='File from which to playback')
+    parser.add_argument('--filter', '-f', default=None, help='Filter packets', nargs='+')
     parser.add_argument('--video', default='shared:lt_video', help='Video sink')
+    parser.add_argument('--disable-video', action='store_true', help='Disable video sink stream')
     args = parser.parse_args()
+
+    typs = []
+    if args.filter is not None:
+        print('Filtering packets', args.filter)
+        for name in args.filter:
+            typ = LTPacketType[name.upper()]
+            typs.append(typ)
+    else:
+        print('No filter specified')
+        typs = None
 
     node = LTNode()
     file = LTFileReader(args.file + ".lt")
@@ -43,7 +55,8 @@ def main():
         t = time.time() - offset_t
         remaining = 1e7
         if t >= t_packet and packet is not None:
-            node.publish(packet)
+            if typs is None or packet.type in typs:
+                node.publish(packet)
             compound = file.read()
             if compound is None:
                 packet = None
@@ -52,7 +65,8 @@ def main():
                 remaining = min(remaining, max(0, t_packet - t))
         if t >= t_frame and frame is not None:
             img = cv2.imread(frame)
-            sink.write(img)
+            if not args.disable_video:
+                sink.write(img)
             if len(frames) == 0:
                 frame = None
             else:
