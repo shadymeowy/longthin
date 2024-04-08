@@ -3,9 +3,10 @@ from .ltpacket_def import *
 
 
 class LTZmq:
-    def __init__(self, port, port2, server=False, context=None):
+    def __init__(self, port=5555, port2=5556, server=False, context=None):
         import zmq
-        self.context = zmq.Context()
+        if context is None:
+            self.context = zmq.Context()
         self.socket_pub = self.context.socket(zmq.PUB)
         if server:
             self.socket_pub.bind(f"tcp://*:{port}")

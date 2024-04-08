@@ -9,13 +9,11 @@ from ..video_source import video_source
 
 def main():
     parser = argparse.ArgumentParser(description='A packet echo client')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--config', default="default.yaml", help='Config file')
     parser.add_argument('--video', default="shared:lt_video", help='Video source')
     parser.add_argument('--show', action='store_true', help='Show camera feed')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
+    conn = LTZmq()
 
     config = load_config(args.config)
     width, height = config.camera.model.width, config.camera.model.height

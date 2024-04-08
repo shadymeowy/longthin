@@ -9,10 +9,9 @@ def main():
     parser = argparse.ArgumentParser(description='A packet plotter')
     parser.add_argument('packet', help='Packet and property to plot', nargs='+')
     parser.add_argument('--duration', '-d', default=None, help='Max duration to plot')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
+    
+    conn = LTZmq()
     start_time = time.time()
 
     value_dict = {}

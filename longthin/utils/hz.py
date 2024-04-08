@@ -6,11 +6,9 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description='A packet frequency monitor')
     parser.add_argument('packet_type', default=None, help='Filter packet type')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--refresh', default=1, help='Refresh rate')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
+    conn = LTZmq()
 
     typ = LTPACKET_TYPE[args.packet_type.upper()]
     last_time = time.time()

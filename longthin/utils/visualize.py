@@ -8,11 +8,9 @@ from ..ltpacket import *
 
 def main():
     parser = argparse.ArgumentParser(description='A visualization of the robot')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
 
+    conn = LTZmq()
     config = load_config('default.yaml')
     renderer = LTRenderer(config)
 

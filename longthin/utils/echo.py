@@ -8,13 +8,12 @@ from dataclasses import asdict
 
 def main():
     parser = argparse.ArgumentParser(description='A packet echo client')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--filter', '-f', default=None, help='Filter packets', nargs='+')
     parser.add_argument('--json', '-j', action='store_true', help='Print as json')
     parser.add_argument('--timestamp', '-t', action='store_true', help='Print timestamp')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
+    
+    conn = LTZmq()
     if args.filter is not None:
         typs = []
         for name in args.filter:

@@ -30,11 +30,9 @@ def main():
     parser.add_argument('type', choices=['accel', 'gyro', 'mag'], help='Type of calibration')
     parser.add_argument('--file', default='calibration.csv', help='File to save calibration')
     parser.add_argument('--load', action='store_true', help='Load instead of live data')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--debug', action='store_true', help='Print debug messages')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
+    conn = LTZmq()
 
     packet = Setparam(LTParams.IMU_RAW_ENABLE.value, 1)
     while conn.read() is None:

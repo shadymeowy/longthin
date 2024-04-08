@@ -12,11 +12,9 @@ def main():
     parser = argparse.ArgumentParser(description='A packet playback client')
     parser.add_argument('file', help='File from which to playback')
     parser.add_argument('--video', default='shared:lt_video', help='Video sink')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     args = parser.parse_args()
 
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
+    conn = LTZmq()
     conf = load_config("default.yaml")
     file = LTFileReader(args.file + ".lt")
     width, height = conf.camera.model.width, conf.camera.model.height

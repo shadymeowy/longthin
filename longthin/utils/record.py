@@ -40,10 +40,9 @@ def main():
     parser.add_argument('file', help='File to record to')
     parser.add_argument('--video_freq', default=20, help='Video period')
     parser.add_argument('--video', default=None, help='Video source')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
+
+    conn = LTZmq()
     conf = load_config("default.yaml")
     file = LTFileWriter(args.file + ".lt")
     worker = mp.Process(target=video_worker, args=(args, conf))

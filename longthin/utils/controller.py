@@ -69,12 +69,9 @@ def make_controller(params):
 
 def main():
     parser = argparse.ArgumentParser(description='A controller SITL')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
-    parser.add_argument('--debug', action='store_true', help='Print debug messages')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
 
+    conn = LTZmq()
     params = default_params()
 
     manual_mode = 0

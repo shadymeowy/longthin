@@ -12,8 +12,6 @@ def main():
     parser.add_argument('--default', action='store_true', help='Print default value of parameter')
     parser.add_argument('--type', action='store_true', help='Print type of parameter')
     parser.add_argument('--debug', action='store_true', help='Print debug info')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     args = parser.parse_args()
 
     if args.param_name is None:
@@ -39,7 +37,7 @@ def main():
         if args.debug:
             print('packet:', packet)
             print('asbytes:', packet.to_bytes())
-        conn = LTZmq(args.zmq, args.zmq2, server=False)
+        conn = LTZmq()
         while conn.read() is None:
             time.sleep(1e-4)
         conn.send(packet)

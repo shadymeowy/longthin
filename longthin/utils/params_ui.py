@@ -108,7 +108,7 @@ class ParamsUI(QWidget):
 
 def main():
     import sys
-    ltzmq = LTZmq(5555, 5556, server=False)
+    ltzmq = LTZmq()
     app = QApplication(sys.argv)
     params = default_params()
     window = ParamsUI(params, ltzmq)

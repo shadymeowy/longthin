@@ -8,16 +8,15 @@ from dataclasses import asdict
 def main():
     parser = argparse.ArgumentParser(description='Bridge between serial and zmq for ltpackets')
     parser.add_argument('serial', help='Serial port', default='', nargs='?')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--baudrate', default=115200, help='Serial baudrate')
     parser.add_argument('--debug', action='store_true', help='Print debug messages')
     args = parser.parse_args()
+    
     if args.serial:
         ser = LTSerial(args.serial, baudrate=args.baudrate)
     else:
         ser = None
-    conn = LTZmq(args.zmq, args.zmq2, server=True)
+    conn = LTZmq(server=True)
     while True:
         while ser and ser.is_available():
             packet = ser.read()

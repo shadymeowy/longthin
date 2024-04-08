@@ -12,13 +12,11 @@ from ..shm import SHMVideoWriter
 
 def main():
     parser = argparse.ArgumentParser(description='A simulation of the robot')
-    parser.add_argument('--zmq', default=5555, help='ZMQ port')
-    parser.add_argument('--zmq2', default=5556, help='ZMQ port2')
     parser.add_argument('--debug', action='store_true', help='Print debug messages')
     parser.add_argument('--video', default='shared:lt_video', help='Video sink')
     args = parser.parse_args()
-    conn = LTZmq(args.zmq, args.zmq2, server=False)
-
+    
+    conn = LTZmq()
     config = load_config('default.yaml')
     renderer = LTRenderer(config)
     width, height = config.camera.model.width, config.camera.model.height
