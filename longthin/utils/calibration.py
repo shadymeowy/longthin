@@ -3,18 +3,19 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
+from ..node import LTNode
 from ..ltpacket import *
 from ..calibration import *
 
 
-def listen_packets(conn, timeout=5):
+def listen_packets(node, timeout=5):
     start = time.time()
-    while conn.read() is not None:
+    while node.read() is not None:
         pass
     result = []
     try:
         while time.time() - start < timeout:
-            packet = conn.read()
+            packet = node.read()
             if packet is None:
                 time.sleep(1e-4)
                 continue
@@ -32,11 +33,11 @@ def main():
     parser.add_argument('--load', action='store_true', help='Load instead of live data')
     parser.add_argument('--debug', action='store_true', help='Print debug messages')
     args = parser.parse_args()
-    conn = LTZmq()
+    node = LTNode()
 
     packet = Setparam(LTParamType.IMU_RAW_ENABLE.value, 1)
-    while conn.read() is None:
-        conn.send(packet)
+    while node.read() is None:
+        node.publish(packet)
         time.sleep(1e-4)
 
     data = []
@@ -46,7 +47,7 @@ def main():
         else:
             print('Rotate the robot around all axes')
             print('Press Ctrl+C to stop')
-            packets = listen_packets(conn)
+            packets = listen_packets(node)
             data = np.array([[p.mag_x, p.mag_y, p.mag_z] for p in packets])
             data = np.array(data, dtype=np.float64)
             np.savetxt(args.file, data, delimiter=',')
@@ -75,7 +76,7 @@ def main():
             print(f'Place the robot {name}')
             print('Press enter to start')
             input()
-            packets = listen_packets(conn)
+            packets = listen_packets(node)
             data = np.array([getattr(p, field) for p in packets], dtype=np.float64)
             data = np.mean(data)
             print(f'{field}:', data)
