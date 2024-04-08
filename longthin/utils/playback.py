@@ -5,7 +5,6 @@ import cv2
 
 from ..node import LTNode
 from ..ltpacket import *
-from ..config import load_config
 from ..shm import SHMVideoWriter
 
 
