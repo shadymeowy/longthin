@@ -3,6 +3,7 @@ import time
 
 from .ltpacket import *
 from .rate import Rate
+from .config import load_config
 
 
 class LTNode:
@@ -18,6 +19,7 @@ class LTNode:
         self.conn = LTZmq(self.port1, self.port2, server=False)
         self.subscribers = {None: list()}
         self.params = LTParameters.from_default()
+        self.config = load_config()
 
     def publish(self, msg):
         self.conn.send(msg)
