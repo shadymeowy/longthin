@@ -9,7 +9,7 @@ from ..config import load_config
 
 
 class LTRenderer:
-    def __init__(self, config):
+    def __init__(self, config, headless=False):
         self.config = config
 
         self.camera_pose = Pose(config.camera.pose.position, config.camera.pose.attitude)
@@ -18,17 +18,27 @@ class LTRenderer:
         self.camera_params = self.dist_params.camera_params
         self.camera_params_2 = self.dist_params.camera_params_2
 
+        hfov = self.camera_params.hfov
+        vfov = self.camera_params.vfov
+        self.camera_vehicle = drawing3d.Camera()
+        self.camera_vehicle.set_perspective(np.deg2rad(hfov), np.deg2rad(vfov))
+        self.camera_vehicle.viewport = self.camera_params.width, self.camera_params.height
+
+        self.drawlist_area = LTDrawList()
+        self.drawlist_vehicle = LTDrawList()
+        self.draw_area()
+        self.draw_vehicle()
+
+        if headless:
+            return
+
         self.windows = dict()
         self.window_free = self.add_window(720, 720, b"Free")
         self.camera_free = self.window_free.get_camera()
         self.camera_free.set_perspective(45.0, 45.0)
         self.camera_free.distance = 3
         self.camera_free.rotation = (0.0, -np.pi/5, np.pi/4)
-        hfov = self.camera_params.hfov
-        vfov = self.camera_params.vfov
-        self.camera_vehicle = drawing3d.Camera()
-        self.camera_vehicle.set_perspective(np.deg2rad(hfov), np.deg2rad(vfov))
-        self.camera_vehicle.viewport = self.camera_params.width, self.camera_params.height
+
         self.window_top = self.add_window(720, 720, b"Top")
         self.camera_top = self.window_top.get_camera()
         self.camera_top.set_orthographic(0.2, 0.2)
@@ -37,15 +47,10 @@ class LTRenderer:
         self.window_top.controllable = False
         self.eventlist = drawing3d.EventList()
 
-        self.drawlist_area = LTDrawList()
-        self.drawlist_vehicle = LTDrawList()
         self.windows[self.window_free].append(self.drawlist_area)
         self.windows[self.window_free].append(self.drawlist_vehicle)
         self.windows[self.window_top].append(self.drawlist_area)
         self.windows[self.window_top].append(self.drawlist_vehicle)
-
-        self.draw_area()
-        self.draw_vehicle()
 
     def add_window(self, *args, **kwargs):
         window = drawing3d.Window(*args, **kwargs)
