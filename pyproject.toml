@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "longthin"
+version = "0.0.1"
+description = "Long Thin Hauler"
+authors = [{name = "Tolga Demirdal"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pyserial",
+    "pyyaml",
+    "pyside6",
+    "pyqtgraph",
+    "opencv-python",
+    "sympy",
+    "qprimaryflightdisplay",
+    "drawing3d"
+]
+
+[project.urls]
+Homepage = "https://github.com/shadymeowy/longthin"
+Repository = "https://github.com/shadymeowy/longthin"
+
+[tool.setuptools]
+packages = [
+    "longthin",
+    "longthin.ltpacket",
+    "longthin.model",
+    "longthin.geometry",
+    "longthin.graphics",
+]
+
+[project.entry-points."console_scripts"]
+longthin-basicsim = "longthin.basic_sim:main"
+longthin-test = "longthin.test:main"
+longthin-bridge = "longthin.utils.bridge:main"
+longthin-blink = "longthin.utils.blink:main"
+longthin-echo = "longthin.utils.echo:main"
+longthin-plot = "longthin.utils.plot:main"
+longthin-params = "longthin.utils.params:main"
+longthin-params-ui = "longthin.utils.params_ui:main"
+longthin-pfd = "longthin.utils.pfd:main"
+longthin-sim = "longthin.utils.sim:main"
+longthin-reboot = "longthin.utils.reboot:main"
+longthin-estimator = "longthin.utils.estimator:main"
+longthin-visualize = "longthin.utils.visualize:main"
+longthin-controller = "longthin.utils.controller:main"
+longthin-calibration = "longthin.utils.calibration:main"
+longthin-record = "longthin.utils.record:main"
+longthin-playback = "longthin.utils.playback:main"
+longthin-hz = "longthin.utils.hz:main"
