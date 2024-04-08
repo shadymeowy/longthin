@@ -1,6 +1,8 @@
-from ..ltpacket import *
-import time
 import argparse
+
+from ..node import LTNode
+from ..rate import Rate
+from ..ltpacket import *
 
 
 def main():
@@ -8,12 +10,13 @@ def main():
     parser.add_argument('--period', default=0.2, help='Blink period', type=float)
     args = parser.parse_args()
 
-    conn = LTZmq()
-    led = Led(0, 1)
+    node = LTNode()
+    rate = node.rate(args.period)
+    packet = Led(0, 0)
     while True:
-        conn.send(led)
-        led.state = not led.state
-        time.sleep(args.period)
+        packet.state = not packet.state
+        node.publish(packet)
+        rate.sleep()
 
 
 if __name__ == "__main__":

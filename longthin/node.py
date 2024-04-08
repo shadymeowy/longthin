@@ -2,6 +2,7 @@ import os
 import time
 
 from .ltpacket import *
+from .rate import Rate
 
 
 class LTNode:
@@ -61,3 +62,6 @@ class LTNode:
         while True:
             self.spin_once()
             time.sleep(1e-4)
+
+    def rate(self, period):
+        return Rate(period, self)
