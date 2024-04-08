@@ -4,6 +4,7 @@ import os
 import cv2
 import multiprocessing as mp
 
+from ..node import LTNode
 from ..ltpacket import *
 from ..video_source import video_source
 from ..config import load_config
@@ -42,16 +43,15 @@ def main():
     parser.add_argument('--video', default=None, help='Video source')
     args = parser.parse_args()
 
-    conn = LTZmq()
-    conf = load_config()
+    node = LTNode()
     file = LTFileWriter(args.file + ".lt")
-    worker = mp.Process(target=video_worker, args=(args, conf))
+    worker = mp.Process(target=video_worker, args=(args, node.config))
     worker.daemon = True
     worker.start()
 
     try:
         while True:
-            packet = conn.read()
+            packet = node.read()
             if packet is None:
                 time.sleep(1e-4)
                 continue
