@@ -1,8 +1,8 @@
-from ..ltpacket import *
 import argparse
-import yaml
 import time
-from dataclasses import asdict
+
+from ..node import LTNode
+from ..ltpacket import *
 
 
 def main():
@@ -14,10 +14,13 @@ def main():
     parser.add_argument('--debug', action='store_true', help='Print debug info')
     args = parser.parse_args()
 
+    node = LTNode()
+    params = node.params
+
     if args.param_name is None:
         print('Available parameters:')
         print('name', 'index', 'default')
-        for param, value in default_params().items():
+        for param, value in params.to_dict().items():
             print(hex(param.value), param.name, value)
         return
     param_name = args.param_name.upper()
@@ -37,10 +40,9 @@ def main():
         if args.debug:
             print('packet:', packet)
             print('asbytes:', packet.to_bytes())
-        conn = LTZmq()
-        while conn.read() is None:
+        while node.read() is None:
             time.sleep(1e-4)
-        conn.send(packet)
+        node.publish(packet)
 
     if args.default:
         value = default_param(param)
