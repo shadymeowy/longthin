@@ -26,8 +26,7 @@ def main():
             count = 0
 
     name = args.packet_type.upper()
-    typ = LTPacketType[name]
-    typ = type_map[typ]
+    typ = LTPacketType[name].to_type()
     print(f"Monitoring {name} packets")
     node.subscribe(typ, callback)
     node.spin()
