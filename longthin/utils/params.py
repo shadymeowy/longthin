@@ -21,7 +21,7 @@ def main():
             print(hex(param.value), param.name, value)
         return
     param_name = args.param_name.upper()
-    param = LTParams[param_name]
+    param = LTParamType[param_name]
     if args.debug:
         print('param:', param)
 

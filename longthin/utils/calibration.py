@@ -34,7 +34,7 @@ def main():
     args = parser.parse_args()
     conn = LTZmq()
 
-    packet = Setparam(LTParams.IMU_RAW_ENABLE.value, 1)
+    packet = Setparam(LTParamType.IMU_RAW_ENABLE.value, 1)
     while conn.read() is None:
         conn.send(packet)
         time.sleep(1e-4)

@@ -53,11 +53,11 @@ def generate_py(defs):
         "from enum import Enum",
         "from dataclasses import dataclass, asdict\n\n",
         f"LTPARAMS_COUNT = 0x{len(defs):x}\n\n",
-        "class LTParamType(Enum):",
+        "class LTParamValueType(Enum):",
         "    LTPARAMS_TYPE_FLOAT = 0",
         "    LTPARAMS_TYPE_UINT32 = 1",
         "    LTPARAMS_TYPE_INT32 = 2\n\n",
-        "class LTParams(Enum):"
+        "class LTParamType(Enum):"
     ]
     for name, value in defs.items():
         namel = name.lower()
@@ -69,19 +69,19 @@ def generate_py(defs):
         namel = name.lower()
         id_ = value['id']
         typ = types_enum[value['type']]
-        def_line = f"    LTParams.{namel.upper()}: LTParamType.{typ},"
+        def_line = f"    LTParamType.{namel.upper()}: LTParamValueType.{typ},"
         def_lines.append(def_line)
     def_lines.append("}\n\nparam_default_dict = {")
     for name, value in defs.items():
         namel = name.lower()
         id_ = value['id']
         default = value['default']
-        def_line = f"    LTParams.{namel.upper()}: {default},"
+        def_line = f"    LTParamType.{namel.upper()}: {default},"
         def_lines.append(def_line)
     def_lines.append("}\n\n")
 
     def_lines.append("@dataclass")
-    def_lines.append("class Parameters:")
+    def_lines.append("class LTParameters:")
     for name, value in defs.items():
         namel = name.lower()
         typ = types_py[value['type']]
@@ -107,7 +107,7 @@ def generate_py(defs):
         new_dict = {}
         for key, item in dct.items():
             key = key.upper()
-            new_dict[LTParams[key]] = item
+            new_dict[LTParamType[key]] = item
         return new_dict
 
     def __getitem__(self, key):

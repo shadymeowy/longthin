@@ -16,7 +16,7 @@ class LTNode:
             self.port2 = 5556
         self.conn = LTZmq(self.port1, self.port2, server=False)
         self.subscribers = {None: list()}
-        self.params = Parameters.from_default()
+        self.params = LTParameters.from_default()
 
     def publish(self, msg):
         self.conn.send(msg)
@@ -51,11 +51,11 @@ class LTNode:
             for callback in self.subscribers[None]:
                 callback(packet)
             if isinstance(packet, Setparam):
-                self.params[LTParams(packet.param)] = packet.value
+                self.params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, Setparami):
-                self.params[LTParams(packet.param)] = packet.value
+                self.params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, Setparamu):
-                self.params[LTParams(packet.param)] = packet.value
+                self.params[LTParamType(packet.param)] = packet.value
 
     def spin(self):
         while True:

@@ -10,7 +10,7 @@ from ..ltpacket import *
 class ParamsUI(QWidget):
     def __init__(self, params, conn, parent=None):
         super(ParamsUI, self).__init__(parent)
-        self.setWindowTitle('Parameters')
+        self.setWindowTitle('LTParameters')
         self.setGeometry(100, 100, 800, 600)
         self.conn = conn
         self.table = QTableWidget()
@@ -52,7 +52,7 @@ class ParamsUI(QWidget):
 
     def changed(self, item):
         id_ = int(self.table.item(item.row(), 0).text(), 16)
-        param = LTParams(id_)
+        param = LTParamType(id_)
         value = self.table.item(item.row(), 3).text()
         try:
             value = int(value)

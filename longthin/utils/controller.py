@@ -17,16 +17,16 @@ def make_controller(params):
         dt = t - last_t
         last_t = t
 
-        ed_kp = params[LTParams.ED_KP]
-        ed_ki = params[LTParams.ED_KI]
-        theta_kp = params[LTParams.THETA_KP]
-        theta_ki = params[LTParams.THETA_KI]
-        vdesired_kp = params[LTParams.VDESIRED_KP]
-        vdesired_ki = params[LTParams.VDESIRED_KI]
-        wdesired_kp = params[LTParams.WDESIRED_KP]
-        wdesired_ki = params[LTParams.WDESIRED_KI]
-        wheel_distance = params[LTParams.WHEEL_DISTANCE]
-        wheel_radius = params[LTParams.WHEEL_RADIUS]
+        ed_kp = params[LTParamType.ED_KP]
+        ed_ki = params[LTParamType.ED_KI]
+        theta_kp = params[LTParamType.THETA_KP]
+        theta_ki = params[LTParamType.THETA_KI]
+        vdesired_kp = params[LTParamType.VDESIRED_KP]
+        vdesired_ki = params[LTParamType.VDESIRED_KI]
+        wdesired_kp = params[LTParamType.WDESIRED_KP]
+        wdesired_ki = params[LTParamType.WDESIRED_KI]
+        wheel_distance = params[LTParamType.WHEEL_DISTANCE]
+        wheel_radius = params[LTParamType.WHEEL_RADIUS]
 
         e_d = desired_d - current_d
         e_theta = (desired_yaw % 360) - (current_yaw % 360)
@@ -89,11 +89,11 @@ def main():
                 time.sleep(1e-4)
                 break
             if isinstance(packet, Setparam):
-                params[LTParams(packet.param)] = packet.value
+                params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, Setparami):
-                params[LTParams(packet.param)] = packet.value
+                params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, Setparamu):
-                params[LTParams(packet.param)] = packet.value
+                params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, Motor):
                 u_l = packet.left
                 u_r = packet.right
@@ -115,10 +115,10 @@ def main():
             u_v, u_w, u_l, u_r, desired_vel, desired_w = controller(
                 t, current_d, current_yaw, desired_d, desired_yaw, current_vel, current_w)
 
-        out_enabled = params[LTParams.MOTOR_OUTPUT_ENABLE]
-        out_period = params[LTParams.MOTOR_OUTPUT_PUBLISH_PERIOD] / 1e6
-        debug_enabled = params[LTParams.CONTROL_DEBUG_ENABLE]
-        debug_period = params[LTParams.CONTROL_DEBUG_PUBLISH_PERIOD] / 1e6
+        out_enabled = params[LTParamType.MOTOR_OUTPUT_ENABLE]
+        out_period = params[LTParamType.MOTOR_OUTPUT_PUBLISH_PERIOD] / 1e6
+        debug_enabled = params[LTParamType.CONTROL_DEBUG_ENABLE]
+        debug_period = params[LTParamType.CONTROL_DEBUG_PUBLISH_PERIOD] / 1e6
         if out_enabled and t - last_out > out_period:
             packet_out = MotorOutput(u_l, u_r)
             conn.send(packet_out)

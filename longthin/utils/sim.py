@@ -42,15 +42,15 @@ def main():
             if packet is None:
                 break
             if isinstance(packet, Setparam):
-                params[LTParams(packet.param)] = packet.value
+                params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, Setparami):
-                params[LTParams(packet.param)] = packet.value
+                params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, Setparamu):
-                params[LTParams(packet.param)] = packet.value
+                params[LTParamType(packet.param)] = packet.value
             elif isinstance(packet, MotorOutput):
                 left, right = packet.left, packet.right
 
-        period = params[LTParams.IMU_PUBLISH_PERIOD] / 1e6
+        period = params[LTParamType.IMU_PUBLISH_PERIOD] / 1e6
         if last_time + period < time.time():
             img = renderer.render_image()
             sink.write(img)
