@@ -61,9 +61,13 @@ class LTNode:
                 self.params[LTParamType(packet.param)] = packet.value
 
     def spin(self):
-        while True:
-            self.spin_once()
-            time.sleep(1e-2)
+        try:
+            while True:
+                self.spin_once()
+                time.sleep(1e-2)
+        except KeyboardInterrupt:
+            print("Exiting")
+            return
 
     def rate(self, period):
         return Rate(period, self)
