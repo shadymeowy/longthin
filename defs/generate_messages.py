@@ -76,7 +76,7 @@ def generate_py(defs):
     def1_lines = []
     def2_lines = []
     def3_lines = [
-        'class LTPACKET_TYPE(Enum):'
+        'class LTPacketType(Enum):'
     ]
     def4_lines = [
         'type_map = {'
@@ -104,12 +104,19 @@ def generate_py(defs):
         def1_lines.append(f'        )\n')
         def1_lines.append(f'    @property')
         def1_lines.append(f'    def type(self):')
-        def1_lines.append(f'        return LTPACKET_TYPE.{typu}\n')
+        def1_lines.append(f'        return LTPacketType.{typu}\n')
         def1_lines.append('\n')
         def3_lines.append(f'    {typu} = {int(value["id"])}')
-        def4_lines.append(f'    LTPACKET_TYPE.{typu}: {camel},')
+        def4_lines.append(f'    LTPacketType.{typu}: {camel},')
     def2_lines.append('')
     def3_lines.append('')
+    def3_lines.append(r'''    @staticmethod
+    def from_type(type_):
+        return type_map_rev[type_]
+    
+    def to_type(self):
+        return type_map[self]
+''')
     def4_lines.append('}')
     def4_lines.append(f'type_map_rev = {{v: k for k, v in type_map.items()}}')
     def0_lines.extend(def1_lines)

@@ -18,7 +18,7 @@ class Reserved:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.RESERVED
+        return LTPacketType.RESERVED
 
 
 
@@ -51,7 +51,7 @@ class Imu:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.IMU
+        return LTPacketType.IMU
 
 
 
@@ -86,7 +86,7 @@ class ImuRaw:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.IMU_RAW
+        return LTPacketType.IMU_RAW
 
 
 
@@ -107,7 +107,7 @@ class Motor:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.MOTOR
+        return LTPacketType.MOTOR
 
 
 
@@ -128,7 +128,7 @@ class MotorRaw:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.MOTOR_RAW
+        return LTPacketType.MOTOR_RAW
 
 
 
@@ -149,7 +149,7 @@ class Setpoint:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.SETPOINT
+        return LTPacketType.SETPOINT
 
 
 
@@ -170,7 +170,7 @@ class Setparam:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.SETPARAM
+        return LTPacketType.SETPARAM
 
 
 
@@ -191,7 +191,7 @@ class Led:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.LED
+        return LTPacketType.LED
 
 
 
@@ -232,7 +232,7 @@ class ControlDebug:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.CONTROL_DEBUG
+        return LTPacketType.CONTROL_DEBUG
 
 
 
@@ -253,7 +253,7 @@ class Setparamu:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.SETPARAMU
+        return LTPacketType.SETPARAMU
 
 
 
@@ -274,7 +274,7 @@ class Setparami:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.SETPARAMI
+        return LTPacketType.SETPARAMI
 
 
 
@@ -295,7 +295,7 @@ class MotorOutput:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.MOTOR_OUTPUT
+        return LTPacketType.MOTOR_OUTPUT
 
 
 
@@ -314,7 +314,7 @@ class Reboot:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.REBOOT
+        return LTPacketType.REBOOT
 
 
 
@@ -337,7 +337,7 @@ class EvPose:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.EV_POSE
+        return LTPacketType.EV_POSE
 
 
 
@@ -366,7 +366,7 @@ class SimState:
 
     @property
     def type(self):
-        return LTPACKET_TYPE.SIM_STATE
+        return LTPacketType.SIM_STATE
 
 
 
@@ -386,7 +386,7 @@ reboot_struct = struct.Struct('B')
 ev_pose_struct = struct.Struct('fff')
 sim_state_struct = struct.Struct('ffffff')
 
-class LTPACKET_TYPE(Enum):
+class LTPacketType(Enum):
     RESERVED = 0
     IMU = 1
     IMU_RAW = 2
@@ -403,21 +403,28 @@ class LTPACKET_TYPE(Enum):
     EV_POSE = 17
     SIM_STATE = 18
 
+    @staticmethod
+    def from_type(type_):
+        return type_map_rev[type_]
+    
+    def to_type(self):
+        return type_map[self]
+
 type_map = {
-    LTPACKET_TYPE.RESERVED: Reserved,
-    LTPACKET_TYPE.IMU: Imu,
-    LTPACKET_TYPE.IMU_RAW: ImuRaw,
-    LTPACKET_TYPE.MOTOR: Motor,
-    LTPACKET_TYPE.MOTOR_RAW: MotorRaw,
-    LTPACKET_TYPE.SETPOINT: Setpoint,
-    LTPACKET_TYPE.SETPARAM: Setparam,
-    LTPACKET_TYPE.LED: Led,
-    LTPACKET_TYPE.CONTROL_DEBUG: ControlDebug,
-    LTPACKET_TYPE.SETPARAMU: Setparamu,
-    LTPACKET_TYPE.SETPARAMI: Setparami,
-    LTPACKET_TYPE.MOTOR_OUTPUT: MotorOutput,
-    LTPACKET_TYPE.REBOOT: Reboot,
-    LTPACKET_TYPE.EV_POSE: EvPose,
-    LTPACKET_TYPE.SIM_STATE: SimState,
+    LTPacketType.RESERVED: Reserved,
+    LTPacketType.IMU: Imu,
+    LTPacketType.IMU_RAW: ImuRaw,
+    LTPacketType.MOTOR: Motor,
+    LTPacketType.MOTOR_RAW: MotorRaw,
+    LTPacketType.SETPOINT: Setpoint,
+    LTPacketType.SETPARAM: Setparam,
+    LTPacketType.LED: Led,
+    LTPacketType.CONTROL_DEBUG: ControlDebug,
+    LTPacketType.SETPARAMU: Setparamu,
+    LTPacketType.SETPARAMI: Setparami,
+    LTPacketType.MOTOR_OUTPUT: MotorOutput,
+    LTPacketType.REBOOT: Reboot,
+    LTPacketType.EV_POSE: EvPose,
+    LTPacketType.SIM_STATE: SimState,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

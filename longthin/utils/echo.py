@@ -17,7 +17,7 @@ def main():
     if args.filter is not None:
         typs = []
         for name in args.filter:
-            typ = LTPACKET_TYPE[name.upper()]
+            typ = LTPacketType[name.upper()]
             typs.append(typ)
     while True:
         packet = conn.read()

@@ -5,6 +5,8 @@ LTPACKET_MAX_LENGTH = 1024
 
 
 def encode(packet, frame=True):
+    # This is a hot path, so we use a dictionary instead of a function call
+    # id_ = LTPacketType.from_type(type(packet)).value
     id_ = type_map_rev[type(packet)].value
     data = id_.to_bytes(1, 'little') + packet.to_bytes()
     if frame:
@@ -28,8 +30,10 @@ def decode(byts, frame=True):
         byts = byts[3:-2]
         if crc != crc16(byts):
             return ValueError('Invalid CRC')
-    id_ = LTPACKET_TYPE(byts[0])
-    return type_map[id_].from_bytes(byts[1:])
+    # To save a function call, this is a hot path
+    # typ = LTPacketType(byts[0]).to_type()
+    typ = type_map[LTPacketType(byts[0])]
+    return typ.from_bytes(byts[1:])
 
 
 def crc16(data):

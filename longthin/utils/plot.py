@@ -19,7 +19,7 @@ def main():
     for i, ps in enumerate(args.packet):
         for packet in ps.split(','):
             typ, prop = packet.split('.')
-            typ = LTPACKET_TYPE[typ.upper()]
+            typ = LTPacketType[typ.upper()]
             prop = prop.lower()
             value_dict[(typ, prop)] = [[], [], None, i]
             packets.append(typ)
@@ -45,7 +45,7 @@ def main():
         w.nextRow()
 
     for i, (k, v) in enumerate(value_dict.items()):
-        name = LTPACKET_TYPE(k[0]).name + '.' + k[1]
+        name = LTPacketType(k[0]).name + '.' + k[1]
         v[2] = plots[v[3]].plot(pen=(i, len(value_dict)), name=name)
 
     while True:
