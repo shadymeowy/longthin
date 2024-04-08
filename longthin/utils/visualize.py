@@ -1,8 +1,8 @@
 import numpy as np
 import argparse
 
+from ..node import LTNode
 from ..graphics import LTRenderer
-from ..config import load_config
 from ..ltpacket import *
 
 
@@ -10,26 +10,23 @@ def main():
     parser = argparse.ArgumentParser(description='A visualization of the robot')
     args = parser.parse_args()
 
-    conn = LTZmq()
-    config = load_config()
-    renderer = LTRenderer(config)
+    node = LTNode()
+    renderer = LTRenderer(node.config)
 
     x, y, yaw = 0, 0, 0
-    while True:
-        while True:
-            packet = conn.read()
-            if packet is None:
-                break
-            if isinstance(packet, EvPose):
-                x = packet.x
-                y = packet.y
-                yaw = packet.yaw
 
+    def cb_evpose(packet):
+        nonlocal x, y, yaw
+        x = packet.x
+        y = packet.y
+        yaw = packet.yaw
         renderer.vehicle_pose.pos = np.array([x, y, 0.])
         renderer.vehicle_pose.att = np.array([0., 0., yaw])
 
-        if renderer.draw():
-            break
+    node.subscribe(EvPose, cb_evpose)
+
+    while not renderer.draw():
+        node.spin_once()
 
 
 if __name__ == "__main__":
