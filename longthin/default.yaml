@@ -59,6 +59,7 @@ sim:
     Ki: 0.45
     Rs: 1.25
   dt: 1.0e-3
+  cam_dt: 0.1
 
 markers:
   - id: 38
