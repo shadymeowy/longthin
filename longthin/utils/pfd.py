@@ -6,15 +6,15 @@ from PySide6.QtGui import *
 from PySide6.QtCore import *
 from QPrimaryFlightDisplay import QPrimaryFlightDisplay
 
+from ..node import LTNode
 from ..ltpacket import *
-from ..config import load_config
 
 
-class LTApp(QDialog):
-    def __init__(self, conn, config):
+class LTPFD(QWidget):
+    def __init__(self, node):
         super().__init__()
-        self.conn = conn
-        self.config = config
+        self.node = node
+        self.node.subscribe(Imu, self.cb_imu)
 
         self.setWindowTitle("Longthin PFD")
         self.setGeometry(100, 100, 800, 600)
@@ -46,23 +46,24 @@ class LTApp(QDialog):
         self.pfd.zoom = 1
 
         self.timer = QTimer()
-        self.timer.timeout.connect(self.update)
-        self.timer.start(1000 / 120)
+        self.timer.timeout.connect(self.pfd.update)
+        self.timer.start(1000 / 30)
 
         self.x = 0
         self.y = 0
+        self.euler = ""
 
     def setpoint(self):
         packet = Setpoint(0, 0)
         packet.vel = float(self.input_vel.text())
         packet.yaw = float(self.input_yaw.text())
-        self.conn.send(packet)
+        self.node.publish(packet)
 
     def motor_setpoint(self):
         packet = Motor(0, 0)
         packet.left = float(self.input_motor_left.text())
         packet.right = float(self.input_motor_right.text())
-        self.conn.send(packet)
+        self.node.publish(packet)
 
     def keyPressEvent(self, event):
         super().keyPressEvent(event)
@@ -101,7 +102,7 @@ class LTApp(QDialog):
     def update_motor(self):
         x = self.x
         y = self.y
-        conf = self.config.manual_control
+        conf = self.node.config.manual_control
         f = conf.forward_backward
         l = conf.left_right
         m1 = conf.mixed_1
@@ -132,7 +133,7 @@ class LTApp(QDialog):
 
     def set_motor(self, left, right):
         packet = Motor(left, right)
-        self.conn.send(packet)
+        self.node.publish(packet)
 
     def append_widget(self, widget, w=1, h=1):
         self.layout.addWidget(widget, self._y, self._x, h, w)
@@ -151,32 +152,30 @@ class LTApp(QDialog):
         packet = Led(0, self.led_state)
         packet.state = 1 - self.led_state
         self.led_state = packet.state
-        self.conn.send(packet)
+        self.node.publis(packet)
 
-    def update(self):
-        while True:
-            packet = self.conn.read()
-            pfd = self.pfd
-            if packet is None:
-                return
-            if isinstance(packet, Imu):
-                rot = Rotation.from_quat([packet.qx, packet.qy, packet.qz, packet.qw])
-                euler = rot.as_euler('xyz', degrees=False)
-                pfd.roll = euler[0]
-                pfd.pitch = euler[1]
-                pfd.heading = np.rad2deg(euler[2])
-                euler = rot.as_euler('xyz', degrees=True)
-                euler = ", ".join([f"{x:.2f}" for x in euler])
-                self.label.setText(euler)
-                pfd.update()
+    def cb_imu(self, packet):
+        rot = Rotation.from_quat([packet.qx, packet.qy, packet.qz, packet.qw])
+        euler = rot.as_euler('xyz', degrees=False)
+        self.pfd.roll = euler[0]
+        self.pfd.pitch = euler[1]
+        self.pfd.heading = np.rad2deg(euler[2])
+        self.euler = rot.as_euler('xyz', degrees=True)
+        self.euler = ", ".join([f"{x:.2f}" for x in euler])
+        self.label.setText(self.euler)
 
 
 def main():
     app = QApplication(sys.argv)
-    conn = LTZmq()
-    config = load_config()
-    window = LTApp(conn, config)
+    node = LTNode()
+
+    timer = QTimer()
+    timer.timeout.connect(node.spin_once)
+    timer.start(1000 / 30)
+
+    window = LTPFD(node)
     window.show()
+
     sys.exit(app.exec_())
 
 
