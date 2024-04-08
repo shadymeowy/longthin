@@ -21,9 +21,12 @@ class PiCam:
             "AfMode": controls.AfModeEnum.Auto,
             "AfRange": controls.AfRangeEnum.Normal,
             "AfTrigger": controls.AfTriggerEnum.Start,
-            "AeEnable": True,
-            "AeExposureMode": controls.AeExposureModeEnum.Short,
-            "AeConstraintMode": controls.AeConstraintModeEnum.Highlight,
+            #"AeEnable": True,
+            #"AeExposureMode": controls.AeExposureModeEnum.Short,
+            #"AeConstraintMode": controls.AeConstraintModeEnum.Highlight,
+            "AeEnable": False,
+            "AnalogueGain": 16.0,
+            "ExposureTime": 10000,
         })
 
     def read(self):
