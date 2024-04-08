@@ -16,10 +16,9 @@ class Rate:
         return False
 
     def sleep(self):
-        while True:
-            self.node.spin_once()
-            dt = time.time() - self.last_time
-            if dt > self.period:
-                break
-            time.sleep(min(self.period - dt, 1e-2))
+        self.node.spin_once()
+        dt = time.time() - self.last_time
+        if dt > self.period:
+            return
+        time.sleep(self.period - dt)
         self.last_time = time.time()
