@@ -174,7 +174,7 @@ class LTApp(QDialog):
 def main():
     app = QApplication(sys.argv)
     conn = LTZmq()
-    config = load_config("default.yaml")
+    config = load_config()
     window = LTApp(conn, config)
     window.show()
     sys.exit(app.exec_())

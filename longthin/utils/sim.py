@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
     
     conn = LTZmq()
-    config = load_config('default.yaml')
+    config = load_config()
     renderer = LTRenderer(config)
     width, height = config.camera.model.width, config.camera.model.height
     if not args.video.startswith('shared:'):

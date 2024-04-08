@@ -1,10 +1,17 @@
+import os
 import yaml
 from collections import namedtuple
+from importlib.resources import read_text
 
 
-def load_config(path):
-    with open(path) as f:
-        dct = yaml.safe_load(f)
+def load_config():
+    if 'LTCONFIG' in os.environ:
+        path = os.environ['LTCONFIG']
+        with open(path) as f:
+            dct = yaml.safe_load(f)
+    else:
+        txt = read_text('longthin', 'default.yaml')
+        dct = yaml.safe_load(txt)
     return to_namedtuple('Config', dct)
 
 
@@ -30,5 +37,5 @@ def to_namedtuple(name, dct):
 
 
 if __name__ == '__main__':
-    config = load_config('default.yaml')
+    config = load_config()
     print(config)

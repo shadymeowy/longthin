@@ -43,7 +43,7 @@ def main():
     args = parser.parse_args()
 
     conn = LTZmq()
-    conf = load_config("default.yaml")
+    conf = load_config()
     file = LTFileWriter(args.file + ".lt")
     worker = mp.Process(target=video_worker, args=(args, conf))
     worker.daemon = True

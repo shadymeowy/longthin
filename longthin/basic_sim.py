@@ -9,7 +9,7 @@ from .config import load_config
 
 
 def main():
-    config = load_config('default.yaml')
+    config = load_config()
     renderer = LTRenderer(config)
     estimator = Estimator.from_config(config)
 

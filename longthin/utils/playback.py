@@ -15,7 +15,7 @@ def main():
     args = parser.parse_args()
 
     conn = LTZmq()
-    conf = load_config("default.yaml")
+    conf = load_config()
     file = LTFileReader(args.file + ".lt")
     width, height = conf.camera.model.width, conf.camera.model.height
     if not args.video.startswith('shared:'):

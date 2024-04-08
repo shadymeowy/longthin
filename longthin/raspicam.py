@@ -43,7 +43,7 @@ class PiCam:
 
 if __name__ == "__main__":
     from .config import load_config
-    config = load_config("default.yaml")
+    config = load_config()
     width, height = config.camera.model.width, config.camera.model.height
     cam = PiCam(width, height)
     cam.print_info()

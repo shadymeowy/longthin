@@ -196,7 +196,7 @@ class LTRenderer:
 
 
 if __name__ == '__main__':
-    config = load_config('default.yaml')
+    config = load_config()
     renderer = LTRenderer(config)
 
     while not renderer.draw():

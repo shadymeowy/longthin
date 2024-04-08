@@ -11,7 +11,7 @@ def main():
     args = parser.parse_args()
 
     conn = LTZmq()
-    config = load_config('default.yaml')
+    config = load_config()
     renderer = LTRenderer(config)
 
     x, y, yaw = 0, 0, 0
