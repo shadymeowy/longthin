@@ -61,7 +61,7 @@ class LTNode:
     def spin(self):
         while True:
             self.spin_once()
-            time.sleep(1e-4)
+            time.sleep(1e-2)
 
     def rate(self, period):
         return Rate(period, self)
