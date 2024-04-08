@@ -1,4 +1,5 @@
 from enum import Enum
+from dataclasses import dataclass, asdict
 
 
 LTPARAMS_COUNT = 0x31
@@ -165,3 +166,86 @@ param_default_dict = {
     LTParams.ACCEL_CALIB_M21: 0.0,
     LTParams.ACCEL_CALIB_M22: 9.72531012,
 }
+
+
+@dataclass
+class Parameters:
+    reserved: int
+    qcomp_alpha: float
+    qcomp_beta: float
+    theta_kp: float
+    theta_ki: float
+    ed_kp: float
+    ed_ki: float
+    vdesired_kp: float
+    vdesired_ki: float
+    wdesired_kp: float
+    wdesired_ki: float
+    wheel_radius: float
+    wheel_distance: float
+    blink_period: float
+    madgwick_beta: float
+    imu_filter_type: int
+    mahony_kp: float
+    imu_calibration_samples: int
+    imu_publish_period: int
+    motor_pwm_refresh_period: int
+    control_debug_enable: int
+    control_debug_publish_period: int
+    imu_raw_enable: int
+    motor_output_enable: int
+    motor_output_publish_period: int
+    mag_calib_b0: float
+    mag_calib_b1: float
+    mag_calib_b2: float
+    mag_calib_m00: float
+    mag_calib_m01: float
+    mag_calib_m02: float
+    mag_calib_m10: float
+    mag_calib_m11: float
+    mag_calib_m12: float
+    mag_calib_m20: float
+    mag_calib_m21: float
+    mag_calib_m22: float
+    accel_calib_b0: float
+    accel_calib_b1: float
+    accel_calib_b2: float
+    accel_calib_m00: float
+    accel_calib_m01: float
+    accel_calib_m02: float
+    accel_calib_m10: float
+    accel_calib_m11: float
+    accel_calib_m12: float
+    accel_calib_m20: float
+    accel_calib_m21: float
+    accel_calib_m22: float
+
+    @classmethod
+    def from_dict(cls, d):
+        new_dict = {}
+        for key, item in d.items():
+            if key not in param_default_dict:
+                raise ValueError(f"Unknown parameter {key}")
+            key = key.name.lower()
+            new_dict[key] = item
+        return cls(**new_dict)
+
+    @classmethod
+    def from_default(cls):
+        return cls.from_dict(param_default_dict)
+
+    def to_dict(self):
+        dct = asdict(self)
+        new_dict = {}
+        for key, item in dct.items():
+            key = key.upper()
+            new_dict[LTParams[key]] = item
+        return new_dict
+
+
+if __name__ == "__main__":
+    params = Parameters.from_default()
+    print(params.control_debug_enable)
+    dct = params.to_dict()
+    print(dct)
+    print(Parameters.from_dict(dct))
