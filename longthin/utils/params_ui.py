@@ -1,18 +1,20 @@
+import sys
 import yaml
 from PySide6 import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
+from ..node import LTNode
 from ..ltpacket import *
 
 
-class ParamsUI(QWidget):
-    def __init__(self, params, conn, parent=None):
-        super(ParamsUI, self).__init__(parent)
+class LTParamsUI(QWidget):
+    def __init__(self, node, parent=None):
+        super(LTParamsUI, self).__init__(parent)
         self.setWindowTitle('LTParameters')
         self.setGeometry(100, 100, 800, 600)
-        self.conn = conn
+        self.node = node
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(['ID', 'Name', 'Type', 'Value'])
@@ -20,7 +22,7 @@ class ParamsUI(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        items = params.items()
+        items = node.params.to_dict().items()
         items = sorted(items, key=lambda x: x[0].name)
         for param, value in items:
             self.add_param(param.value, param.name, value, get_param_type(param).name)
@@ -60,7 +62,7 @@ class ParamsUI(QWidget):
             value = float(value)
         packet = setparam(param, value)
         print('packet', packet)
-        self.conn.send(packet)
+        self.node.publish(packet)
 
     def save(self):
         filename, _ = QFileDialog.getSaveFileName(self, 'Save File', '', 'YAML Files (*.yaml)')
@@ -107,11 +109,9 @@ class ParamsUI(QWidget):
 
 
 def main():
-    import sys
-    ltzmq = LTZmq()
+    node = LTNode()
     app = QApplication(sys.argv)
-    params = default_params()
-    window = ParamsUI(params, ltzmq)
+    window = LTParamsUI(node)
     window.show()
     sys.exit(app.exec())
 
