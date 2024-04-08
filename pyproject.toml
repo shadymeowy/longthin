@@ -19,6 +19,7 @@ dependencies = [
     "pyqtgraph",
     "opencv-python",
     "sympy",
+    "zmq",
     "qprimaryflightdisplay",
     "drawing3d"
 ]
@@ -30,10 +31,14 @@ Repository = "https://github.com/shadymeowy/longthin"
 [tool.setuptools]
 packages = [
     "longthin",
-    "longthin.ltpacket",
-    "longthin.model",
+    "longthin.calibration",
+    "longthin.filter",
     "longthin.geometry",
     "longthin.graphics",
+    "longthin.ltpacket",
+    "longthin.model",
+    "longthin.path",
+    "longthin.utils"
 ]
 
 [project.entry-points."console_scripts"]
