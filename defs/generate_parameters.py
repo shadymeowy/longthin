@@ -50,7 +50,8 @@ def generate_c(defs):
 
 def generate_py(defs):
     def_lines = [
-        "from enum import Enum\n\n",
+        "from enum import Enum",
+        "from dataclasses import dataclass, asdict\n\n",
         f"LTPARAMS_COUNT = 0x{len(defs):x}\n\n",
         "class LTParamType(Enum):",
         "    LTPARAMS_TYPE_FLOAT = 0",
@@ -77,7 +78,45 @@ def generate_py(defs):
         default = value['default']
         def_line = f"    LTParams.{namel.upper()}: {default},"
         def_lines.append(def_line)
-    def_lines.append("}")
+    def_lines.append("}\n\n")
+
+    def_lines.append("@dataclass")
+    def_lines.append("class Parameters:")
+    for name, value in defs.items():
+        namel = name.lower()
+        typ = types_py[value['type']]
+        def_line = f"    {namel}: {typ}"
+        def_lines.append(def_line)
+    def_lines.append("")
+    def_lines.append(r"""    @classmethod
+    def from_dict(cls, d):
+        new_dict = {}
+        for key, item in d.items():
+            if key not in param_default_dict:
+                raise ValueError(f"Unknown parameter {key}")
+            key = key.name.lower()
+            new_dict[key] = item
+        return cls(**new_dict)
+
+    @classmethod
+    def from_default(cls):
+        return cls.from_dict(param_default_dict)
+
+    def to_dict(self):
+        dct = asdict(self)
+        new_dict = {}
+        for key, item in dct.items():
+            key = key.upper()
+            new_dict[LTParams[key]] = item
+        return new_dict
+
+    def __getitem__(self, key):
+        key = key.name.lower()
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        key = key.name.lower()
+        setattr(self, key, value)""")
     def_lines = '\n'.join(def_lines)
     return def_lines
 

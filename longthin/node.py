@@ -1,7 +1,7 @@
 import os
 import time
 
-from .ltpacket import LTZmq
+from .ltpacket import *
 
 
 class LTNode:
@@ -16,9 +16,13 @@ class LTNode:
             self.port2 = 5556
         self.conn = LTZmq(self.port1, self.port2, server=False)
         self.subscribers = {None: list()}
+        self.params = Parameters.from_default()
 
     def publish(self, msg):
         self.conn.send(msg)
+
+    def read(self):
+        return self.conn.read()
 
     def close(self):
         pass
@@ -33,19 +37,25 @@ class LTNode:
         if msg_type in self.subscribers:
             self.subscribers[msg_type].remove(callback)
         else:
-            print("No subscriber for message type with callback")
+            raise Exception("No subscriber for message type with callback")
 
     def spin_once(self):
         while True:
-            msg = self.conn.read()
-            if msg is None:
+            packet = self.conn.read()
+            if packet is None:
                 break
-            msg_type = type(msg)
+            msg_type = type(packet)
             if msg_type in self.subscribers:
                 for callback in self.subscribers[msg_type]:
-                    callback(msg)
+                    callback(packet)
             for callback in self.subscribers[None]:
-                callback(msg)
+                callback(packet)
+            if isinstance(packet, Setparam):
+                self.params[LTParams(packet.param)] = packet.value
+            elif isinstance(packet, Setparami):
+                self.params[LTParams(packet.param)] = packet.value
+            elif isinstance(packet, Setparamu):
+                self.params[LTParams(packet.param)] = packet.value
 
     def spin(self):
         while True:

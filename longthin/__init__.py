@@ -5,6 +5,7 @@ from .marker import MarkerHelper
 from .ltpacket import *
 from .shm import *
 from .abg import alpha_beta_filter
+from .node import LTNode
 try:
     from .raspicam import PiCam
 except ImportError:

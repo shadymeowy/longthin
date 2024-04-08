@@ -242,10 +242,10 @@ class Parameters:
             new_dict[LTParams[key]] = item
         return new_dict
 
+    def __getitem__(self, key):
+        key = key.name.lower()
+        return getattr(self, key)
 
-if __name__ == "__main__":
-    params = Parameters.from_default()
-    print(params.control_debug_enable)
-    dct = params.to_dict()
-    print(dct)
-    print(Parameters.from_dict(dct))
+    def __setitem__(self, key, value):
+        key = key.name.lower()
+        setattr(self, key, value)
