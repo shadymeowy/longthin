@@ -11,9 +11,9 @@ from . import LTJoystick
 from . import LTPFD
 from . import LTParamsUI
 from . import LTControls
+from . import LTPlot
 
 
-# Using QDockWidget to create a GCS window
 class LTGCS(QMainWindow):
     def __init__(self, node, parent=None):
         super(LTGCS, self).__init__(parent)
@@ -21,9 +21,15 @@ class LTGCS(QMainWindow):
         self.setWindowState(Qt.WindowMaximized)
         self.node = node
 
-        # Empty central widget
-        self.central_widget = QWidget()
+        # Tab central widget
+        self.central_widget = QTabWidget()
         self.setCentralWidget(self.central_widget)
+
+        self.plot = LTPlot(self.node)
+        self.central_widget.addTab(self.plot, 'Plot')
+
+        self.empty_widget = QWidget()
+        self.central_widget.addTab(self.empty_widget, 'Empty')
 
         features = (QDockWidget.DockWidgetMovable |
                     QDockWidget.DockWidgetFloatable)
@@ -80,4 +86,4 @@ class LTGCS(QMainWindow):
         self.controls_dock.setMaximumWidth(350)
 
         # set minimum size to parameters dock
-        self.params_dock.setMinimumWidth(300)
+        self.params_dock.setMinimumWidth(350)
