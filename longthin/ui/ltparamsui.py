@@ -44,7 +44,8 @@ class LTParamsUI(QWidget):
         item = QTableWidgetItem(name)
         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
         self.table.setItem(index, 1, item)
-        item = QTableWidgetItem(str(type))
+        typ_str = str(type).split('_')[-1]
+        item = QTableWidgetItem(typ_str)
         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
         self.table.setItem(index, 2, item)
         item = QTableWidgetItem(str(value))

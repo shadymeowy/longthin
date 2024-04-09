@@ -86,4 +86,4 @@ class LTGCS(QMainWindow):
         self.controls_dock.setMaximumWidth(350)
 
         # set minimum size to parameters dock
-        self.params_dock.setMinimumWidth(350)
+        self.params_dock.setMinimumWidth(400)
