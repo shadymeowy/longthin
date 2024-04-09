@@ -12,6 +12,7 @@ from . import LTPFD
 from . import LTParamsUI
 from . import LTControls
 from . import LTPlot
+from . import LTHUD
 
 
 class LTGCS(QMainWindow):
@@ -63,6 +64,13 @@ class LTGCS(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.params_dock)
         self.params_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
         self.params_dock.setFeatures(features)
+
+        self.hud_dock = QDockWidget('HUD', self)
+        self.hud = LTHUD(self.node)
+        self.hud_dock.setWidget(self.hud)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.hud_dock)
+        self.hud_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
+        self.hud_dock.setFeatures(features)
 
         # set size initial of right dock
         self.resizeDocks([self.params_dock], [400], Qt.Horizontal)
