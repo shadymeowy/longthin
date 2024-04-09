@@ -101,3 +101,9 @@ struct ltpacket_sim_state_t {
     float y;
     float rate;
 };
+
+struct ltpacket_ekf_state_t {
+    float x;
+    float y;
+    float yaw;
+};

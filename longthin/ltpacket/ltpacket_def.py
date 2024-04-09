@@ -370,6 +370,29 @@ class SimState:
 
 
 
+@dataclass
+class EkfState:
+    x: float
+    y: float
+    yaw: float
+
+    @staticmethod
+    def from_bytes(data):
+        return EkfState(*ekf_state_struct.unpack(data))
+
+    def to_bytes(self):
+        return ekf_state_struct.pack(
+            self.x,
+            self.y,
+            self.yaw,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.EKF_STATE
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -385,6 +408,7 @@ motor_output_struct = struct.Struct('ff')
 reboot_struct = struct.Struct('B')
 ev_pose_struct = struct.Struct('fff')
 sim_state_struct = struct.Struct('ffffff')
+ekf_state_struct = struct.Struct('fff')
 
 class LTPacketType(Enum):
     RESERVED = 0
@@ -402,6 +426,7 @@ class LTPacketType(Enum):
     REBOOT = 16
     EV_POSE = 17
     SIM_STATE = 18
+    EKF_STATE = 19
 
     @staticmethod
     def from_type(type_):
@@ -426,5 +451,6 @@ type_map = {
     LTPacketType.REBOOT: Reboot,
     LTPacketType.EV_POSE: EvPose,
     LTPacketType.SIM_STATE: SimState,
+    LTPacketType.EKF_STATE: EkfState,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

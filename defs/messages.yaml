@@ -113,3 +113,10 @@ sim_state:
     x: f32
     y: f32
     rate: f32
+
+ekf_state:
+  id: 0x13
+  fields:
+    x: f32
+    y: f32
+    yaw: f32
