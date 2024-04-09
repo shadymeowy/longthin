@@ -10,8 +10,8 @@ from QPrimaryFlightDisplay import QPrimaryFlightDisplay
 
 
 class LTPFD(QWidget):
-    def __init__(self, node):
-        super().__init__()
+    def __init__(self, node, parent=None):
+        super(LTPFD, self).__init__(parent)
         self.node = node
         self.node.subscribe(Imu, self.cb_imu)
 
