@@ -10,6 +10,7 @@ from ..ltpacket import *
 from . import LTJoystick
 from . import LTPFD
 from . import LTParamsUI
+from . import LTControls
 
 
 # Using QDockWidget to create a GCS window
@@ -17,7 +18,7 @@ class LTGCS(QMainWindow):
     def __init__(self, node, parent=None):
         super(LTGCS, self).__init__(parent)
         self.setWindowTitle('LTGCS')
-        self.setGeometry(100, 100, 800, 600)
+        self.setWindowState(Qt.WindowMaximized)
         self.node = node
 
         # Empty central widget
@@ -26,15 +27,6 @@ class LTGCS(QMainWindow):
 
         features = (QDockWidget.DockWidgetMovable |
                     QDockWidget.DockWidgetFloatable)
-        
-        os.environ["NO_GL"] = "1"
-
-        self.joystick_dock = QDockWidget('Joystick', self)
-        self.joystick = LTJoystick(self.node)
-        self.joystick_dock.setWidget(self.joystick)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.joystick_dock)
-        self.joystick_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
-        self.joystick_dock.setFeatures(features)
 
         self.pfd_dock = QDockWidget('PFD', self)
         self.pfd = LTPFD(self.node)
@@ -45,6 +37,20 @@ class LTGCS(QMainWindow):
         self.pfd_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
         self.pfd_dock.setFeatures(features)
 
+        self.joystick_dock = QDockWidget('Joystick', self)
+        self.joystick = LTJoystick(self.node)
+        self.joystick_dock.setWidget(self.joystick)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.joystick_dock)
+        self.joystick_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
+        self.joystick_dock.setFeatures(features)
+
+        self.controls_dock = QDockWidget('Controls', self)
+        self.controls = LTControls(self.node)
+        self.controls_dock.setWidget(self.controls)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.controls_dock)
+        self.controls_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
+        self.controls_dock.setFeatures(features)
+
         self.params_dock = QDockWidget('Parameters', self)
         self.params = LTParamsUI(self.node)
         self.params_dock.setWidget(self.params)
@@ -53,7 +59,7 @@ class LTGCS(QMainWindow):
         self.params_dock.setFeatures(features)
 
         # set size initial of right dock
-        self.resizeDocks([self.params_dock], [350], Qt.Horizontal)
+        self.resizeDocks([self.params_dock], [400], Qt.Horizontal)
         self.resizeDocks([self.joystick_dock, self.pfd_dock], [350, 350], Qt.Horizontal)
         self.resizeDocks([self.joystick_dock, self.pfd_dock], [350, 350], Qt.Vertical)
 
@@ -66,3 +72,12 @@ class LTGCS(QMainWindow):
         # set maximum size to joystick dock
         self.joystick_dock.setMaximumHeight(500)
         self.joystick_dock.setMaximumWidth(500)
+
+        # set maximum size to controls dock
+        self.controls_dock.setMinimumHeight(200)
+        self.controls_dock.setMaximumHeight(200)
+        self.controls_dock.setMinimumWidth(300)
+        self.controls_dock.setMaximumWidth(350)
+
+        # set minimum size to parameters dock
+        self.params_dock.setMinimumWidth(300)
