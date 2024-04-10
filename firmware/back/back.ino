@@ -182,9 +182,9 @@ void motor_debug()
 	packet.type = LTPACKET_TYPE_CONTROL_DEBUG;
 	struct ltpacket_control_debug_t *p = &packet.control_debug;
 	p->current_d = current_d;
-	p->current_yaw = current_yaw;
+	p->current_yaw = modby2pi(current_yaw);
 	p->desired_d = desired_d;
-	p->desired_yaw = desired_yaw;
+	p->desired_yaw = modby2pi(desired_yaw);
 	p->current_vel = current_vel;
 	p->current_w = current_w;
 	p->desired_vel = desired_v;
