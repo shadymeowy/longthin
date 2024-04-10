@@ -63,46 +63,71 @@ def main():
     args = parser.parse_args()
 
     manual_mode = 0
+    ekf_mode = False
+    last_ekf_time = 0
+    last_setpoint_time = 0
     u_l, u_r = 0, 0
     desired_d, desired_yaw = 0, 0
     current_d, current_yaw = 0, 0
     current_vel, current_w = 0, 0
+    u_v, u_w, u_l, u_r, desired_vel, desired_w = 0, 0, 0, 0, 0, 0
     node = LTNode()
     params = node.params
     controller = make_controller(params)
 
     def cb_motor(packet):
-        nonlocal u_l, u_r, manual_mode
+        nonlocal u_l, u_r, manual_mode, last_setpoint_time
         u_l = packet.left
         u_r = packet.right
         manual_mode = 1
+        last_setpoint_time = time.time()
 
     def cb_motor_raw(packet):
-        nonlocal u_l, u_r, manual_mode
+        nonlocal u_l, u_r, manual_mode, last_setpoint_time
         u_l = packet.left / 2048
         u_r = packet.right / 2048
         manual_mode = 1
+        last_setpoint_time = time.time()
 
     def cb_setpoint(packet):
-        nonlocal desired_d, desired_yaw, manual_mode
+        nonlocal desired_d, desired_yaw, manual_mode, last_setpoint_time
         desired_d = packet.vel
         desired_yaw = packet.yaw
         manual_mode = 0
+        last_setpoint_time = time.time()
 
     def cb_imu(packet):
-        nonlocal current_d, current_yaw
+        nonlocal current_d, current_yaw, ekf_mode
+        if ekf_mode:
+            return
         rot = R.from_quat([packet.qx, packet.qy, packet.qz, packet.qw])
         current_yaw = rot.as_euler('xyz', degrees=True)[2]
+
+    def cb_ekf_state(packet):
+        nonlocal current_d, current_yaw, ekf_mode, last_ekf_time
+        current_yaw = packet.yaw
+        ekf_mode = True
+        last_ekf_time = time.time()
 
     node.subscribe(Motor, cb_motor)
     node.subscribe(MotorRaw, cb_motor_raw)
     node.subscribe(Setpoint, cb_setpoint)
     node.subscribe(Imu, cb_imu)
+    node.subscribe(EkfState, cb_ekf_state)
 
     last_out = time.time()
     last_debug = time.time()
     while True:
         t = time.time()
+
+        controller_timeout = params.controller_timeout / 1e6
+        if t - last_setpoint_time > controller_timeout:
+            manual_mode = 1
+            u_l, u_r = 0, 0
+
+        if t - last_ekf_time > controller_timeout:
+            ekf_mode = False
+
         if not manual_mode:
             u_v, u_w, u_l, u_r, desired_vel, desired_w = controller(
                 t, current_d, current_yaw, desired_d, desired_yaw, current_vel, current_w)
@@ -128,7 +153,7 @@ def main():
                     desired_vel,
                     desired_w,
                     u_v, u_w,
-                    u_l, u_r)
+                    u_r, u_l)
                 node.publish(packet_debug)
 
         node.spin_once()

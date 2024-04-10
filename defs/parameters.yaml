@@ -242,3 +242,8 @@ accel_calib_m22:
   id: 0x30
   type: f32
   default: 9.72531012
+
+controller_timeout:
+  id: 0x31
+  type: u32
+  default: 1000000

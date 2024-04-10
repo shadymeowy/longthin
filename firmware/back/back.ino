@@ -12,6 +12,9 @@
 int16_t motor_left = 0;
 int16_t motor_right = 0;
 int manual_mode = 0;
+bool ekf_mode = false;
+long last_ekf_time = 0;
+long last_setpoint_time = 0;
 
 float current_d = 0;
 float current_yaw = 0;
@@ -93,6 +96,15 @@ void motor_update()
 	float wdesired_ki = ltparams_get(LTPARAMS_WDESIRED_KI);
 	float wheel_distance = ltparams_get(LTPARAMS_WHEEL_DISTANCE);
 	float wheel_radius = ltparams_get(LTPARAMS_WHEEL_RADIUS);
+
+	double controller_timeout = ltparams_getu(LTPARAMS_CONTROLLER_TIMEOUT) / 1e3;
+	if (millis() - last_setpoint_time > controller_timeout) {
+		manual_mode = 1;
+		motor_set(0, 0);
+	}
+	if (millis() - last_ekf_time > controller_timeout) {
+		ekf_mode = false;
+	}
 
 	if (!manual_mode) {
 		float e_d = desired_d - current_d;
@@ -278,24 +290,34 @@ void listen_handle(struct ltpacket_t *packet)
 	case LTPACKET_TYPE_MOTOR_RAW:
 		motor_set_raw(packet->motor_raw.left, packet->motor_raw.right);
 		manual_mode = 1;
+		last_setpoint_time = millis();
 		break;
 	case LTPACKET_TYPE_MOTOR:
 		motor_set(packet->motor.left, packet->motor.right);
 		manual_mode = 1;
+		last_setpoint_time = millis();
 		break;
 	case LTPACKET_TYPE_SETPOINT:
 		desired_d = packet->setpoint.vel;
 		desired_yaw = packet->setpoint.yaw;
 		manual_mode = 0;
+		last_setpoint_time = millis();
 		break;
 	case LTPACKET_TYPE_IMU:
-		q[0] = packet->imu.qw;
-		q[1] = packet->imu.qx;
-		q[2] = packet->imu.qy;
-		q[3] = packet->imu.qz;
-		euler_from_quat(q, rpy);
-		current_yaw = rpy[2];
-		current_d = 0;
+		if (!ekf_mode) {
+			q[0] = packet->imu.qw;
+			q[1] = packet->imu.qx;
+			q[2] = packet->imu.qy;
+			q[3] = packet->imu.qz;
+			euler_from_quat(q, rpy);
+			current_yaw = rpy[2];
+			current_d = 0;
+		}
+		break;
+	case LTPACKET_TYPE_EKF_STATE:
+		current_yaw = packet->ekf_state.yaw;
+		ekf_mode = true;
+		last_ekf_time = millis();
 		break;
 	case LTPACKET_TYPE_REBOOT:
 		rp2040.reboot();

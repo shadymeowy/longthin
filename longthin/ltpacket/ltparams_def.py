@@ -2,7 +2,7 @@ from enum import Enum
 from dataclasses import dataclass, asdict
 
 
-LTPARAMS_COUNT = 0x31
+LTPARAMS_COUNT = 0x32
 
 
 class LTParamValueType(Enum):
@@ -61,6 +61,7 @@ class LTParamType(Enum):
     ACCEL_CALIB_M20 = 0x2e
     ACCEL_CALIB_M21 = 0x2f
     ACCEL_CALIB_M22 = 0x30
+    CONTROLLER_TIMEOUT = 0x31
 
 
 param_type_dict = {
@@ -113,6 +114,7 @@ param_type_dict = {
     LTParamType.ACCEL_CALIB_M20: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.ACCEL_CALIB_M21: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.ACCEL_CALIB_M22: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.CONTROLLER_TIMEOUT: LTParamValueType.LTPARAMS_TYPE_UINT32,
 }
 
 param_default_dict = {
@@ -165,6 +167,7 @@ param_default_dict = {
     LTParamType.ACCEL_CALIB_M20: 0.0,
     LTParamType.ACCEL_CALIB_M21: 0.0,
     LTParamType.ACCEL_CALIB_M22: 9.72531012,
+    LTParamType.CONTROLLER_TIMEOUT: 1000000,
 }
 
 
@@ -219,6 +222,7 @@ class LTParameters:
     accel_calib_m20: float
     accel_calib_m21: float
     accel_calib_m22: float
+    controller_timeout: int
 
     @classmethod
     def from_dict(cls, d):
