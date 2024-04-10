@@ -58,6 +58,7 @@ sim:
     Kb: 0.06820926132509801
     Ki: 0.45
     Rs: 1.25
+  north_offset: 30
   dt: 1.0e-3
   cam_dt: 0.1
 

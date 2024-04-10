@@ -37,6 +37,7 @@ def main():
     model = ddmr_dynamic_model(**config.sim.model._asdict())
     sim_period = config.sim.dt
     cam_period = config.sim.cam_dt
+    north_offset = np.deg2rad(config.sim.north_offset)
     solver = RK4(model, 0, [0, 0, 0, 0, 0], sim_period)
     left, right = 0, 0
     y = None
@@ -65,7 +66,7 @@ def main():
         imu_period = params.imu_publish_period / 1e6
         if imu_accumulator >= imu_period:
             imu_accumulator -= imu_period
-            rot = R.from_euler('xyz', [0, 0, y[2]], degrees=False)
+            rot = R.from_euler('xyz', [0, 0, y[2]+north_offset], degrees=False)
             q = rot.as_quat()
             vel = y[1]
             vel_x = vel * np.cos(y[2])
