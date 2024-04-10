@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from PySide6 import *
 from PySide6.QtCore import *
@@ -13,11 +14,14 @@ class LTJoystick(QWidget):
         super(LTJoystick, self).__init__(parent)
         self.setWindowTitle('LTJoystick')
         self.zoom = 1
-        self.current_heading = 0
-        self.target_heading = 10
+        self.current_imu = 0
+        self.current_ekf = 0
+        self.last_ekf_time = 0
+        self.target_heading = 0
 
         self.node = node
         self.node.subscribe(Imu, self.cb_imu)
+        self.node.subscribe(EkfState, self.cb_ekf)
 
         self.mouse_press = False
         self.will_stop = False
@@ -37,6 +41,7 @@ class LTJoystick(QWidget):
             QPalette.Active, QPalette.Highlight)
         self.bg = palette.color(QPalette.Base)
         self.wg = palette.color(QPalette.Window)
+        self.fg_n = palette.color(QPalette.Disabled, QPalette.WindowText)
 
         self.fg2 = QPen(self.fg, 2 * z)
         self.fg2.setJoinStyle(Qt.RoundJoin)
@@ -46,9 +51,9 @@ class LTJoystick(QWidget):
         self.hg2.setJoinStyle(Qt.RoundJoin)
         self.hg2.setCapStyle(Qt.RoundCap)
 
-        self.bg2 = QPen(self.bg, 2 * z)
-        self.bg2.setJoinStyle(Qt.RoundJoin)
-        self.bg2.setCapStyle(Qt.RoundCap)
+        self.fg_n2 = QPen(self.fg_n, 2 * z)
+        self.fg_n2.setJoinStyle(Qt.RoundJoin)
+        self.fg_n2.setCapStyle(Qt.RoundCap)
 
         self.font16 = QFont("Arial", 16 * z)
 
@@ -65,7 +70,8 @@ class LTJoystick(QWidget):
         self.painter.setFont(self.font16)
 
         self.draw_background()
-        self.draw_current()
+        self.draw_imu()
+        self.draw_ekf()
         self.draw_target()
 
         self.painter.end()
@@ -81,9 +87,17 @@ class LTJoystick(QWidget):
         self.painter.drawRect(-wh/2, -wh/2, wh, wh)
         self.painter.restore()
 
-    def draw_current(self):
+    def draw_imu(self):
+        self.painter.setPen(self.fg_n2)
+        self.draw_arrow(self.current_imu)
+
+    def draw_ekf(self):
+        # TODO: Add a timeout parameter for ekf exclusive
+        timeout = self.node.params.controller_timeout / 1e6
+        if time.time() - self.last_ekf_time > timeout:
+            return
         self.painter.setPen(self.fg2)
-        self.draw_arrow(self.current_heading)
+        self.draw_arrow(self.current_ekf)
 
     def draw_target(self):
         self.painter.setPen(self.hg2)
@@ -118,8 +132,13 @@ class LTJoystick(QWidget):
     def cb_imu(self, packet):
         rot = Rotation.from_quat([packet.qx, packet.qy, packet.qz, packet.qw])
         euler = rot.as_euler('xyz', degrees=True)
-        self.current_heading = euler[2]
+        self.current_imu = euler[2]
         self.send_control()
+        self.update()
+
+    def cb_ekf(self, packet):
+        self.current_ekf = packet.yaw
+        self.last_ekf_time = time.time()
         self.update()
 
     def update_target(self):
