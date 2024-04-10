@@ -93,6 +93,6 @@ class Estimator:
         rmat = rmat.T
         tvec = -rmat @ tvec
         est_pose_cam = Pose(tvec.flatten(), rmat)
-        # camera_rel_pose = self.camera_rel_pose
-        # est_pose = est_pose_cam.from_frame(camera_rel_pose.inv())
-        return est_pose_cam, corners3, img_markers
+        camera_rel_pose = self.camera_rel_pose
+        est_pose = est_pose_cam.from_frame(camera_rel_pose.inv())
+        return est_pose, corners3, img_markers
