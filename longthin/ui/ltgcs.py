@@ -13,6 +13,7 @@ from . import LTParamsUI
 from . import LTControls
 from . import LTPlot
 from . import LTHUD
+from . import LTMap
 
 
 class LTGCS(QMainWindow):
@@ -25,6 +26,9 @@ class LTGCS(QMainWindow):
         # Tab central widget
         self.central_widget = QTabWidget()
         self.setCentralWidget(self.central_widget)
+
+        self.map = LTMap(self.node)
+        self.central_widget.addTab(self.map, 'Map')
 
         self.plot = LTPlot(self.node)
         self.central_widget.addTab(self.plot, 'Plot')
