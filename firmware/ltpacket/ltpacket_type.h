@@ -107,3 +107,8 @@ struct ltpacket_ekf_state_t {
     float y;
     float yaw;
 };
+
+struct ltpacket_setpoint_pos_t {
+    float x;
+    float y;
+};

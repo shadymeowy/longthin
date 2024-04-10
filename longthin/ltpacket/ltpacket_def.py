@@ -393,6 +393,27 @@ class EkfState:
 
 
 
+@dataclass
+class SetpointPos:
+    x: float
+    y: float
+
+    @staticmethod
+    def from_bytes(data):
+        return SetpointPos(*setpoint_pos_struct.unpack(data))
+
+    def to_bytes(self):
+        return setpoint_pos_struct.pack(
+            self.x,
+            self.y,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.SETPOINT_POS
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -409,6 +430,7 @@ reboot_struct = struct.Struct('B')
 ev_pose_struct = struct.Struct('fff')
 sim_state_struct = struct.Struct('ffffff')
 ekf_state_struct = struct.Struct('fff')
+setpoint_pos_struct = struct.Struct('ff')
 
 class LTPacketType(Enum):
     RESERVED = 0
@@ -427,6 +449,7 @@ class LTPacketType(Enum):
     EV_POSE = 17
     SIM_STATE = 18
     EKF_STATE = 19
+    SETPOINT_POS = 20
 
     @staticmethod
     def from_type(type_):
@@ -452,5 +475,6 @@ type_map = {
     LTPacketType.EV_POSE: EvPose,
     LTPacketType.SIM_STATE: SimState,
     LTPacketType.EKF_STATE: EkfState,
+    LTPacketType.SETPOINT_POS: SetpointPos,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

@@ -19,10 +19,19 @@ class LTMap(QWidget):
         self.yaw_ev = 0
         self.pos_ev = [0, 0]
         self.last_ekf_time = 0
+        self.target_x = 0
+        self.target_y = 0
+        self.target_x_ext = 0
+        self.target_y_ext = 0
+        self.last_setpoint_time = 0
 
         self.node = node
         self.node.subscribe(EvPose, self.cb_ev)
         self.node.subscribe(EkfState, self.cb_ekf)
+        self.node.subscribe(SetpointPos, self.cb_setpoint_pos)
+        self.node.subscribe(Motor, self.cb_manual)
+        self.node.subscribe(MotorRaw, self.cb_manual)
+        self.node.subscribe(Setpoint, self.cb_manual)
 
         self.mouse_press = False
         self.will_stop = False
@@ -73,6 +82,7 @@ class LTMap(QWidget):
         self.draw_background()
         self.draw_ev_pose()
         self.draw_ekf_pose()
+        self.draw_target()
 
         self.painter.end()
 
@@ -128,6 +138,28 @@ class LTMap(QWidget):
         self.painter.restore()
         self.painter.restore()
 
+    def draw_target(self):
+        timeout = self.node.params.controller_timeout / 1e6
+        if time.time() - self.last_setpoint_time > timeout:
+            return
+        w = self.width()
+        h = self.height()
+        wh = min(w, h)
+        config = self.node.config
+        area_w = config.renderer.area.width
+        area_h = config.renderer.area.height
+        s = min(wh/area_w, wh/area_h)
+        self.painter.save()
+        self.painter.translate(w/2, h/2)
+        self.painter.rotate(-90)
+        self.painter.setPen(self.hg2)
+        self.painter.setBrush(self.hg)
+        x = self.target_x_ext * s
+        y = self.target_y_ext * s
+        self.painter.drawLine(x-5, y-5, x+5, y+5)
+        self.painter.drawLine(x-5, y+5, x+5, y-5)
+        self.painter.restore()
+
     def cb_ev(self, packet):
         self.yaw_ev = packet.yaw
         self.pos_ev = [packet.x, packet.y]
@@ -137,4 +169,54 @@ class LTMap(QWidget):
         self.yaw_ekf = packet.yaw
         self.pos_ekf = [packet.x, packet.y]
         self.last_ekf_time = time.time()
+        self.send_control()
         self.update()
+
+    def cb_setpoint_pos(self, packet):
+        self.target_x_ext = packet.x
+        self.target_y_ext = packet.y
+        self.last_setpoint_time = time.time()
+        self.update()
+
+    def cb_manual(self, packet):
+        self.last_setpoint_time = 0
+
+    def update_target(self):
+        mx = self.mouse_pos.x()
+        my = self.mouse_pos.y()
+        w = self.width()
+        h = self.height()
+        wh = min(w, h)
+        area_w = self.node.config.renderer.area.width
+        area_h = self.node.config.renderer.area.height
+        s = min(wh/area_w, wh/area_h)
+        self.target_x = (h/2 - my) / s
+        self.target_y = (mx - w/2) / s
+
+    def send_control(self):
+        if self.mouse_press:
+            packet = SetpointPos(self.target_x, self.target_y)
+            self.node.publish(packet)
+        if self.will_stop:
+            packet = Motor(0, 0)
+            self.node.publish(packet)
+            self.will_stop = False
+
+    def mousePressEvent(self, e):
+        if e.button() == Qt.LeftButton:
+            self.mouse_press = True
+            self.mouse_pos = e.pos()
+            self.update_target()
+        super().mousePressEvent(e)
+
+    def mouseReleaseEvent(self, e):
+        if e.button() == Qt.LeftButton:
+            self.mouse_press = False
+            self.will_stop = True
+        super().mouseReleaseEvent(e)
+
+    def mouseMoveEvent(self, e):
+        if self.mouse_press:
+            self.mouse_pos = e.pos()
+            self.update_target()
+        super().mouseMoveEvent(e)

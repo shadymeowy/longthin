@@ -1,10 +1,17 @@
 import time
 import argparse
+import enum
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 from ..node import LTNode
 from ..ltpacket import *
+
+
+class Mode(enum.Enum):
+    MANUAL = 0
+    YAW = 1
+    POS = 2
 
 
 def make_controller(params):
@@ -62,7 +69,7 @@ def main():
     parser = argparse.ArgumentParser(description='A controller SITL')
     args = parser.parse_args()
 
-    manual_mode = 0
+    mode = Mode.MANUAL
     ekf_mode = False
     last_ekf_time = 0
     last_setpoint_time = 0
@@ -70,30 +77,39 @@ def main():
     desired_d, desired_yaw = 0, 0
     current_d, current_yaw = 0, 0
     current_vel, current_w = 0, 0
+    current_x, current_y = 0, 0
+    target_x, target_y = 0, 0
     u_v, u_w, u_l, u_r, desired_vel, desired_w = 0, 0, 0, 0, 0, 0
     node = LTNode()
     params = node.params
     controller = make_controller(params)
 
     def cb_motor(packet):
-        nonlocal u_l, u_r, manual_mode, last_setpoint_time
+        nonlocal u_l, u_r, mode, last_setpoint_time
         u_l = packet.left
         u_r = packet.right
-        manual_mode = 1
+        mode = Mode.MANUAL
         last_setpoint_time = time.time()
 
     def cb_motor_raw(packet):
-        nonlocal u_l, u_r, manual_mode, last_setpoint_time
+        nonlocal u_l, u_r, mode, last_setpoint_time
         u_l = packet.left / 2048
         u_r = packet.right / 2048
-        manual_mode = 1
+        mode = Mode.MANUAL
         last_setpoint_time = time.time()
 
     def cb_setpoint(packet):
-        nonlocal desired_d, desired_yaw, manual_mode, last_setpoint_time
+        nonlocal desired_d, desired_yaw, mode, last_setpoint_time
         desired_d = packet.vel
         desired_yaw = packet.yaw
-        manual_mode = 0
+        mode = Mode.YAW
+        last_setpoint_time = time.time()
+
+    def cb_setpoint_pos(packet):
+        nonlocal target_x, target_y, mode, last_setpoint_time
+        target_x = packet.x
+        target_y = packet.y
+        mode = Mode.POS
         last_setpoint_time = time.time()
 
     def cb_imu(packet):
@@ -104,7 +120,9 @@ def main():
         current_yaw = rot.as_euler('xyz', degrees=True)[2]
 
     def cb_ekf_state(packet):
-        nonlocal current_d, current_yaw, ekf_mode, last_ekf_time
+        nonlocal current_d, current_yaw, current_x, current_y, ekf_mode, last_ekf_time
+        current_x = packet.x
+        current_y = packet.y
         current_yaw = packet.yaw
         ekf_mode = True
         last_ekf_time = time.time()
@@ -112,6 +130,7 @@ def main():
     node.subscribe(Motor, cb_motor)
     node.subscribe(MotorRaw, cb_motor_raw)
     node.subscribe(Setpoint, cb_setpoint)
+    node.subscribe(SetpointPos, cb_setpoint_pos)
     node.subscribe(Imu, cb_imu)
     node.subscribe(EkfState, cb_ekf_state)
 
@@ -128,7 +147,12 @@ def main():
         if t - last_ekf_time > controller_timeout:
             ekf_mode = False
 
-        if not manual_mode:
+        if mode == Mode.POS:
+            # maybe we should use the ekf position
+            desired_d = 1.0
+            desired_yaw = np.arctan2(target_y - current_y, target_x - current_x) * 180 / np.pi
+
+        if not mode == Mode.MANUAL:
             u_v, u_w, u_l, u_r, desired_vel, desired_w = controller(
                 t, current_d, current_yaw, desired_d, desired_yaw, current_vel, current_w)
 

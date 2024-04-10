@@ -120,3 +120,9 @@ ekf_state:
     x: f32
     y: f32
     yaw: f32
+
+setpoint_pos:
+  id: 0x14
+  fields:
+    x: f32
+    y: f32

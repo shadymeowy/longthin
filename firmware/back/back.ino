@@ -9,9 +9,15 @@
 #define MOTOR_RIGHT_FORWARD 13
 #define MOTOR_RIGHT_BACKWARD 12
 
+enum control_mode_t {
+	MODE_MANUAL,
+	MODE_YAW,
+	MODE_POS
+};
+
 int16_t motor_left = 0;
 int16_t motor_right = 0;
-int manual_mode = 0;
+enum control_mode_t mode = MODE_MANUAL;
 bool ekf_mode = false;
 long last_ekf_time = 0;
 long last_setpoint_time = 0;
@@ -25,6 +31,11 @@ float current_vel = 0;
 float current_w = 0;
 float desired_v = 0;
 float desired_w = 0;
+
+float current_x = 0;
+float current_y = 0;
+float target_x = 0;
+float target_y = 0;
 
 float u_v = 0;
 float u_w = 0;
@@ -99,14 +110,23 @@ void motor_update()
 
 	double controller_timeout = ltparams_getu(LTPARAMS_CONTROLLER_TIMEOUT) / 1e3;
 	if (millis() - last_setpoint_time > controller_timeout) {
-		manual_mode = 1;
+		mode = MODE_MANUAL;
 		motor_set(0, 0);
 	}
 	if (millis() - last_ekf_time > controller_timeout) {
 		ekf_mode = false;
 	}
 
-	if (!manual_mode) {
+	if (mode == MODE_POS) {
+		float dx = target_x - current_x;
+		float dy = target_y - current_y;
+		// desired_d = sqrt(dx * dx + dy * dy);
+		desired_d = 1.0;
+		desired_yaw = atan2(dy, dx) * 180 / M_PI;
+		desired_yaw = modby2pi(desired_yaw);
+	}
+
+	if (mode != MODE_MANUAL) {
 		float e_d = desired_d - current_d;
 		float e_theta = modby2pi(desired_yaw) - modby2pi(current_yaw);
 		e_theta = modby2pi(e_theta);
@@ -289,18 +309,24 @@ void listen_handle(struct ltpacket_t *packet)
 		break;
 	case LTPACKET_TYPE_MOTOR_RAW:
 		motor_set_raw(packet->motor_raw.left, packet->motor_raw.right);
-		manual_mode = 1;
+		mode = MODE_MANUAL;
 		last_setpoint_time = millis();
 		break;
 	case LTPACKET_TYPE_MOTOR:
 		motor_set(packet->motor.left, packet->motor.right);
-		manual_mode = 1;
+		mode = MODE_MANUAL;
 		last_setpoint_time = millis();
 		break;
 	case LTPACKET_TYPE_SETPOINT:
 		desired_d = packet->setpoint.vel;
 		desired_yaw = packet->setpoint.yaw;
-		manual_mode = 0;
+		mode = MODE_YAW;
+		last_setpoint_time = millis();
+		break;
+	case LTPACKET_TYPE_SETPOINT_POS:
+		target_x = packet->setpoint_pos.x;
+		target_y = packet->setpoint_pos.y;
+		mode = MODE_POS;
 		last_setpoint_time = millis();
 		break;
 	case LTPACKET_TYPE_IMU:
@@ -315,6 +341,8 @@ void listen_handle(struct ltpacket_t *packet)
 		}
 		break;
 	case LTPACKET_TYPE_EKF_STATE:
+		current_x = packet->ekf_state.x;
+		current_y = packet->ekf_state.y;
 		current_yaw = packet->ekf_state.yaw;
 		ekf_mode = true;
 		last_ekf_time = millis();
