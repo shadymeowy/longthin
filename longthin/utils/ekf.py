@@ -13,6 +13,12 @@ def main():
     args = parser.parse_args()
 
     node = LTNode()
+    camera_rel_pose = node.config.camera.pose
+    camera_rel_pose = Pose(
+        [*camera_rel_pose.position[0:2], 0],
+        [0, 0, camera_rel_pose.attitude[2]]
+    )
+
     ekf = EKFAdapter()
     ekf_state = EkfState(0, 0, 0)
 
@@ -25,9 +31,13 @@ def main():
         ekf.set_imu_dvel(dvel, angle, dt)
         ekf.step()
 
-        ekf_state.x = ekf.x
-        ekf_state.y = ekf.y
-        ekf_state.yaw = np.rad2deg(ekf.angle) % 360
+        ekf_angle = np.rad2deg(ekf.angle) % 360
+        est_pose_cam = Pose([ekf.x, ekf.y, 0], [0, 0, ekf_angle])
+        est_pose = est_pose_cam.from_frame(camera_rel_pose.inv())
+
+        ekf_state.x = est_pose.pos[0]
+        ekf_state.y = est_pose.pos[1]
+        ekf_state.yaw = ekf_angle
         node.publish(ekf_state)
 
     def cb_ev(packet):

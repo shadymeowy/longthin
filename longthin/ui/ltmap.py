@@ -80,7 +80,7 @@ class LTMap(QWidget):
         self.painter.setFont(self.font16)
 
         self.draw_background()
-        self.draw_ev_pose()
+        # self.draw_ev_pose()
         self.draw_ekf_pose()
         self.draw_target()
 
