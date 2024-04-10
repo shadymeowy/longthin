@@ -82,7 +82,13 @@ def main():
                 dvx, dvy, dvz,
                 dvt)
             node.publish(packet)
-            packet = SimState(*y, 0)
+            packet = SimState(
+                y[0],
+                y[1],
+                np.rad2deg(y[2]) % 360,
+                y[3],
+                y[4],
+                0)
             node.publish(packet)
 
         if sim_accumulator >= sim_period:
