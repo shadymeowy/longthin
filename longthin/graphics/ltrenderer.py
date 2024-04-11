@@ -80,7 +80,7 @@ class LTRenderer:
 
     def draw_area(self):
         # background
-        self.drawlist_area.style2(0xc6/255, 0xe3/255, 0xff/255, 1., 1.)
+        self.drawlist_area.style2(0xc6/255, 0xc6/255, 0xc6/255, 1., 1.)
         self.drawlist_area.clear()
         # base
         self.drawlist_area.style2(.8, .8, .8, 1., 1.)
