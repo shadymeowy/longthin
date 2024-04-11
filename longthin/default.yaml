@@ -30,8 +30,8 @@ renderer:
     height: 3
   spot:
     width: 0.15
-    length: 0.75
-    percent: 0.3
+    length: 0.95
+    percent: 0.25
   strip:
     width: 0.02
   chassis:
@@ -103,11 +103,11 @@ markers:
     pose:
       position: [0.0, -1.5075, -0.02]
       attitude: [0.0, 0.0, 270.0]
-# - id: 20
-#    size: 0.27
-#    pose:
-#      position: [0.81, 2.4575, -0.02]
-#      attitude: [0.0, 0.0, 90.0]
+  - id: 20
+    size: 0.27
+    pose:
+      position: [0.75375, 2.4575, -0.02]
+      attitude: [0.0, 0.0, 90.0]
 
 manual_control:
   forward_backward: 1.0

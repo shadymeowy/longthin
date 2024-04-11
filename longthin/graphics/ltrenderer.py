@@ -80,7 +80,7 @@ class LTRenderer:
 
     def draw_area(self):
         # background
-        self.drawlist_area.style2(0xa2/255, 0xbf/255, 0xf4/255, 1., 1.)
+        self.drawlist_area.style2(0xc6/255, 0xe3/255, 0xff/255, 1., 1.)
         self.drawlist_area.clear()
         # base
         self.drawlist_area.style2(.8, .8, .8, 1., 1.)
@@ -88,7 +88,7 @@ class LTRenderer:
         h = self.config.renderer.area.height
         self.drawlist_area.plane(0, 0, 0, w, h, 0.1, 0.1)
         # strips
-        self.drawlist_area.style2(1., .2, .2, 1., 1.)
+        self.drawlist_area.style2(1., .40, .01, 1., 1.)
         strip_w = self.config.renderer.strip.width
         # strips cover the whole area but don't overlap
         self.drawlist_area.plane(
@@ -99,8 +99,20 @@ class LTRenderer:
             0, h/2+strip_w/2, 0, w + 2*strip_w, strip_w, 0.1, 0.1)
         self.drawlist_area.plane(0, -h/2-strip_w/2, 0,
                                  w + 2*strip_w, strip_w, 0.1, 0.1)
+        
+        # strips surrounding the parking spot
+        self.drawlist_area.style2(1., .40, .01, 1., 1.)
+        spot_w = self.config.renderer.spot.width
+        spot_l = self.config.renderer.spot.length
+        spot_percent = self.config.renderer.spot.percent
+        spot_x = w * spot_percent
+        spot_y = h/2 + spot_l/2
+        self.drawlist_area.plane(
+            spot_x - spot_w/2 - strip_w/2, strip_w+spot_y, 0, strip_w, spot_l+strip_w, 0.1, 0.1)
+        self.drawlist_area.plane(
+            spot_x + spot_w/2 + strip_w/2, strip_w+spot_y, 0, strip_w, spot_l+strip_w, 0.1, 0.1)
         # parking spot
-        self.drawlist_area.style2(1., 1., .4, 1., 1.)
+        self.drawlist_area.style2(0., .24, .54, 1., 1.)
         spot_w = self.config.renderer.spot.width
         spot_l = self.config.renderer.spot.length
         spot_percent = self.config.renderer.spot.percent
