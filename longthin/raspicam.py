@@ -25,8 +25,8 @@ class PiCam:
             #"AeExposureMode": controls.AeExposureModeEnum.Short,
             #"AeConstraintMode": controls.AeConstraintModeEnum.Highlight,
             "AeEnable": False,
-            "AnalogueGain": 16.0,
-            "ExposureTime": 10000,
+            "AnalogueGain": 8.0,
+            "ExposureTime": 5000,
         })
 
     def read(self):
