@@ -14,12 +14,12 @@ class ParkDetector:
             height_offset=250,
             width_offset=0,
             slope_limit=0.5,
-            hue_orange=(-5, 30),
-            hue_blue=(150, 270),
+            hue_orange=(np.deg2rad(-5),  np.deg2rad(30)),
+            hue_blue=(np.deg2rad(150),  np.deg2rad(270)),
             chrome_orange=(0.2, 1.),
             intensity_orange=(0.15, 1.),
-            chroma_blue=(0.05, 1.),
-            intensity_blue=(0.01, 1.),
+            chroma_blue=(0.2, 1.0),
+            intensity_blue=(0.1, 1.),
             storage=2048):
 
         self.width = width
@@ -53,7 +53,7 @@ class ParkDetector:
         mask_and = cv2.bitwise_and(mask_orange, mask_blue)
 
         if debug:
-            cv2.imshow("Original", image)
+            cv2.imshow("Original", cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
             cv2.imshow("Orange", mask_orange*255)
             cv2.imshow("Blue", mask_blue*255)
             cv2.imshow("And", mask_and*255)
@@ -72,7 +72,7 @@ class ParkDetector:
         k = self.slope_limit
         y1 = image.shape[0] - self.height_offset
         inlier_count = 0
-        inliers_mins = None
+        y_min = None
         if ln_d > 100:
             for _ in range(4):
                 line = ransac_line(pps_d, inliers, count, delta, k)
@@ -81,8 +81,8 @@ class ParkDetector:
                 # TODO: Fix this
                 inliers_ps = pps_d[inliers[:pps_d.shape[0]]]
                 mn = np.min(inliers_ps[:, 1])
-                if inliers_mins is None or mn < inliers_mins:
-                    inliers_mins = mn
+                if y_min is None or mn < y_min:
+                    y_min = mn
                 inlier_count += np.sum(inliers)
 
                 x = -(y1-line["py"])/line["nx"]*line["ny"]+line["px"]
@@ -105,7 +105,7 @@ class ParkDetector:
 
         if inlier_count < self.inlier_threshold:
             mean_x = None
-        return mean_x, inlier_count, inliers_mins
+        return mean_x, y_min
 
 
 def draw_line(image, px, py, nx, ny):
