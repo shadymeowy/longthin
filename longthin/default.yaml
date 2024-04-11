@@ -12,7 +12,7 @@ camera:
     p2: 0
     k3: 0
   pose:
-    position: [0.5, 0.0, -0.4]
+    position: [0.36, 0.0, -0.33]
     attitude: [0.0, -25.0, 0.0]
 
 estimator:
@@ -35,10 +35,10 @@ renderer:
   strip:
     width: 0.02
   chassis:
-    length: 0.61
+    length: 0.50
     width: 0.1
     height: 0.1
-    offset: 0.1
+    offset: 0.13
   wheel:
     radius: 0.0175
     width: 0.02
