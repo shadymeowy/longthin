@@ -414,6 +414,50 @@ class SetpointPos:
 
 
 
+@dataclass
+class GoalVision:
+    area: float
+    center_x: float
+    center_y: float
+
+    @staticmethod
+    def from_bytes(data):
+        return GoalVision(*goal_vision_struct.unpack(data))
+
+    def to_bytes(self):
+        return goal_vision_struct.pack(
+            self.area,
+            self.center_x,
+            self.center_y,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.GOAL_VISION
+
+
+
+@dataclass
+class LaneVision:
+    mean_x: float
+    min_y: float
+
+    @staticmethod
+    def from_bytes(data):
+        return LaneVision(*lane_vision_struct.unpack(data))
+
+    def to_bytes(self):
+        return lane_vision_struct.pack(
+            self.mean_x,
+            self.min_y,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.LANE_VISION
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -431,6 +475,8 @@ ev_pose_struct = struct.Struct('fff')
 sim_state_struct = struct.Struct('ffffff')
 ekf_state_struct = struct.Struct('fff')
 setpoint_pos_struct = struct.Struct('ff')
+goal_vision_struct = struct.Struct('fff')
+lane_vision_struct = struct.Struct('ff')
 
 class LTPacketType(Enum):
     RESERVED = 0
@@ -450,6 +496,8 @@ class LTPacketType(Enum):
     SIM_STATE = 18
     EKF_STATE = 19
     SETPOINT_POS = 20
+    GOAL_VISION = 21
+    LANE_VISION = 22
 
     @staticmethod
     def from_type(type_):
@@ -476,5 +524,7 @@ type_map = {
     LTPacketType.SIM_STATE: SimState,
     LTPacketType.EKF_STATE: EkfState,
     LTPacketType.SETPOINT_POS: SetpointPos,
+    LTPacketType.GOAL_VISION: GoalVision,
+    LTPacketType.LANE_VISION: LaneVision,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

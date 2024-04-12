@@ -126,3 +126,16 @@ setpoint_pos:
   fields:
     x: f32
     y: f32
+
+goal_vision:
+  id: 0x15
+  fields:
+    area: f32
+    center_x: f32
+    center_y: f32
+
+lane_vision:
+  id: 0x16
+  fields:
+    mean_x: f32
+    min_y: f32

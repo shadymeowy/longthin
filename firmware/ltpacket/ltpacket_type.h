@@ -112,3 +112,14 @@ struct ltpacket_setpoint_pos_t {
     float x;
     float y;
 };
+
+struct ltpacket_goal_vision_t {
+    float area;
+    float center_x;
+    float center_y;
+};
+
+struct ltpacket_lane_vision_t {
+    float mean_x;
+    float min_y;
+};
