@@ -67,53 +67,63 @@ class Estimator:
 
         corners2, ids = self.marker_helper.detect(img_gray)
         if ids is None:
-            return None, None, None, None
-        mask = np.isin(ids, self.marker_goals)
-        ids_goal = ids[mask]
-        corners2_goal = corners2[mask]
-        goal_points = corners2_goal.reshape((-1, 2))
-        goal_points = goal_points.astype(np.float32)
+            return None, None, img_ud, None
 
-        mask = np.isin(ids, self.marker_landmarks)
-        # remove markers that have corners too close to the edges
-        mask &= np.all(corners2[:, :, 0] > 32, axis=1)
-        mask &= np.all(corners2[:, :, 0] < img_gray.shape[1] - 32, axis=1)
-        mask &= np.all(corners2[:, :, 1] > 32, axis=1)
-        mask &= np.all(corners2[:, :, 1] < img_gray.shape[0] - 32, axis=1)
-        ids_landmark = ids[mask]
-        corners2_landmark = corners2[mask]
-        if draw:
-            img_markers = self.marker_helper.draw(img_ud, corners2_landmark, ids_landmark)
+        img_markers = img_ud.copy()
+        mask_goal = np.isin(ids, self.marker_goals)
+        mask_landmark = np.isin(ids, self.marker_landmarks)
+
+        if np.any(mask_goal):
+            ids_goal = ids[mask_goal]
+            corners2_goal = corners2[mask_goal]
+            goal_points = corners2_goal.reshape((-1, 2))
+            goal_points = goal_points.astype(np.float32)
+        else:
+            corners2_goal = np.array([])
+            goal_points = None
+
+        if np.any(mask_landmark):
+            # remove markers that have corners too close to the edges
+            mask_landmark &= np.all(corners2[:, :, 0] > 32, axis=1)
+            mask_landmark &= np.all(corners2[:, :, 0] < img_gray.shape[1] - 32, axis=1)
+            mask_landmark &= np.all(corners2[:, :, 1] > 32, axis=1)
+            mask_landmark &= np.all(corners2[:, :, 1] < img_gray.shape[0] - 32, axis=1)
+
+        if np.any(mask_landmark):
+            ids_landmark = ids[mask_landmark]
+            corners2_landmark = corners2[mask_landmark]
+
+            sorter = np.argsort(self.marker_landmarks)
+            idx = sorter[np.searchsorted(self.marker_landmarks, ids_landmark, sorter=sorter)]
+            if not (ids_landmark == self.marker_landmarks[idx]).all():
+                raise ValueError('ids_landmark are not matched')
+            corners3 = self.marker_corners[idx]
+
+            # TODO check this
+            m_int = self.dist_params.m_intrinsics_2
+            obj_points = corners3.reshape((-1, 3))[..., [1, 2, 0]]
+            obj_points = obj_points.astype(np.float64)
+            img_points = corners2_landmark.reshape((-1, 2))
+            img_points = img_points.astype(np.float64)
+            ret, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, m_int, None, flags=cv2.SOLVEPNP_SQPNP)
+            if ret:
+                rvec = np.array([rvec[2], rvec[0], rvec[1]])
+                tvec = np.array([tvec[2], tvec[0], tvec[1]])
+                rmat, _ = cv2.Rodrigues(rvec)
+                rmat = rmat.T
+                tvec = -rmat @ tvec
+                est_pose_cam = Pose(tvec.flatten(), rmat)
+            else:
+                est_pose_cam = None
+        else:
+            ids_landmark = None
+            corners3 = None
+            est_pose_cam = None
+
+        if draw and ids_landmark is not None:
+            img_markers = self.marker_helper.draw(img_markers, corners2_landmark, ids_landmark)
+
+        if draw and goal_points is not None:
             for goal in goal_points:
                 img_markers = cv2.circle(img_markers, tuple(map(int, goal)), 3, (0, 0, 255), -1)
-        else:
-            img_markers = None
-        if corners2_goal.size == 0:
-            goal_points = None
-        sorter = np.argsort(self.marker_landmarks)
-        idx = sorter[np.searchsorted(self.marker_landmarks, ids_landmark, sorter=sorter)]
-        if not (ids_landmark == self.marker_landmarks[idx]).all():
-            raise ValueError('ids_landmark are not matched')
-        corners3 = self.marker_corners[idx]
-        if corners2_landmark.size == 0:
-            return None, None, img_markers, goal_points
-
-        # TODO check this
-        m_int = self.dist_params.m_intrinsics_2
-        obj_points = corners3.reshape((-1, 3))[..., [1, 2, 0]]
-        obj_points = obj_points.astype(np.float64)
-        img_points = corners2_landmark.reshape((-1, 2))
-        img_points = img_points.astype(np.float64)
-        ret, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, m_int, None, flags=cv2.SOLVEPNP_SQPNP)
-        if not ret:
-            return None, None, img_markers, goal_points
-
-        rvec = np.array([rvec[2], rvec[0], rvec[1]])
-        tvec = np.array([tvec[2], tvec[0], tvec[1]])
-        rmat, _ = cv2.Rodrigues(rvec)
-        rmat = rmat.T
-        tvec = -rmat @ tvec
-        est_pose_cam = Pose(tvec.flatten(), rmat)
-        # camera_rel_pose = self.camera_rel_pose
-        # est_pose = est_pose_cam.from_frame(camera_rel_pose.inv())
         return est_pose_cam, corners3, img_markers, goal_points

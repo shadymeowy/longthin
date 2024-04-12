@@ -85,6 +85,8 @@ class ParkDetector:
                     min_y = mn
                 inlier_count += np.sum(inliers)
 
+                if line["nx"] == 0:
+                    line["nx"] = 1e-6
                 x = -(y1-line["py"])/line["nx"]*line["ny"]+line["px"]
                 intercepts.append(x)
 
