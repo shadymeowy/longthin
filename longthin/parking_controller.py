@@ -31,5 +31,5 @@ class ParkingController:
             self.mean_x = mean_x
         if min_y is not None and min_y/self.height >= 0.83:
             self.active = False
-        else:
+        if min_y is not None and min_y/self.height < 0.83:
             self.active = True

@@ -14,11 +14,11 @@ class ParkDetector:
             height_offset=250,
             width_offset=0,
             slope_limit=0.5,
-            hue_orange=(np.deg2rad(-5),  np.deg2rad(30)),
-            hue_blue=(np.deg2rad(150),  np.deg2rad(270)),
+            hue_orange=(np.deg2rad(-5), np.deg2rad(30)),
+            hue_blue=(np.deg2rad(150), np.deg2rad(270)),
             chrome_orange=(0.2, 1.),
             intensity_orange=(0.15, 1.),
-            chroma_blue=(0.2, 1.0),
+            chroma_blue=(0.1, 1.),
             intensity_blue=(0.1, 1.),
             storage=2048):
 
