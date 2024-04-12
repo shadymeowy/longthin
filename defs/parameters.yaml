@@ -247,3 +247,18 @@ controller_timeout:
   id: 0x31
   type: u32
   default: 1000000
+
+lane_lookahead:
+  id: 0x32
+  type: f32
+  default: -100.0
+
+lane_inlier_threshold:
+  id: 0x33
+  type: u32
+  default: 100
+
+lane_slope_limit:
+  id: 0x34
+  type: f32
+  default: 0.5

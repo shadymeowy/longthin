@@ -4,7 +4,6 @@ import numpy as np
 
 from ..node import LTNode
 from ..ltpacket import *
-from ..config import load_config
 from ..estimator import Estimator
 from ..park_detector import ParkDetector
 from ..video_source import video_source
@@ -17,15 +16,17 @@ def main():
     args = parser.parse_args()
 
     node = LTNode()
-    config = load_config()
+    config = node.config
+    params = node.params
     width, height = config.camera.model.width, config.camera.model.height
     cap = video_source(args.video, width, height)
     estimator = Estimator.from_config(config)
     # TODO add parking parameters to config
-    detector = ParkDetector(width, height, height_offset=-100, width_offset=0)
+    detector = ParkDetector(width, height, params)
 
     while True:
         node.spin_once()
+        node.params.lane_lookahead
         ret, img = cap.read()
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         if not ret:

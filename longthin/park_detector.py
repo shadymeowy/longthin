@@ -10,10 +10,7 @@ class ParkDetector:
             self,
             width,
             height,
-            inlier_threshold=100,
-            height_offset=250,
-            width_offset=0,
-            slope_limit=0.5,
+            params,
             hue_orange=(np.deg2rad(-5), np.deg2rad(30)),
             hue_blue=(np.deg2rad(150), np.deg2rad(270)),
             chrome_orange=(0.2, 1.),
@@ -24,10 +21,7 @@ class ParkDetector:
 
         self.width = width
         self.height = height
-        self.inlier_threshold = inlier_threshold
-        self.height_offset = height_offset
-        self.slope_limit = slope_limit
-        self.width_offset = width_offset
+        self.params = params
 
         self.mask_orange = np.zeros((height, width), dtype="uint8")
         self.mask_blue = np.zeros((height, width), dtype="uint8")
@@ -69,8 +63,8 @@ class ParkDetector:
         pps_d2 = self.pps_d2[:ln_d]
         inliers = self.inliers[:ln_d]
 
-        k = self.slope_limit
-        y1 = image.shape[0] - self.height_offset
+        k = self.params.lane_slope_limit
+        y1 = image.shape[0] - self.params.lane_lookahead
         inlier_count = 0
         min_y = None
         if ln_d > 100:
@@ -107,7 +101,7 @@ class ParkDetector:
         else:
             mean_x = None
 
-        if inlier_count < self.inlier_threshold:
+        if inlier_count < self.params.lane_inlier_threshold:
             mean_x = None
         return mean_x, min_y
 

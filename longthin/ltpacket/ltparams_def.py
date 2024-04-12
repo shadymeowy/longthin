@@ -2,7 +2,7 @@ from enum import Enum
 from dataclasses import dataclass, asdict
 
 
-LTPARAMS_COUNT = 0x32
+LTPARAMS_COUNT = 0x35
 
 
 class LTParamValueType(Enum):
@@ -62,6 +62,9 @@ class LTParamType(Enum):
     ACCEL_CALIB_M21 = 0x2f
     ACCEL_CALIB_M22 = 0x30
     CONTROLLER_TIMEOUT = 0x31
+    LANE_LOOKAHEAD = 0x32
+    LANE_INLIER_THRESHOLD = 0x33
+    LANE_SLOPE_LIMIT = 0x34
 
 
 param_type_dict = {
@@ -115,6 +118,9 @@ param_type_dict = {
     LTParamType.ACCEL_CALIB_M21: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.ACCEL_CALIB_M22: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.CONTROLLER_TIMEOUT: LTParamValueType.LTPARAMS_TYPE_UINT32,
+    LTParamType.LANE_LOOKAHEAD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.LANE_INLIER_THRESHOLD: LTParamValueType.LTPARAMS_TYPE_UINT32,
+    LTParamType.LANE_SLOPE_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
 }
 
 param_default_dict = {
@@ -168,6 +174,9 @@ param_default_dict = {
     LTParamType.ACCEL_CALIB_M21: 0.0,
     LTParamType.ACCEL_CALIB_M22: 9.72531012,
     LTParamType.CONTROLLER_TIMEOUT: 1000000,
+    LTParamType.LANE_LOOKAHEAD: -100.0,
+    LTParamType.LANE_INLIER_THRESHOLD: 100,
+    LTParamType.LANE_SLOPE_LIMIT: 0.5,
 }
 
 
@@ -223,6 +232,9 @@ class LTParameters:
     accel_calib_m21: float
     accel_calib_m22: float
     controller_timeout: int
+    lane_lookahead: float
+    lane_inlier_threshold: int
+    lane_slope_limit: float
 
     @classmethod
     def from_dict(cls, d):
