@@ -52,11 +52,11 @@ class ParkDetector:
         mask_blue = cv2.dilate(mask_blue, self.kernel2, iterations=2)
         mask_and = cv2.bitwise_and(mask_orange, mask_blue)
 
-        if debug:
-            cv2.imshow("Original", cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
-            cv2.imshow("Orange", mask_orange*255)
-            cv2.imshow("Blue", mask_blue*255)
-            cv2.imshow("And", mask_and*255)
+        # if debug:
+        #     cv2.imshow("Original", cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+        #     cv2.imshow("Orange", mask_orange*255)
+        #     cv2.imshow("Blue", mask_blue*255)
+        #    cv2.imshow("And", mask_and*255)
 
         delta = 1
         count = 2000
@@ -80,10 +80,11 @@ class ParkDetector:
                 lines.append(line)
                 # TODO: Fix this
                 inliers_ps = pps_d[inliers[:pps_d.shape[0]]]
-                mn = np.min(inliers_ps[:, 1])
-                if min_y is None or mn < min_y:
-                    min_y = mn
-                inlier_count += np.sum(inliers)
+                if inliers_ps.shape[0] != 0:
+                    mn = np.min(inliers_ps[:, 1])
+                    if min_y is None or mn < min_y:
+                        min_y = mn
+                    inlier_count += np.sum(inliers)
 
                 if line["nx"] == 0:
                     line["nx"] = 1e-6
@@ -101,7 +102,7 @@ class ParkDetector:
                     cv2.circle(image, [int(x), int(y1)], 5, [255, 0, 0], -1)
                 cv2.circle(image, [int(mean_x), int(y1)], 5, [255, 0, 255], -1)
                 cv2.line(image, [int(image.shape[1] / 2), 0], [int(image.shape[1] / 2), image.shape[0]], [0, 0, 255], 2)
-                cv2.imshow("Result", cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+                cv2.imshow("Result", image)
         else:
             mean_x = None
 

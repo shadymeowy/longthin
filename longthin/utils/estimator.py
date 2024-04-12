@@ -27,28 +27,28 @@ def main():
     while True:
         node.spin_once()
         ret, img = cap.read()
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         if not ret:
             print("Failed to get frame")
             break
 
-        pose_est, _, img_markers, goal_points = estimator.estimate(img, draw=True)
-        if pose_est is None:
-            if args.show and img_markers is not None:
-                cv2.imshow('markers', img_markers)
-                cv2.waitKey(1)
-            continue
+        pose_est, _, img_markers, goal_points, img_ud = estimator.estimate(img, draw=True)
+        mean_x, min_y = detector.process_image(img_ud, debug=args.show)
+
+        if pose_est is not None:
+            pos = pose_est.pos
+            att = pose_est.att
+            packet = EvPose(pos[0], pos[1], att[2] % 360)
+            node.publish(packet)
+            print(packet)
 
         if goal_points is not None:
             goal_area = cv2.contourArea(goal_points)
             goal_center = np.mean(goal_points, axis=0)
+            print(f"Goal area: {goal_area}, center: {goal_center}")
 
-        mean_x, min_y = detector.process_image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), debug=False)
-
-        pos = pose_est.pos
-        att = pose_est.att
-        packet = EvPose(pos[0], pos[1], att[2] % 360)
-        node.publish(packet)
-        print(packet)
+        if mean_x is not None and min_y is not None:
+            print(f"Mean x: {mean_x}, min y: {min_y}")
 
         if args.show and img_markers is not None:
             cv2.imshow('markers', img_markers)

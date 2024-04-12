@@ -67,7 +67,7 @@ class Estimator:
 
         corners2, ids = self.marker_helper.detect(img_gray)
         if ids is None:
-            return None, None, img_ud, None
+            return None, None, img_ud, None, img_ud
 
         img_markers = img_ud.copy()
         mask_goal = np.isin(ids, self.marker_goals)
@@ -126,4 +126,4 @@ class Estimator:
         if draw and goal_points is not None:
             for goal in goal_points:
                 img_markers = cv2.circle(img_markers, tuple(map(int, goal)), 3, (0, 0, 255), -1)
-        return est_pose_cam, corners3, img_markers, goal_points
+        return est_pose_cam, corners3, img_markers, goal_points, img_ud
