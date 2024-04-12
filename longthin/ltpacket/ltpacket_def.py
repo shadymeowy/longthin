@@ -458,6 +458,27 @@ class LaneVision:
 
 
 
+@dataclass
+class ButtonState:
+    index: int
+    state: int
+
+    @staticmethod
+    def from_bytes(data):
+        return ButtonState(*button_state_struct.unpack(data))
+
+    def to_bytes(self):
+        return button_state_struct.pack(
+            self.index,
+            self.state,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.BUTTON_STATE
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -477,6 +498,7 @@ ekf_state_struct = struct.Struct('fff')
 setpoint_pos_struct = struct.Struct('ff')
 goal_vision_struct = struct.Struct('fff')
 lane_vision_struct = struct.Struct('ff')
+button_state_struct = struct.Struct('BB')
 
 class LTPacketType(Enum):
     RESERVED = 0
@@ -498,6 +520,7 @@ class LTPacketType(Enum):
     SETPOINT_POS = 20
     GOAL_VISION = 21
     LANE_VISION = 22
+    BUTTON_STATE = 23
 
     @staticmethod
     def from_type(type_):
@@ -526,5 +549,6 @@ type_map = {
     LTPacketType.SETPOINT_POS: SetpointPos,
     LTPacketType.GOAL_VISION: GoalVision,
     LTPacketType.LANE_VISION: LaneVision,
+    LTPacketType.BUTTON_STATE: ButtonState,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

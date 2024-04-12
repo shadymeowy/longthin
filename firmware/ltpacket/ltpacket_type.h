@@ -123,3 +123,8 @@ struct ltpacket_lane_vision_t {
     float mean_x;
     float min_y;
 };
+
+struct ltpacket_button_state_t {
+    uint8_t index;
+    uint8_t state;
+};
