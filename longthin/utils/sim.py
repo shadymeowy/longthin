@@ -38,7 +38,14 @@ def main():
     sim_period = config.sim.dt
     cam_period = config.sim.cam_dt
     north_offset = np.deg2rad(config.sim.north_offset)
-    solver = RK4(model, 0, [0, 0, 0, 0, 0], sim_period)
+    y0 = [
+        config.sim.initial.w,
+        config.sim.initial.v,
+        np.deg2rad(config.sim.initial.theta),
+        config.sim.initial.x,
+        config.sim.initial.y
+    ]
+    solver = RK4(model, 0, y0, sim_period)
     left, right = 0, 0
     y = None
     vel_x_prev = 0

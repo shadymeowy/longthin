@@ -61,6 +61,12 @@ sim:
   north_offset: 30
   dt: 1.0e-3
   cam_dt: 0.1
+  initial:
+    w: 0.0
+    v: 0.0
+    yaw: 110.0
+    x: 0.65
+    y: 0.0
 
 markers:
   - id: 38
