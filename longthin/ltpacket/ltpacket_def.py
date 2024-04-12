@@ -345,7 +345,7 @@ class EvPose:
 class SimState:
     w: float
     v: float
-    theta: float
+    yaw: float
     x: float
     y: float
     rate: float
@@ -358,7 +358,7 @@ class SimState:
         return sim_state_struct.pack(
             self.w,
             self.v,
-            self.theta,
+            self.yaw,
             self.x,
             self.y,
             self.rate,

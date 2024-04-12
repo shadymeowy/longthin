@@ -109,7 +109,7 @@ sim_state:
   fields:
     w: f32
     v: f32
-    theta: f32
+    yaw: f32
     x: f32
     y: f32
     rate: f32
