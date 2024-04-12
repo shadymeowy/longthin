@@ -16,17 +16,17 @@ qcomp_beta:
 theta_kp:
   id: 0x03
   type: f32
-  default: 0.05
+  default: 0.03
 
 theta_ki:
   id: 0x04
   type: f32
-  default: 1e-12
+  default: 0.0
 
 ed_kp:
   id: 0x05
   type: f32
-  default: 0.8
+  default: 1.0
 
 ed_ki:
   id: 0x06

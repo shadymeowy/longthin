@@ -9,11 +9,7 @@
 #define MOTOR_RIGHT_FORWARD 13
 #define MOTOR_RIGHT_BACKWARD 12
 
-enum control_mode_t {
-	MODE_MANUAL,
-	MODE_YAW,
-	MODE_POS
-};
+enum control_mode_t { MODE_MANUAL, MODE_YAW, MODE_POS };
 
 int16_t motor_left = 0;
 int16_t motor_right = 0;
@@ -379,6 +375,25 @@ void led_process()
 	}
 }
 
+void button_init()
+{
+	pinMode(15, INPUT_PULLDOWN);
+}
+
+void button_publish()
+{
+	static int prev_state = 0;
+	int state = digitalRead(15);
+	if (state != prev_state) {
+		struct ltpacket_t packet;
+		packet.type = LTPACKET_TYPE_BUTTON_STATE;
+		packet.button_state.index = 0;
+		packet.button_state.state = state;
+		ltpacket_send(&packet, serial_write);
+		prev_state = state;
+	}
+}
+
 void setup()
 {
 	Serial.begin(115200);
@@ -387,6 +402,7 @@ void setup()
 	led_init();
 	listen_init();
 	motor_init();
+	button_init();
 }
 
 void loop()
@@ -396,6 +412,7 @@ void loop()
 	motor_update();
 	motor_debug();
 	motor_publish();
+	button_publish();
 }
 
 void setup1()
