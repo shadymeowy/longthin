@@ -41,7 +41,7 @@ def main():
     y0 = [
         config.sim.initial.w,
         config.sim.initial.v,
-        np.deg2rad(config.sim.initial.theta),
+        np.deg2rad(config.sim.initial.yaw),
         config.sim.initial.x,
         config.sim.initial.y
     ]
