@@ -2,17 +2,14 @@ import numpy as np
 
 
 class ParkingController:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.mean_x = width / 2
+    def __init__(self):
+        self.mean_x = 0
         self.active = True
 
     def control(self):
-        error = self.mean_x - self.width / 2
+        error = self.mean_x
         sgn = np.sign(error)
         error = np.abs(error)
-        error /= self.width / 2
         error **= 0.7
         error *= 1.
         error *= sgn
@@ -29,7 +26,7 @@ class ParkingController:
     def update(self, mean_x, min_y):
         if mean_x is not None:
             self.mean_x = mean_x
-        if min_y is not None and min_y/self.height >= 0.83:
+        if min_y is not None and min_y >= 0.83:
             self.active = False
-        if min_y is not None and min_y/self.height < 0.83:
+        if min_y is not None and min_y < 0.83:
             self.active = True

@@ -102,6 +102,7 @@ class ParkDetector:
                     cv2.circle(image, [int(x), int(y1)], 5, [255, 0, 0], -1)
                 cv2.circle(image, [int(mean_x), int(y1)], 5, [255, 0, 255], -1)
                 cv2.line(image, [int(image.shape[1] / 2), 0], [int(image.shape[1] / 2), image.shape[0]], [0, 0, 255], 2)
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 cv2.imshow("Result", image)
         else:
             mean_x = None

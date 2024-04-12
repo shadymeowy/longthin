@@ -43,13 +43,17 @@ def main():
             print(packet)
 
         if goal_points is not None:
-            goal_area = cv2.contourArea(goal_points)
+            goal_area = cv2.contourArea(goal_points) / (width * height)
             goal_center = np.mean(goal_points, axis=0)
+            goal_center = goal_center[0] / (0.5 * width) - 1, goal_center[1] / height
             print(f"Goal area: {goal_area}, center: {goal_center}")
 
         if mean_x is not None and min_y is not None:
+            mean_x = mean_x / (0.5 * width) - 1
+            min_y = min_y/height
             print(f"Mean x: {mean_x}, min y: {min_y}")
 
         if args.show and img_markers is not None:
+            img_markers = cv2.cvtColor(img_markers, cv2.COLOR_RGB2BGR)
             cv2.imshow('markers', img_markers)
             cv2.waitKey(1)
