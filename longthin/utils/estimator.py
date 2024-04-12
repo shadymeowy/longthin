@@ -27,14 +27,13 @@ def main():
             print("Failed to get frame")
             break
 
-        compound = estimator.estimate(img, draw=True)
-        if compound is None:
+        pose_est, _, img_markers, goal_points = estimator.estimate(img, draw=True)
+        if img_markers is None:
             if args.show:
                 cv2.imshow('markers', img)
                 cv2.waitKey(1)
             continue
 
-        pose_est, _, img_markers = compound
         pos = pose_est.pos
         att = pose_est.att
         packet = EvPose(pos[0], pos[1], att[2] % 360)
@@ -42,5 +41,7 @@ def main():
         print(packet)
 
         if args.show and img_markers is not None:
+            for goal in goal_points:
+                img_markers = cv2.circle(img_markers, tuple(map(int, goal)), 3, (0, 0, 255), -1)
             cv2.imshow('markers', img_markers)
             cv2.waitKey(1)

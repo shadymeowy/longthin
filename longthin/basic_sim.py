@@ -30,11 +30,10 @@ def main():
         camera_pose = vehicle_pose.from_frame(renderer.camera_pose)
 
         img = renderer.render_image()
-        compound = estimator.estimate(img, draw=True)
-        if compound is None:
+        pose_est, corners_pos, img_markers, _ = estimator.estimate(img, draw=True)
+        if pose_est is None:
             continue
 
-        pose_est, corners_pos, img_markers = compound
         if img_markers is not None:
             cv2.imshow('markers', img_markers)
             cv2.waitKey(1)
