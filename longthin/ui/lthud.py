@@ -16,7 +16,7 @@ to_show = [
     (ControlDebug, 'desired_yaw'),
     (SimState, 'x'),
     (SimState, 'y'),
-    (SimState, 'theta'),
+    (SimState, 'yaw'),
     (EvPose, 'x'),
     (EvPose, 'y'),
     (EvPose, 'yaw')]
