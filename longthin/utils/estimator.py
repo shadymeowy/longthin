@@ -1,10 +1,12 @@
 import argparse
 import cv2
+import numpy as np
 
 from ..node import LTNode
 from ..ltpacket import *
 from ..config import load_config
 from ..estimator import Estimator
+from ..park_detector import ParkDetector
 from ..video_source import video_source
 
 
@@ -19,6 +21,8 @@ def main():
     width, height = config.camera.model.width, config.camera.model.height
     cap = video_source(args.video, width, height)
     estimator = Estimator.from_config(config)
+    # TODO add parking parameters to config
+    detector = ParkDetector(width, height, height_offset=-100, width_offset=0)
 
     while True:
         node.spin_once()
@@ -28,11 +32,17 @@ def main():
             break
 
         pose_est, _, img_markers, goal_points = estimator.estimate(img, draw=True)
-        if img_markers is None:
-            if args.show:
-                cv2.imshow('markers', img)
+        if pose_est is None:
+            if args.show and img_markers is not None:
+                cv2.imshow('markers', img_markers)
                 cv2.waitKey(1)
             continue
+
+        if goal_points is not None:
+            goal_area = cv2.contourArea(goal_points)
+            goal_center = np.mean(goal_points, axis=0)
+
+        mean_x, min_y = detector.process_image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), debug=False)
 
         pos = pose_est.pos
         att = pose_est.att
@@ -41,7 +51,5 @@ def main():
         print(packet)
 
         if args.show and img_markers is not None:
-            for goal in goal_points:
-                img_markers = cv2.circle(img_markers, tuple(map(int, goal)), 3, (0, 0, 255), -1)
             cv2.imshow('markers', img_markers)
             cv2.waitKey(1)

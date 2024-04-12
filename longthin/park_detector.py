@@ -72,7 +72,7 @@ class ParkDetector:
         k = self.slope_limit
         y1 = image.shape[0] - self.height_offset
         inlier_count = 0
-        y_min = None
+        min_y = None
         if ln_d > 100:
             for _ in range(4):
                 line = ransac_line(pps_d, inliers, count, delta, k)
@@ -81,8 +81,8 @@ class ParkDetector:
                 # TODO: Fix this
                 inliers_ps = pps_d[inliers[:pps_d.shape[0]]]
                 mn = np.min(inliers_ps[:, 1])
-                if y_min is None or mn < y_min:
-                    y_min = mn
+                if min_y is None or mn < min_y:
+                    min_y = mn
                 inlier_count += np.sum(inliers)
 
                 x = -(y1-line["py"])/line["nx"]*line["ny"]+line["px"]
@@ -105,7 +105,7 @@ class ParkDetector:
 
         if inlier_count < self.inlier_threshold:
             mean_x = None
-        return mean_x, y_min
+        return mean_x, min_y
 
 
 def draw_line(image, px, py, nx, ny):

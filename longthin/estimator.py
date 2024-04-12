@@ -72,7 +72,7 @@ class Estimator:
         ids_goal = ids[mask]
         corners2_goal = corners2[mask]
         goal_points = corners2_goal.reshape((-1, 2))
-        goal_points = goal_points.astype(np.float64)
+        goal_points = goal_points.astype(np.float32)
 
         mask = np.isin(ids, self.marker_landmarks)
         # remove markers that have corners too close to the edges
@@ -84,8 +84,12 @@ class Estimator:
         corners2_landmark = corners2[mask]
         if draw:
             img_markers = self.marker_helper.draw(img_ud, corners2_landmark, ids_landmark)
+            for goal in goal_points:
+                img_markers = cv2.circle(img_markers, tuple(map(int, goal)), 3, (0, 0, 255), -1)
         else:
             img_markers = None
+        if corners2_goal.size == 0:
+            goal_points = None
         sorter = np.argsort(self.marker_landmarks)
         idx = sorter[np.searchsorted(self.marker_landmarks, ids_landmark, sorter=sorter)]
         if not (ids_landmark == self.marker_landmarks[idx]).all():
