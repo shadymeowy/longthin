@@ -145,3 +145,8 @@ button_state:
   fields:
     index: u8
     state: u8
+
+ekf_reset:
+  id: 0x18
+  fields:
+    reserved: u8

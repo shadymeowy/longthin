@@ -31,6 +31,9 @@ def main():
         ekf.set_imu_dvel(dvel, angle, dt)
         ekf.step()
 
+        if ekf.ekf is None:
+            return
+
         ekf_angle = np.rad2deg(ekf.angle) % 360
         est_pose_cam = Pose([ekf.x, ekf.y, 0], [0, 0, ekf_angle])
         est_pose = est_pose_cam.from_frame(camera_rel_pose.inv())
@@ -47,8 +50,14 @@ def main():
         md, ret = ekf.step()
         print(ret)
 
+    def cb_ekfreset(packet):
+        nonlocal ekf
+        print("Resetting EKF")
+        ekf = EKFAdapter()
+
     node.subscribe(Imu, cb_imu)
     node.subscribe(EvPose, cb_ev)
+    node.subscribe(EkfReset, cb_ekfreset)
 
     node.spin()
 

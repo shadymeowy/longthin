@@ -45,10 +45,18 @@ class LTControls(QWidget):
 
         self.toggle_led_button = QPushButton("Toggle LEDs")
         layout.addWidget(self.toggle_led_button)
+
+        self.send_parking_button = QPushButton("Park")
+        layout.addWidget(self.send_parking_button)
+
+        self.send_ekfreset_button = QPushButton("EKF Reset")
+        layout.addWidget(self.send_ekfreset_button)
         self.setLayout(layout)
 
         self.send_motor_button.clicked.connect(self.send_motor)
         self.send_setpoint_button.clicked.connect(self.send_setpoint)
+        self.send_parking_button.clicked.connect(self.send_parking)
+        self.send_ekfreset_button.clicked.connect(self.send_ekfreset)
         self.stop_movement_button.clicked.connect(self.stop_movement)
         self.toggle_led_button.clicked.connect(self.toggle_leds)
 
@@ -68,6 +76,12 @@ class LTControls(QWidget):
         vel = float(self.desired_velocity_input.text())
         theta = float(self.desired_heading_input.text())
         self.packet = Setpoint(vel, theta)
+
+    def send_parking(self):
+        self.node.publish(ButtonState(0, 1))
+
+    def send_ekfreset(self):
+        self.node.publish(EkfReset(0))
 
     def stop_movement(self):
         self.packet = None

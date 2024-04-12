@@ -128,3 +128,7 @@ struct ltpacket_button_state_t {
     uint8_t index;
     uint8_t state;
 };
+
+struct ltpacket_ekf_reset_t {
+    uint8_t reserved;
+};
