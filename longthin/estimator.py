@@ -33,19 +33,20 @@ class Estimator:
         for marker in config.markers:
             if marker.role == 'landmark':
                 marker_landmarks.append(marker.id)
+                marker_ids.append(marker.id)
+                pose = Pose(marker.pose.position, marker.pose.attitude)
+                s = marker.size
+                corners = np.array([
+                    [0, -s/2, -s],
+                    [0, s/2, -s],
+                    [0, s/2, 0],
+                    [0, -s/2, 0]
+                ])
+                corners = pose.from_frame(corners)
+                marker_corners.append(corners)
             elif marker.role == 'goal':
                 marker_goals.append(marker.id)
-            marker_ids.append(marker.id)
-            pose = Pose(marker.pose.position, marker.pose.attitude)
-            s = marker.size
-            corners = np.array([
-                [0, -s/2, -s],
-                [0, s/2, -s],
-                [0, s/2, 0],
-                [0, -s/2, 0]
-            ])
-            corners = pose.from_frame(corners)
-            marker_corners.append(corners)
+
         marker_corners = np.array(marker_corners)
         marker_ids = np.array(marker_ids)
         marker_landmarks = np.array(marker_landmarks)
