@@ -9,6 +9,7 @@ from .node import LTNode
 from .rate import Rate
 from .park_detector import ParkDetector
 from .video_source import video_source
+from .parking_controller import ParkingController
 try:
     from .raspicam import PiCam
 except ImportError:
