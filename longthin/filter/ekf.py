@@ -113,7 +113,7 @@ class EKFAdapter:
         self.P0 = np.diag([10., 10., 10., 10., 1e-3, 1e-3, 10., 10.])
         self.R = np.diag([0.07, 0.07, 1e-2, 1e-2])
         self.Q = np.diag([1e-4, 1e-4, 2e-2, 2e-2, 1e-7, 1e-7, 1e-6, 1e-6])
-        self.md = 2.
+        self.md = 3.
         self.x = 0
         self.y = 0
         self.angle = 0
