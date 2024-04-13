@@ -1,9 +1,10 @@
-import cv2
 import numpy as np
 import enum
 import time
 from longthin import *
 
+# Some code glued together to make the car park itself from a random position
+# TODO: Refactor this code to make it more readable and maintainable
 
 class State(enum.Enum):
     IDLE = 0
@@ -120,6 +121,7 @@ def cb_button(packet):
             node.publish(packet)
             state = State.IDLE
 
+
 node = LTNode()
 config = node.config
 state = State.IDLE
@@ -205,7 +207,11 @@ while True:
     elif state == State.TO_SPOT3:
         packet = SetpointPos(spot_x, spot_y)
         node.publish(packet)
-        if goal_area is not None and goal_area > 0.007 and mean_x is not None and np.linalg.norm([spot_x, spot_y] - ekf_pos) < 1.0:
+        if (goal_area is not None
+            and goal_area > 0.007
+            and mean_x is not None
+            and np.linalg.norm([spot_x, spot_y] - ekf_pos) < 1.0
+            ):
             state = State.PARK
     elif state == State.PARK:
         controller.update(mean_x, min_y)
