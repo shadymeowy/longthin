@@ -7,7 +7,7 @@ from .shm import *
 from .abg import alpha_beta_filter
 from .node import LTNode
 from .rate import Rate
-from .park_detector import ParkDetector
+from .lane_detector import LaneDetector
 from .video_source import video_source
 from .parking_controller import ParkingController
 try:

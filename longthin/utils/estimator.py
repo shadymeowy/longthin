@@ -5,7 +5,7 @@ import numpy as np
 from ..node import LTNode
 from ..ltpacket import *
 from ..estimator import Estimator
-from ..park_detector import ParkDetector
+from ..lane_detector import LaneDetector
 from ..video_source import video_source
 
 
@@ -22,7 +22,7 @@ def main():
     cap = video_source(args.video, width, height)
     estimator = Estimator.from_config(config)
     # TODO add parking parameters to config
-    detector = ParkDetector(width, height, params)
+    detector = LaneDetector(width, height, params)
 
     while True:
         node.spin_once()

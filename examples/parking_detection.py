@@ -1,10 +1,10 @@
 import timeit
 import os
 import cv2
-from longthin import ParkDetector
+from longthin import LaneDetector
 
-# Create a ParkDetector object
-detector = ParkDetector(1280, 720)
+# Create a LaneDetector object
+detector = LaneDetector(1280, 720)
 
 # Load images from a directory and process them
 path = "images/"
