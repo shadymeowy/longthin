@@ -1,15 +1,27 @@
 import time
 import numpy as np
 
+from .ltpacket import *
+
 
 class ParkingController:
-    def __init__(self, params):
-        self.params = params
+    def __init__(self, node):
+        self.node = node
+        self.params = node.params
         self.mean_x = 0
-        self.active = True
+        self.enabled = False
+        self._active = True
         self.last_time = None
         self.e_sum = 0
         self.e_last = 0
+
+        self.node.subscribe(LaneVision, self.cb_lane_vision)
+
+    def enable(self):
+        self.enabled = True
+
+    def disable(self):
+        self.enabled = False
 
     def control(self):
         t = time.time()
@@ -40,14 +52,19 @@ class ParkingController:
         u_l = np.clip(u_l, 0, 1.0)
         u_r = np.clip(u_r, 0, 1.0)
 
-        if not self.active:
+        if not self._active:
             return 0, 0
         return u_l, u_r
 
-    def update(self, mean_x, min_y):
+    def cb_lane_vision(self, packet):
+        mean_x = packet.mean_x
+        min_y = packet.min_y
         if mean_x is not None:
             self.mean_x = mean_x
         if min_y is not None and min_y >= 0.83:
-            self.active = False
+            self._active = False
         if min_y is not None and min_y < 0.83:
-            self.active = True
+            self._active = True
+        left, right = self.control()
+        packet = Motor(left, right)
+        self.node.publish(packet)

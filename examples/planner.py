@@ -192,7 +192,7 @@ while True:
         if goal_x is not None and abs(goal_x) < 0.5:
             state = State.TO_SPOT
     elif state == State.TO_SPOT:
-        controller.active = True
+        controller._active = True
         controller.update(goal_x, 0)
         left, right = controller.control()
         packet = Motor(left, right)
@@ -218,7 +218,7 @@ while True:
         left, right = controller.control()
         packet = Motor(left, right)
         node.publish(packet)
-        if not controller.active:
+        if not controller._active:
             packet = Motor(0, 0)
             node.publish(packet)
             state = State.IDLE
