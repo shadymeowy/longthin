@@ -10,12 +10,14 @@ class ParkingController:
         self.params = node.params
         self.mean_x = 0
         self.enabled = False
-        self._active = True
+        self.is_parking = True
         self.last_time = None
         self.e_sum = 0
         self.e_last = 0
+        self.to_goal = False
 
         self.node.subscribe(LaneVision, self.cb_lane_vision)
+        self.node.subscribe(GoalVision, self.cb_goal_vision)
 
     def enable(self):
         self.enabled = True
@@ -52,19 +54,36 @@ class ParkingController:
         u_l = np.clip(u_l, 0, 1.0)
         u_r = np.clip(u_r, 0, 1.0)
 
-        if not self._active:
+        if not self.is_parking:
             return 0, 0
         return u_l, u_r
 
     def cb_lane_vision(self, packet):
+        if not self.enabled:
+            return
+        if self.to_goal:
+            return
         mean_x = packet.mean_x
         min_y = packet.min_y
         if mean_x is not None:
             self.mean_x = mean_x
         if min_y is not None and min_y >= 0.83:
-            self._active = False
+            self.is_parking = False
         if min_y is not None and min_y < 0.83:
-            self._active = True
+            self.is_parking = True
+        left, right = self.control()
+        packet = Motor(left, right)
+        self.node.publish(packet)
+
+    def cb_goal_vision(self, packet):
+        if not self.enabled:
+            return
+        if not self.to_goal:
+            return
+        self.is_parking = True
+        self.mean_x = packet.center_x
+        self.goal_area = packet.area
+
         left, right = self.control()
         packet = Motor(left, right)
         self.node.publish(packet)
