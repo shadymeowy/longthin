@@ -15,40 +15,30 @@ class Mode(enum.Enum):
 
 
 def make_controller(params):
-    e_d_sum = 0
-    e_theta_sum = 0
-    e_v_sum = 0
-    e_w_sum = 0
     last_t = 0
+    e_theta_sum = 0
+    e_theta_last = 0
 
-    def controller(t, current_d, current_yaw, desired_d, desired_yaw, current_vel, current_w):
-        nonlocal e_d_sum, e_theta_sum, e_v_sum, e_w_sum, last_t
+    def controller(t, current_yaw, desired_d, desired_yaw):
+        nonlocal last_t, e_theta_sum, e_theta_last
         dt = t - last_t
         last_t = t
 
-        e_d = desired_d - current_d
         e_theta = (desired_yaw % 360) - (current_yaw % 360)
         e_theta = (e_theta % 360)
         if e_theta > 180:
             e_theta -= 360
 
-        e_d_sum += e_d * dt
-        desired_v = params.ed_kp * e_d + params.ed_ki * e_d_sum
+        u_v = params.ed_kp * desired_d
 
         e_theta_sum += e_theta * dt
-        desired_w = params.theta_kp * e_theta + params.theta_ki * e_theta_sum
+        e_theta_sum = np.clip(e_theta_sum, -params.theta_ki_limit, params.theta_ki_limit)
+        e_theta_deriv = (e_theta - e_theta_last) / dt
+        e_theta_last = e_theta
+        u_w = params.theta_kp * e_theta + params.theta_ki * e_theta_sum + params.theta_kd * e_theta_deriv
 
-        e_v = desired_v - current_vel
-        e_v_sum += e_v * dt
-
-        e_w = desired_w - current_w
-        e_w_sum += e_w * dt
-
-        u_v = params.vdesired_kp * e_v + params.vdesired_ki * e_v_sum
-        u_w = params.wdesired_kp * e_w + params.wdesired_ki * e_w_sum
-
-        u_l = (u_v + params.wheel_distance * u_w / 2) / params.wheel_radius
-        u_r = (u_v - params.wheel_distance * u_w / 2) / params.wheel_radius
+        u_l = u_v + u_w / 2
+        u_r = u_v - u_w / 2
 
         if desired_d == 0:
             u_l = 0
@@ -61,7 +51,7 @@ def make_controller(params):
             u_r = 0
         u_l = np.clip(u_l, 0, 1)
         u_r = np.clip(u_r, 0, 1)
-        return u_v, u_w, u_l, u_r, desired_v, desired_w
+        return u_v, u_w, u_l, u_r
     return controller
 
 
@@ -75,11 +65,10 @@ def main():
     last_setpoint_time = 0
     u_l, u_r = 0, 0
     desired_d, desired_yaw = 0, 0
-    current_d, current_yaw = 0, 0
-    current_vel, current_w = 0, 0
+    current_yaw = 0
     current_x, current_y = 0, 0
     target_x, target_y = 0, 0
-    u_v, u_w, u_l, u_r, desired_vel, desired_w = 0, 0, 0, 0, 0, 0
+    u_v, u_w, u_l, u_r = 0, 0, 0, 0
     node = LTNode()
     params = node.params
     controller = make_controller(params)
@@ -113,14 +102,14 @@ def main():
         last_setpoint_time = time.time()
 
     def cb_imu(packet):
-        nonlocal current_d, current_yaw, ekf_mode
+        nonlocal current_yaw, ekf_mode
         if ekf_mode:
             return
         rot = R.from_quat([packet.qx, packet.qy, packet.qz, packet.qw])
         current_yaw = rot.as_euler('xyz', degrees=True)[2]
 
     def cb_ekf_state(packet):
-        nonlocal current_d, current_yaw, current_x, current_y, ekf_mode, last_ekf_time
+        nonlocal current_yaw, current_x, current_y, ekf_mode, last_ekf_time
         current_x = packet.x
         current_y = packet.y
         current_yaw = packet.yaw
@@ -141,20 +130,18 @@ def main():
 
         controller_timeout = params.controller_timeout / 1e6
         if t - last_setpoint_time > controller_timeout:
-            manual_mode = 1
+            mode = Mode.MANUAL
             u_l, u_r = 0, 0
 
         if t - last_ekf_time > controller_timeout:
             ekf_mode = False
 
         if mode == Mode.POS:
-            # maybe we should use the ekf position
             desired_d = 1.0
             desired_yaw = np.arctan2(target_y - current_y, target_x - current_x) * 180 / np.pi
 
         if not mode == Mode.MANUAL:
-            u_v, u_w, u_l, u_r, desired_vel, desired_w = controller(
-                t, current_d, current_yaw, desired_d, desired_yaw, current_vel, current_w)
+            u_v, u_w, u_l, u_r = controller(t, current_yaw, desired_d, desired_yaw)
 
         out_period = params.motor_output_publish_period / 1e6
         debug_period = params.control_debug_publish_period / 1e6
@@ -168,14 +155,9 @@ def main():
             last_debug = t
             if params.control_debug_enable:
                 packet_debug = ControlDebug(
-                    current_d,
                     current_yaw % 360,
                     desired_d,
                     desired_yaw % 360,
-                    current_vel,
-                    current_w,
-                    desired_vel,
-                    desired_w,
                     u_v, u_w,
                     u_r, u_l)
                 node.publish(packet_debug)

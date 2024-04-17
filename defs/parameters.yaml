@@ -16,52 +16,52 @@ qcomp_beta:
 theta_kp:
   id: 0x03
   type: f32
-  default: 0.03
+  default: 0.1
 
 theta_ki:
   id: 0x04
   type: f32
-  default: 0.0
+  default: 5.0e-3
 
-ed_kp:
+theta_kd:
   id: 0x05
   type: f32
-  default: 1.0
+  default: 0.1
 
-ed_ki:
+theta_ki_limit:
   id: 0x06
   type: f32
-  default: 0.0
+  default: 30.0
 
-vdesired_kp:
+ed_kp:
   id: 0x07
   type: f32
   default: 1.0
 
-vdesired_ki:
+filler0:
   id: 0x08
   type: f32
   default: 0.0
 
-wdesired_kp:
+filler1:
   id: 0x09
   type: f32
-  default: 1.0
+  default: 0.0
 
-wdesired_ki:
+filler2:
   id: 0x0a
   type: f32
   default: 0.0
 
-wheel_radius:
+filler3:
   id: 0x0b
   type: f32
-  default: 1.0
+  default: 0.0
 
-wheel_distance:
+filler4:
   id: 0x0c
   type: f32
-  default: 1.0
+  default: 0.0
 
 blink_period:
   id: 0x0d

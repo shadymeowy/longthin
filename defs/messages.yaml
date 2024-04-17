@@ -61,14 +61,9 @@ led:
 control_debug:
   id: 0xc
   fields:
-    current_d: f32
     current_yaw: f32
     desired_d: f32
     desired_yaw: f32
-    current_vel: f32
-    current_w: f32
-    desired_vel: f32
-    desired_w: f32
     u_v: f32
     u_w: f32
     u_r: f32

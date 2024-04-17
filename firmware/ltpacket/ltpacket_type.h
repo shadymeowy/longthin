@@ -54,14 +54,9 @@ struct ltpacket_led_t {
 };
 
 struct ltpacket_control_debug_t {
-    float current_d;
     float current_yaw;
     float desired_d;
     float desired_yaw;
-    float current_vel;
-    float current_w;
-    float desired_vel;
-    float desired_w;
     float u_v;
     float u_w;
     float u_r;

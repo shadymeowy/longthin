@@ -197,14 +197,9 @@ class Led:
 
 @dataclass
 class ControlDebug:
-    current_d: float
     current_yaw: float
     desired_d: float
     desired_yaw: float
-    current_vel: float
-    current_w: float
-    desired_vel: float
-    desired_w: float
     u_v: float
     u_w: float
     u_r: float
@@ -216,14 +211,9 @@ class ControlDebug:
 
     def to_bytes(self):
         return control_debug_struct.pack(
-            self.current_d,
             self.current_yaw,
             self.desired_d,
             self.desired_yaw,
-            self.current_vel,
-            self.current_w,
-            self.desired_vel,
-            self.desired_w,
             self.u_v,
             self.u_w,
             self.u_r,
@@ -506,7 +496,7 @@ motor_raw_struct = struct.Struct('hh')
 setpoint_struct = struct.Struct('ff')
 setparam_struct = struct.Struct('if')
 led_struct = struct.Struct('BB')
-control_debug_struct = struct.Struct('ffffffffffff')
+control_debug_struct = struct.Struct('fffffff')
 setparamu_struct = struct.Struct('iI')
 setparami_struct = struct.Struct('ii')
 motor_output_struct = struct.Struct('ff')

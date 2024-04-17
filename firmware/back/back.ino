@@ -18,15 +18,9 @@ bool ekf_mode = false;
 long last_ekf_time = 0;
 long last_setpoint_time = 0;
 
-float current_d = 0;
 float current_yaw = 0;
 float desired_d = 0;
 float desired_yaw = 0;
-
-float current_vel = 0;
-float current_w = 0;
-float desired_v = 0;
-float desired_w = 0;
 
 float current_x = 0;
 float current_y = 0;
@@ -92,17 +86,13 @@ void motor_update()
 	static float last_time = 0;
 	float current_time = micros();
 	float dt = (current_time - last_time) / 1e6;
+	last_time = current_time;
 
 	float ed_kp = ltparams_get(LTPARAMS_ED_KP);
-	float ed_ki = ltparams_get(LTPARAMS_ED_KI);
 	float theta_kp = ltparams_get(LTPARAMS_THETA_KP);
+	float theta_kd = ltparams_get(LTPARAMS_THETA_KD);
 	float theta_ki = ltparams_get(LTPARAMS_THETA_KI);
-	float vdesired_kp = ltparams_get(LTPARAMS_VDESIRED_KP);
-	float vdesired_ki = ltparams_get(LTPARAMS_VDESIRED_KI);
-	float wdesired_kp = ltparams_get(LTPARAMS_WDESIRED_KP);
-	float wdesired_ki = ltparams_get(LTPARAMS_WDESIRED_KI);
-	float wheel_distance = ltparams_get(LTPARAMS_WHEEL_DISTANCE);
-	float wheel_radius = ltparams_get(LTPARAMS_WHEEL_RADIUS);
+	float theta_ki_limit = ltparams_get(LTPARAMS_THETA_KI_LIMIT);
 
 	double controller_timeout = ltparams_getu(LTPARAMS_CONTROLLER_TIMEOUT) / 1e3;
 	if (millis() - last_setpoint_time > controller_timeout) {
@@ -123,34 +113,27 @@ void motor_update()
 	}
 
 	if (mode != MODE_MANUAL) {
-		float e_d = desired_d - current_d;
 		float e_theta = modby2pi(desired_yaw) - modby2pi(current_yaw);
 		e_theta = modby2pi(e_theta);
 		if (e_theta > 180) {
 			e_theta -= 360;
 		}
+        u_v = ed_kp * desired_d;
 
-		static float e_d_sum = 0;
-		e_d_sum += e_d * dt;
-		desired_v = ed_kp * e_d + ed_ki * e_d_sum;
-
+		static float e_theta_last = 0;
 		static float e_theta_sum = 0;
-		e_theta_sum += e_theta * dt;
-		desired_w = theta_kp * e_theta + theta_ki * e_theta_sum;
+        e_theta_sum += e_theta * dt;
+		if (e_theta_sum > theta_ki_limit) {
+			e_theta_sum = theta_ki_limit;
+		} else if (e_theta_sum < -theta_ki_limit) {
+			e_theta_sum = -theta_ki_limit;
+		}
+        float e_theta_deriv = (e_theta - e_theta_last) / dt;
+        e_theta_last = e_theta;
+        u_w = theta_kp * e_theta + theta_ki * e_theta_sum + theta_kd * e_theta_deriv;
 
-		static float e_v_sum = 0;
-		float e_v = desired_v - current_vel;
-		e_v_sum += e_v * dt;
-
-		static float e_w_sum = 0;
-		float e_w = desired_w - current_w;
-		e_w_sum += e_w * dt;
-
-		u_v = vdesired_kp * e_v + vdesired_ki * e_v_sum;
-		u_w = wdesired_kp * e_w + wdesired_ki * e_w_sum;
-
-		u_l = (u_v + wheel_distance * u_w / 2) / wheel_radius;
-		u_r = (u_v - wheel_distance * u_w / 2) / wheel_radius;
+        u_l = u_v + u_w / 2;
+        u_r = u_v - u_w / 2;
 		if (desired_d == 0) {
 			u_l = 0;
 			u_r = 0;
@@ -197,14 +180,9 @@ void motor_debug()
 	struct ltpacket_t packet;
 	packet.type = LTPACKET_TYPE_CONTROL_DEBUG;
 	struct ltpacket_control_debug_t *p = &packet.control_debug;
-	p->current_d = current_d;
 	p->current_yaw = modby2pi(current_yaw);
 	p->desired_d = desired_d;
 	p->desired_yaw = modby2pi(desired_yaw);
-	p->current_vel = current_vel;
-	p->current_w = current_w;
-	p->desired_vel = desired_v;
-	p->desired_w = desired_w;
 	p->u_v = u_v;
 	p->u_w = u_w;
 	p->u_r = u_r;
@@ -333,7 +311,6 @@ void listen_handle(struct ltpacket_t *packet)
 			q[3] = packet->imu.qz;
 			euler_from_quat(q, rpy);
 			current_yaw = rpy[2];
-			current_d = 0;
 		}
 		break;
 	case LTPACKET_TYPE_EKF_STATE:

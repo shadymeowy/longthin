@@ -17,14 +17,14 @@ class LTParamType(Enum):
     QCOMP_BETA = 0x2
     THETA_KP = 0x3
     THETA_KI = 0x4
-    ED_KP = 0x5
-    ED_KI = 0x6
-    VDESIRED_KP = 0x7
-    VDESIRED_KI = 0x8
-    WDESIRED_KP = 0x9
-    WDESIRED_KI = 0xa
-    WHEEL_RADIUS = 0xb
-    WHEEL_DISTANCE = 0xc
+    THETA_KD = 0x5
+    THETA_KI_LIMIT = 0x6
+    ED_KP = 0x7
+    FILLER0 = 0x8
+    FILLER1 = 0x9
+    FILLER2 = 0xa
+    FILLER3 = 0xb
+    FILLER4 = 0xc
     BLINK_PERIOD = 0xd
     MADGWICK_BETA = 0xe
     IMU_FILTER_TYPE = 0xf
@@ -73,14 +73,14 @@ param_type_dict = {
     LTParamType.QCOMP_BETA: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.THETA_KP: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.THETA_KI: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.THETA_KD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.THETA_KI_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.ED_KP: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.ED_KI: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.VDESIRED_KP: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.VDESIRED_KI: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.WDESIRED_KP: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.WDESIRED_KI: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.WHEEL_RADIUS: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.WHEEL_DISTANCE: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.FILLER0: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.FILLER1: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.FILLER2: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.FILLER3: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.FILLER4: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.BLINK_PERIOD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.MADGWICK_BETA: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.IMU_FILTER_TYPE: LTParamValueType.LTPARAMS_TYPE_UINT32,
@@ -127,16 +127,16 @@ param_default_dict = {
     LTParamType.RESERVED: 0,
     LTParamType.QCOMP_ALPHA: 0.05,
     LTParamType.QCOMP_BETA: 0.97,
-    LTParamType.THETA_KP: 0.03,
-    LTParamType.THETA_KI: 0.0,
+    LTParamType.THETA_KP: 0.1,
+    LTParamType.THETA_KI: 0.005,
+    LTParamType.THETA_KD: 0.1,
+    LTParamType.THETA_KI_LIMIT: 30.0,
     LTParamType.ED_KP: 1.0,
-    LTParamType.ED_KI: 0.0,
-    LTParamType.VDESIRED_KP: 1.0,
-    LTParamType.VDESIRED_KI: 0.0,
-    LTParamType.WDESIRED_KP: 1.0,
-    LTParamType.WDESIRED_KI: 0.0,
-    LTParamType.WHEEL_RADIUS: 1.0,
-    LTParamType.WHEEL_DISTANCE: 1.0,
+    LTParamType.FILLER0: 0.0,
+    LTParamType.FILLER1: 0.0,
+    LTParamType.FILLER2: 0.0,
+    LTParamType.FILLER3: 0.0,
+    LTParamType.FILLER4: 0.0,
     LTParamType.BLINK_PERIOD: 0.0,
     LTParamType.MADGWICK_BETA: 5,
     LTParamType.IMU_FILTER_TYPE: 3,
@@ -187,14 +187,14 @@ class LTParameters:
     qcomp_beta: float
     theta_kp: float
     theta_ki: float
+    theta_kd: float
+    theta_ki_limit: float
     ed_kp: float
-    ed_ki: float
-    vdesired_kp: float
-    vdesired_ki: float
-    wdesired_kp: float
-    wdesired_ki: float
-    wheel_radius: float
-    wheel_distance: float
+    filler0: float
+    filler1: float
+    filler2: float
+    filler3: float
+    filler4: float
     blink_period: float
     madgwick_beta: float
     imu_filter_type: int
