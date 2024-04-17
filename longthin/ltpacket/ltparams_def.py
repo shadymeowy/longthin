@@ -20,10 +20,10 @@ class LTParamType(Enum):
     THETA_KD = 0x5
     THETA_KI_LIMIT = 0x6
     ED_KP = 0x7
-    FILLER0 = 0x8
-    FILLER1 = 0x9
-    FILLER2 = 0xa
-    FILLER3 = 0xb
+    PARKING_KP = 0x8
+    PARKING_KI = 0x9
+    PARKING_KD = 0xa
+    PARKING_KI_LIMIT = 0xb
     FILLER4 = 0xc
     BLINK_PERIOD = 0xd
     MADGWICK_BETA = 0xe
@@ -76,10 +76,10 @@ param_type_dict = {
     LTParamType.THETA_KD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.THETA_KI_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.ED_KP: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.FILLER0: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.FILLER1: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.FILLER2: LTParamValueType.LTPARAMS_TYPE_FLOAT,
-    LTParamType.FILLER3: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.PARKING_KP: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.PARKING_KI: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.PARKING_KD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.PARKING_KI_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.FILLER4: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.BLINK_PERIOD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.MADGWICK_BETA: LTParamValueType.LTPARAMS_TYPE_FLOAT,
@@ -132,10 +132,10 @@ param_default_dict = {
     LTParamType.THETA_KD: 0.1,
     LTParamType.THETA_KI_LIMIT: 30.0,
     LTParamType.ED_KP: 1.0,
-    LTParamType.FILLER0: 0.0,
-    LTParamType.FILLER1: 0.0,
-    LTParamType.FILLER2: 0.0,
-    LTParamType.FILLER3: 0.0,
+    LTParamType.PARKING_KP: 2.5,
+    LTParamType.PARKING_KI: 1e-05,
+    LTParamType.PARKING_KD: 5.0,
+    LTParamType.PARKING_KI_LIMIT: 100.0,
     LTParamType.FILLER4: 0.0,
     LTParamType.BLINK_PERIOD: 0.0,
     LTParamType.MADGWICK_BETA: 5,
@@ -174,7 +174,7 @@ param_default_dict = {
     LTParamType.ACCEL_CALIB_M21: 0.0,
     LTParamType.ACCEL_CALIB_M22: 9.72531012,
     LTParamType.CONTROLLER_TIMEOUT: 1000000,
-    LTParamType.LANE_LOOKAHEAD: -100.0,
+    LTParamType.LANE_LOOKAHEAD: -175.0,
     LTParamType.LANE_INLIER_THRESHOLD: 100,
     LTParamType.LANE_SLOPE_LIMIT: 0.5,
 }
@@ -190,10 +190,10 @@ class LTParameters:
     theta_kd: float
     theta_ki_limit: float
     ed_kp: float
-    filler0: float
-    filler1: float
-    filler2: float
-    filler3: float
+    parking_kp: float
+    parking_ki: float
+    parking_kd: float
+    parking_ki_limit: float
     filler4: float
     blink_period: float
     madgwick_beta: float

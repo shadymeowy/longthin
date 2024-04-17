@@ -5,8 +5,8 @@ from longthin import *
 # The controller and lane vision can be tuned by related parameters
 
 # Create the controller and node
-controller = ParkingController()
 node = LTNode()
+controller = ParkingController(node.params)
 
 
 # Callback function for the lane vision

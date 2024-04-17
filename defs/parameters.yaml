@@ -38,25 +38,25 @@ ed_kp:
   type: f32
   default: 1.0
 
-filler0:
+parking_kp:
   id: 0x08
   type: f32
-  default: 0.0
+  default: 2.5
 
-filler1:
+parking_ki:
   id: 0x09
   type: f32
-  default: 0.0
+  default: 1.0e-5
 
-filler2:
+parking_kd:
   id: 0x0a
   type: f32
-  default: 0.0
+  default: 5.0
 
-filler3:
+parking_ki_limit:
   id: 0x0b
   type: f32
-  default: 0.0
+  default: 100.0
 
 filler4:
   id: 0x0c
@@ -251,7 +251,7 @@ controller_timeout:
 lane_lookahead:
   id: 0x32
   type: f32
-  default: -100.0
+  default: -175.0
 
 lane_inlier_threshold:
   id: 0x33
