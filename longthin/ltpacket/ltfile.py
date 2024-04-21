@@ -35,6 +35,8 @@ class LTFileReader:
             packet = decode(byts)
         except ValueError as e:
             raise ValueError('Invalid packet', e)
+        except struct.error as e:
+            raise Exception('Decoding error (packet changed?)', e)
         if self.timestamp:
             return t, packet
         else:

@@ -43,7 +43,16 @@ def main():
             frames.append((t, f))
     frames.sort(key=lambda x: -x[0])
 
-    t_packet, packet = file.read()
+    def try_read_packet():
+        while True:
+            try:
+                compound = file.read()
+                break
+            except Exception as e:
+                print('Error reading packet', e)
+        return compound
+
+    t_packet, packet = try_read_packet()
     if len(frames) > 0:
         t_frame, frame = frames.pop()
     else:
@@ -56,7 +65,7 @@ def main():
         if t >= t_packet and packet is not None:
             if typs is None or packet.type in typs:
                 node.publish(packet)
-            compound = file.read()
+            compound = try_read_packet()
             if compound is None:
                 packet = None
             else:
