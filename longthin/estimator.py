@@ -14,7 +14,6 @@ class Estimator:
     marker_landmarks: np.ndarray = None
     marker_goals: np.ndarray = None
     marker_corners: np.ndarray = None
-    camera_params: CameraParams = None
     dist_params: Distortion = None
     camera_rel_pose: Pose = None
     marker_dict = cv2.aruco.DICT_4X4_50
@@ -23,7 +22,6 @@ class Estimator:
     @staticmethod
     def from_config(config):
         dist_params = Distortion.from_params(**config.camera.model._asdict())
-        camera_params = dist_params.camera_params_2
         camera_rel_pose = Pose(config.camera.pose.position, config.camera.pose.attitude)
 
         marker_corners = []
@@ -57,7 +55,6 @@ class Estimator:
             marker_landmarks,
             marker_goals,
             marker_corners,
-            camera_params,
             dist_params,
             camera_rel_pose,
         )
