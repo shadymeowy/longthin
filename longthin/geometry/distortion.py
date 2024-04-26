@@ -35,11 +35,11 @@ class Distortion:
     def __post_init__(self):
         size = (self.width, self.height)
         self.m_intrinsics_2, self.roi = cv2.getOptimalNewCameraMatrix(
-            self.m_intrinsics, self.m_distortion, size, self.alpha, size)
-        self.mapx, self.mapy = cv2.initUndistortRectifyMap(
-            self.m_intrinsics, self.m_distortion, None, self.m_intrinsics_2, size, 5)
+            self.m_intrinsics, self.m_distortion, size, self.alpha)
         self.width2 = self.roi[2]
         self.height2 = self.roi[3]
+        self.mapx, self.mapy = cv2.initUndistortRectifyMap(
+            self.m_intrinsics, self.m_distortion, None, self.m_intrinsics_2, size, 5)
 
         xs, ys = np.meshgrid(range(self.width), range(self.height))
         points_distorted = np.array(
@@ -57,10 +57,10 @@ class Distortion:
             self.m_intrinsics_2, self.width2, self.height2)
 
     @staticmethod
-    def from_params(fx, fy, cx, cy, width, height, k1, k2, p1, p2, k3, alpha=0.):
+    def from_params(fx, fy, cx, cy, width, height, k1, k2, p1, p2, k3):
         m_intrinsics = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
         m_distortion = np.array([k1, k2, p1, p2, k3])
-        return Distortion(m_intrinsics, m_distortion, width, height, alpha)
+        return Distortion(m_intrinsics, m_distortion, width, height)
 
     def undistort(self, image: np.ndarray) -> np.ndarray:
         image_ud = cv2.remap(
@@ -77,8 +77,8 @@ class Distortion:
         # image_rd[..., 0] = 255
         # image_rd[..., 2] = 255
         x, y, w, h = self.roi
-        image_rd[h_pad + y:h_pad + y + h + 1,
-                 w_pad + x:w_pad + x + w + 1] = image
+        image_rd[h_pad + y:h_pad + y + h,
+                 w_pad + x:w_pad + x + w] = image
         mapx_re = self.mapx_re + w_pad
         mapy_re = self.mapy_re + h_pad
         image_rd = cv2.remap(image_rd, mapx_re, mapy_re, cv2.INTER_LINEAR)
@@ -99,7 +99,7 @@ class Distortion:
 
 
 if __name__ == '__main__':
-    image_distorted = cv2.imread('other/distorted.png')
+    image_distorted = cv2.imread('other/distorted.jpg')
     distortion = Distortion.from_file('other/calibration.txt')
     image_undistorted = distortion.undistort(image_distorted)
     image_redistorted = distortion.distort(image_undistorted)

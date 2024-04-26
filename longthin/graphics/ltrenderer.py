@@ -15,14 +15,16 @@ class LTRenderer:
         self.camera_pose = Pose(config.camera.pose.position, config.camera.pose.attitude)
         self.vehicle_pose = Pose([0, 0, 0], [0, 0, 0])
         self.dist_params = Distortion.from_params(**config.camera.model._asdict())
-        self.camera_params = self.dist_params.camera_params
         self.camera_params_2 = self.dist_params.camera_params_2
 
-        hfov = self.camera_params.hfov
-        vfov = self.camera_params.vfov
+        hfov = self.camera_params_2.hfov
+        vfov = self.camera_params_2.vfov
+        cx = self.camera_params_2.cxf
+        cy = self.camera_params_2.cyf
         self.camera_vehicle = drawing3d.Camera()
-        self.camera_vehicle.set_perspective(np.deg2rad(hfov), np.deg2rad(vfov))
-        self.camera_vehicle.viewport = self.camera_params.width, self.camera_params.height
+        self.camera_vehicle.preserve_ratio_set(False)
+        self.camera_vehicle.set_perspective2(np.deg2rad(hfov), np.deg2rad(vfov), cx, cy)
+        self.camera_vehicle.viewport = self.camera_params_2.width, self.camera_params_2.height
 
         self.drawlist_area = LTDrawList()
         self.drawlist_vehicle = LTDrawList()
@@ -99,7 +101,7 @@ class LTRenderer:
             0, h/2+strip_w/2, 0, w + 2*strip_w, strip_w, 0.1, 0.1)
         self.drawlist_area.plane(0, -h/2-strip_w/2, 0,
                                  w + 2*strip_w, strip_w, 0.1, 0.1)
-        
+
         # strips surrounding the parking spot
         self.drawlist_area.style2(1., .40, .01, 1., 1.)
         spot_w = self.config.renderer.spot.width
@@ -159,7 +161,7 @@ class LTRenderer:
         self.update_coordinates()
         # draw camera view first
         self.drawlist_vehicle.draw_camera_field(self.camera_pose,
-                                                self.camera_params)
+                                                self.camera_params_2)
 
         # draw chassis
         l = self.config.renderer.chassis.length
@@ -200,14 +202,13 @@ class LTRenderer:
         self.drawlist_vehicle.style2(1., 0., 0., 1., 4.)
         # line from top of chassis to camera
         self.drawlist_vehicle.line(x, y, - h, x, y, z)
-        self.drawlist_vehicle.draw_camera(self.camera_pose, self.camera_params)
+        self.drawlist_vehicle.draw_camera(self.camera_pose, self.camera_params_2)
         self.drawlist_vehicle.save()
 
     def render_image(self):
         img = drawing3d.DrawList.save_buffer(self.drawlist_area, self.camera_vehicle)
-        img = img.reshape((self.camera_params.height, self.camera_params.width, 4))
+        img = img.reshape((self.camera_params_2.height, self.camera_params_2.width, 4))
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
-        img = cv2.resize(img, (self.camera_params.width, self.camera_params.height))
         img = self.dist_params.distort(img)
         return img
 
