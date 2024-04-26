@@ -10,9 +10,11 @@ class CameraParams:
     vfov: float
     width: float
     height: float
+    cxf: float = None
+    cyf: float = None
 
     def copy(self):
-        return CameraParams(self.hfov, self.vfov, self.width, self.height)
+        return CameraParams(self.hfov, self.vfov, self.width, self.height, self.cxf, self.cyf)
 
     @property
     def fx(self):
@@ -24,26 +26,23 @@ class CameraParams:
 
     @property
     def cx(self):
-        return self.width / 2
+        return self.width * self.cxf
 
     @property
     def cy(self):
-        return self.height / 2
+        return self.height * self.cyf
 
     @property
     def image_size(self):
         return np.array([self.width, self.height])
 
     @staticmethod
-    def from_params(fx, fy, cx, cy, width=None, height=None):
-        if width is None:
-            width = cx * 2
-        if height is None:
-            height = cy * 2
-
+    def from_params(fx, fy, cx, cy, width, height):
         hfov = np.rad2deg(2 * np.arctan(width / (2 * fx)))
         vfov = np.rad2deg(2 * np.arctan(height / (2 * fy)))
-        return CameraParams(hfov, vfov, width, height)
+        cxf = cx / width
+        cyf = cy / height
+        return CameraParams(hfov, vfov, width, height, cxf, cyf)
 
     @staticmethod
     def from_matrix(mat, width=None, height=None):
@@ -54,10 +53,11 @@ class CameraParams:
         return CameraParams.from_params(fx, fy, cx, cy, width, height)
 
     def scale(self, scale):
-        return CameraParams(self.hfov, self.vfov, int(self.width * scale), int(self.height * scale))
+        return CameraParams(
+            self.hfov, self.vfov, int(self.width * scale), int(self.height * scale), self.cxf, self.cyf)
 
     def to_params(self):
-        return self.fx, self.fy, self.cx, self.cy
+        return self.fx, self.fy, self.cx, self.cy, self.width, self.height
 
     def to_matrix(self):
         return np.array([
@@ -101,8 +101,8 @@ class CameraParams:
     def rays(self, att, img_points):
         vec, vec_v, vec_h = self.image_plane_vecs(att)
         rays = np.array(img_points, np.float64)
-        rays[:, 0] = (rays[:, 0] / self.width - 0.5) * 2
-        rays[:, 1] = (rays[:, 1] / self.height - 0.5) * 2
+        rays[:, 0] = (rays[:, 0] / self.width - self.cxf) * 2
+        rays[:, 1] = (rays[:, 1] / self.height - self.cyf) * 2
         rays = rays[:, 0:1] * vec_h + rays[:, 1:2] * vec_v + vec
         rays /= np.linalg.norm(rays, axis=1, keepdims=True)
         return rays
