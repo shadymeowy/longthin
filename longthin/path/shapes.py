@@ -21,7 +21,11 @@ class Arc:
     length: float = None  # length
 
     def __post_init__(self):
-        self.theta = angle(self.v1, self.v2, self.n)
+        # TODO: fix this hack
+        if np.allclose(self.v1, self.v2):
+            self.theta = 2*np.pi
+        else:
+            self.theta = angle(self.v1, self.v2, self.n)
         self.n = self.n / np.linalg.norm(self.n)
         self.q1 = self.p + self.v1
         self.q2 = self.p + self.v2
