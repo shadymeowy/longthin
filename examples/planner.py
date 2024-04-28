@@ -57,7 +57,8 @@ goal_x = None
 goal_area = None
 
 
-controller = ParkingController(node)
+pcontrol = ParkingController(node)
+dcontrol = DubinsController(node)
 parking_est = ParkingEstimator(node)
 node.subscribe(LaneVision, cb_lane_vision)
 node.subscribe(EkfState, cb_ekf)
@@ -69,26 +70,34 @@ while True:
 
     print(state)
     if state == State.IDLE:
+        pcontrol.enabled = False
+        dcontrol.enabled = False
+        packet = Motor(0, 0)
+        node.publish(packet)
         if button_park:
-            state = State.TO_CENTER
             node.publish(EkfReset(0))
             parking_est.unsubscribe()
             parking_est = ParkingEstimator(node)
-            controller.disable()
             button_park = False
             goal_x = None
             goal_area = None
             mean_x = None
             min_y = None
+
+            pcontrol.enabled = False
+            pcontrol.is_parking = True
+            dcontrol.set_target(0, 0, circle=True)
+            dcontrol.enabled = True
+            state = State.TO_CENTER
     elif state == State.TO_CENTER:
-        packet = SetpointPos(0, 0)
-        node.publish(packet)
-        if np.linalg.norm(ekf_pos) < 0.2:
+        if dcontrol.target_reached:
+            dcontrol.enabled = False
+            direction = dcontrol.gen_path[2].n[2]
+            t_start = time.time()
             state = State.ORBIT
-            heading = np.array([np.cos(ekf_yaw), np.sin(ekf_yaw)])
-            direction = heading[0] * ekf_pos[1] - heading[1] * ekf_pos[0]
-        t_start = time.time()
-        if parking_est.measurement_count > 40:
+        if parking_est.measurement_count > 50:
+            dcontrol.set_target(*parking_est.approach_pos, circle=False)
+            dcontrol.enabled = True
             state = State.TO_SPOT2
     elif state == State.ORBIT:
         u = (time.time() - t_start) / 90 * 0.8 + 0.2
@@ -98,35 +107,37 @@ while True:
             packet = Motor(1.0, u)
         node.publish(packet)
         if goal_x is not None and abs(goal_x) < 0.5:
+            pcontrol.to_goal = True
+            pcontrol.enabled = True
             state = State.TO_SPOT
     elif state == State.TO_SPOT:
-        controller.to_goal = True
-        controller.enabled = True
-        if parking_est.measurement_count > 40:
+        if parking_est.measurement_count > 50:
+            pcontrol.to_goal = False
+            pcontrol.enabled = False
+            dcontrol.set_target(*parking_est.approach_pos, circle=False)
+            dcontrol.enabled = True
             state = State.TO_SPOT2
     elif state == State.TO_SPOT2:
-        controller.to_goal = False
-        controller.enabled = False
-        packet = SetpointPos(*parking_est.approach_pos)
-        node.publish(packet)
-        if np.linalg.norm(ekf_pos - parking_est.approach_pos) < 0.2:
+        if dcontrol.target_reached:
+            dcontrol.set_target(*parking_est.spot_pos, circle=False)
+            dcontrol.enabled = True
             state = State.TO_SPOT3
     elif state == State.TO_SPOT3:
-        packet = SetpointPos(*parking_est.spot_pos)
-        node.publish(packet)
+        # TODO Parameterize this
         if (goal_area is not None
                 and goal_area > 0.007
                 and mean_x is not None
-                and np.linalg.norm(parking_est.spot_pos - ekf_pos) < 1.0
             ):
+            pcontrol.enabled = True
+            pcontrol.to_goal = False
+            dcontrol.enabled = False
             state = State.PARK
     elif state == State.PARK:
-        controller.enabled = True
-        controller.to_goal = False
-
-        if not controller.is_parking:
+        if not pcontrol.is_parking:
             packet = Motor(0, 0)
             node.publish(packet)
+            pcontrol.enabled = False
+            dcontrol.enabled = False
             state = State.IDLE
 
     time.sleep(1e-2)
