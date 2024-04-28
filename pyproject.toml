@@ -39,7 +39,8 @@ packages = [
     "longthin.model",
     "longthin.path",
     "longthin.utils",
-    "longthin.ui"
+    "longthin.ui",
+    "longthin.controller",
 ]
 
 [tool.setuptools.package-data]

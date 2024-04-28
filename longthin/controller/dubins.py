@@ -1,17 +1,17 @@
-from longthin import *
+from ..ltpacket import *
+from ..path import *
+from .controller_abc import ControllerABC
 
 import numpy as np
 
 
-class DubinsController:
-    def __init__(self, node):
-        self.node = node
+class DubinsController(ControllerABC):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.target = None
         self.gen_path = None
         self.is_limited = True
-        self.target_reached = False
-        self.enabled = False
 
         # TODO: parameterize these
         self.R = 0.2
@@ -23,39 +23,37 @@ class DubinsController:
             [0.6, -0.0, 0.]
         ])
 
+        self.ekf_pos = None
+        self.ekf_yaw = None
         self.node.subscribe(EkfState, self.cb_ekf)
 
-    def set_target(self, target_x, target_y, circle=False):
+    def setpoint(self, target_x, target_y, circle=False):
+        if self.ekf_pos is None:
+            raise ValueError("EKF position not set")
+
         self.target = np.array([target_x, target_y, 0], dtype=np.float32)
-        self.gen_path = None
         self.is_limited = True
-        self.target_reached = False
+        self.is_reached = False
         if circle:
             self.methods = [path_rsrc, path_rslc]
         else:
             self.methods = [path_rs]
+        self.gen_path = dubins(
+            self.ekf_pos,
+            self.target,
+            self.ekf_yaw,
+            0,
+            R=self.R,
+            vps=self.vehicle_points,
+            methods=self.methods)
+        self.target_p = self.gen_path[1].q2
+        self.target_v = self.gen_path[1].u2
+        self.target_inf = self.gen_path[1].q2 + 0.5*self.gen_path[1].u2
+        self.is_right = self.gen_path[0].n[2] >= 0
 
-    def cb_ekf(self, packet):
-        self.ekf_pos = np.array([packet.x, packet.y, 0])
-        self.ekf_yaw = packet.yaw
-
-        if self.target is None:
-            return
-
-        if self.gen_path is None:
-            self.gen_path = dubins(
-                self.ekf_pos,
-                self.target,
-                self.ekf_yaw,
-                0,
-                R=self.R,
-                vps=self.vehicle_points,
-                methods=self.methods)
-            self.target_p = self.gen_path[1].q2
-            self.target_v = self.gen_path[1].u2
-            self.target_inf = self.gen_path[1].q2 + 0.5*self.gen_path[1].u2
-            self.is_right = self.gen_path[0].n[2] >= 0
-            return
+    def control(self):
+        if not self.enabled:
+            return Motor(0, 0)
 
         delta_inf_p = self.target_inf - self.ekf_pos
         self.angle_inf = np.arctan2(delta_inf_p[1], delta_inf_p[0])
@@ -79,9 +77,11 @@ class DubinsController:
         if d > 0:
             packet = Setpoint(1.0, self.ekf_yaw + angle_diff)
         else:
-            self.target_reached = True
+            self.is_reached = True
             # TODO: remove this
             packet = Motor(0, 0)
+        return packet
 
-        if self.enabled:
-            self.node.publish(packet)
+    def cb_ekf(self, packet):
+        self.ekf_pos = np.array([packet.x, packet.y, 0])
+        self.ekf_yaw = packet.yaw

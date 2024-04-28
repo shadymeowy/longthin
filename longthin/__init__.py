@@ -9,10 +9,9 @@ from .node import LTNode
 from .rate import Rate
 from .lane_detector import LaneDetector
 from .video_source import video_source
-from .parking_controller import ParkingController
 from .parking_estimator import ParkingEstimator
 from .path import *
-from .dubins_controller import DubinsController
+from .controller import *
 try:
     from .raspicam import PiCam
 except ImportError:
