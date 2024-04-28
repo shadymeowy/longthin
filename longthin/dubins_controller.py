@@ -43,14 +43,6 @@ class DubinsController:
             return
 
         if self.gen_path is None:
-            print('Generating path')
-            print(self.ekf_pos,
-                  self.target,
-                  self.ekf_yaw,
-                  0,
-                  self.R,
-                  self.vehicle_points,
-                  self.methods)
             self.gen_path = dubins(
                 self.ekf_pos,
                 self.target,
@@ -88,6 +80,7 @@ class DubinsController:
             packet = Setpoint(1.0, self.ekf_yaw + angle_diff)
         else:
             self.target_reached = True
+            # TODO: remove this
             packet = Motor(0, 0)
 
         if self.enabled:
