@@ -95,31 +95,36 @@ class ParkingEstimator:
             entry_xs3.append(xp)
             entry_ys3.append(yp)
 
+        # TODO: parametrize the spot and approach positions
         mx = np.max([len(entry_xs0), len(entry_xs1), len(entry_xs2), len(entry_xs3)])
         if len(entry_xs0) == mx:
             spot_x = np.mean(entry_xs0)
             spot_y = np.mean(entry_ys0)
-            spot_x = max(-1., min(1., spot_x))
+            spot_x = max(-area_w/2, min(area_w/2, spot_x))
             approach_x = spot_x
             approach_y = spot_y - 2.0
+            spot_y -= 0.8
         elif len(entry_xs1) == mx:
             spot_x = np.mean(entry_xs1)
             spot_y = np.mean(entry_ys1)
-            spot_x = max(-1., min(1., spot_x))
+            spot_x = max(-area_w/2, min(area_w/2, spot_x))
             approach_x = spot_x
             approach_y = spot_y + 2.0
+            spot_y += 0.8
         elif len(entry_xs2) == mx:
             spot_x = np.mean(entry_xs2)
             spot_y = np.mean(entry_ys2)
-            spot_y = max(-1., min(1., spot_y))
+            spot_x = max(-area_w/2, min(area_w/2, spot_x))
             approach_x = spot_x - 2.0
             approach_y = spot_y
+            spot_x -= 0.8
         else:
             spot_x = np.mean(entry_xs3)
             spot_y = np.mean(entry_ys3)
-            spot_y = max(-1., min(1., spot_y))
+            spot_x = max(-area_w/2, min(area_w/2, spot_x))
             approach_x = spot_x + 2.0
             approach_y = spot_y
+            spot_x += 0.8
 
         self.spot_pos = np.array([spot_x, spot_y])
         self.approach_pos = np.array([approach_x, approach_y])
