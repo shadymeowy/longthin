@@ -13,16 +13,6 @@ class DubinsController(ControllerABC):
         self.gen_path = None
         self.is_limited = True
 
-        # TODO: parameterize these
-        self.R = 0.2
-        self.limit_angle = 60
-        self.vehicle_points = np.array([
-            [-0.0, 0.0, 0.],
-            [-0.0, -0.0, 0.],
-            [0.6, 0.0, 0.],
-            [0.6, -0.0, 0.]
-        ])
-
         self.ekf_pos = None
         self.ekf_yaw = None
         self.node.subscribe(EkfState, self.cb_ekf)
@@ -38,13 +28,20 @@ class DubinsController(ControllerABC):
             self.methods = [path_rsrc, path_rslc]
         else:
             self.methods = [path_rs]
+        safety = self.params.dubins_safety_margin
+        vehicle_points = np.array([
+            [-0.0, 0.0, 0.],
+            [-0.0, -0.0, 0.],
+            [safety, 0.0, 0.],
+            [safety, -0.0, 0.]
+        ])
         self.gen_path = dubins(
             self.ekf_pos,
             self.target,
             self.ekf_yaw,
             0,
-            R=self.R,
-            vps=self.vehicle_points,
+            R=self.params.dubins_radius,
+            vps=vehicle_points,
             methods=self.methods)
         self.target_p = self.gen_path[1].q2
         self.target_v = self.gen_path[1].u2
@@ -67,8 +64,8 @@ class DubinsController(ControllerABC):
         if not self.is_limited and angle_diff > 180:
             angle_diff -= 360
 
-        if np.abs(angle_diff) > self.limit_angle:
-            angle_diff = np.sign(angle_diff) * self.limit_angle
+        if np.abs(angle_diff) > self.params.dubins_limit_angle:
+            angle_diff = np.sign(angle_diff) * self.params.dubins_limit_angle
         else:
             self.is_limited = False
 

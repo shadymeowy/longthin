@@ -287,3 +287,18 @@ parking_estimator_alignment_d:
   id: 0x39
   type: f32
   default: 2.0
+
+dubins_limit_angle:
+  id: 0x3a
+  type: f32
+  default: 60
+
+dubins_radius:
+  id: 0x3b
+  type: f32
+  default: 0.2
+
+dubins_safety_margin:
+  id: 0x3c
+  type: f32
+  default: 0.6

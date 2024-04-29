@@ -2,7 +2,7 @@ from enum import Enum
 from dataclasses import dataclass, asdict
 
 
-LTPARAMS_COUNT = 0x3a
+LTPARAMS_COUNT = 0x3d
 
 
 class LTParamValueType(Enum):
@@ -70,6 +70,9 @@ class LTParamType(Enum):
     PARKING_ESTIMATOR_XY_LIMIT = 0x37
     PARKING_ESTIMATOR_APPROACH_D = 0x38
     PARKING_ESTIMATOR_ALIGNMENT_D = 0x39
+    DUBINS_LIMIT_ANGLE = 0x3a
+    DUBINS_RADIUS = 0x3b
+    DUBINS_SAFETY_MARGIN = 0x3c
 
 
 param_type_dict = {
@@ -131,6 +134,9 @@ param_type_dict = {
     LTParamType.PARKING_ESTIMATOR_XY_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.PARKING_ESTIMATOR_APPROACH_D: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.PARKING_ESTIMATOR_ALIGNMENT_D: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.DUBINS_LIMIT_ANGLE: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.DUBINS_RADIUS: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.DUBINS_SAFETY_MARGIN: LTParamValueType.LTPARAMS_TYPE_FLOAT,
 }
 
 param_default_dict = {
@@ -192,6 +198,9 @@ param_default_dict = {
     LTParamType.PARKING_ESTIMATOR_XY_LIMIT: 1.0,
     LTParamType.PARKING_ESTIMATOR_APPROACH_D: 0.8,
     LTParamType.PARKING_ESTIMATOR_ALIGNMENT_D: 2.0,
+    LTParamType.DUBINS_LIMIT_ANGLE: 60,
+    LTParamType.DUBINS_RADIUS: 0.2,
+    LTParamType.DUBINS_SAFETY_MARGIN: 0.6,
 }
 
 
@@ -255,6 +264,9 @@ class LTParameters:
     parking_estimator_xy_limit: float
     parking_estimator_approach_d: float
     parking_estimator_alignment_d: float
+    dubins_limit_angle: float
+    dubins_radius: float
+    dubins_safety_margin: float
 
     @classmethod
     def from_dict(cls, d):
