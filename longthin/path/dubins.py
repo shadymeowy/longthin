@@ -365,7 +365,7 @@ def _dubins(method, p1, p2, v1, v2, R, reverse, vps):
     n = np.array([0, 0, 1], dtype=np.float32) * (-1 if reverse else 1)
     path = method(p1, p2, v1, v2, R, n)
     if path is None:
-        return None
+        return None, None
 
     # TODO: do not hardcode this?
     area_w, area_h = 3, 3
