@@ -2,7 +2,7 @@ from enum import Enum
 from dataclasses import dataclass, asdict
 
 
-LTPARAMS_COUNT = 0x37
+LTPARAMS_COUNT = 0x3a
 
 
 class LTParamValueType(Enum):
@@ -67,6 +67,9 @@ class LTParamType(Enum):
     LANE_SLOPE_LIMIT = 0x34
     PLANNER_GOAL_AREA_THRESHOLD = 0x35
     PLANNER_MEASUREMENT_COUNT = 0x36
+    PARKING_ESTIMATOR_XY_LIMIT = 0x37
+    PARKING_ESTIMATOR_APPROACH_D = 0x38
+    PARKING_ESTIMATOR_ALIGNMENT_D = 0x39
 
 
 param_type_dict = {
@@ -125,6 +128,9 @@ param_type_dict = {
     LTParamType.LANE_SLOPE_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.PLANNER_GOAL_AREA_THRESHOLD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.PLANNER_MEASUREMENT_COUNT: LTParamValueType.LTPARAMS_TYPE_UINT32,
+    LTParamType.PARKING_ESTIMATOR_XY_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.PARKING_ESTIMATOR_APPROACH_D: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.PARKING_ESTIMATOR_ALIGNMENT_D: LTParamValueType.LTPARAMS_TYPE_FLOAT,
 }
 
 param_default_dict = {
@@ -183,6 +189,9 @@ param_default_dict = {
     LTParamType.LANE_SLOPE_LIMIT: 0.5,
     LTParamType.PLANNER_GOAL_AREA_THRESHOLD: 0.005,
     LTParamType.PLANNER_MEASUREMENT_COUNT: 50,
+    LTParamType.PARKING_ESTIMATOR_XY_LIMIT: 1.0,
+    LTParamType.PARKING_ESTIMATOR_APPROACH_D: 0.8,
+    LTParamType.PARKING_ESTIMATOR_ALIGNMENT_D: 2.0,
 }
 
 
@@ -243,6 +252,9 @@ class LTParameters:
     lane_slope_limit: float
     planner_goal_area_threshold: float
     planner_measurement_count: int
+    parking_estimator_xy_limit: float
+    parking_estimator_approach_d: float
+    parking_estimator_alignment_d: float
 
     @classmethod
     def from_dict(cls, d):

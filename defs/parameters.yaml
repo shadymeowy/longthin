@@ -272,3 +272,18 @@ planner_measurement_count:
   id: 0x36
   type: u32
   default: 50
+
+parking_estimator_xy_limit:
+  id: 0x37
+  type: f32
+  default: 1.0
+
+parking_estimator_approach_d:
+  id: 0x38
+  type: f32
+  default: 0.8
+
+parking_estimator_alignment_d:
+  id: 0x39
+  type: f32
+  default: 2.0
