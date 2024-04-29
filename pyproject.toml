@@ -21,7 +21,8 @@ dependencies = [
     "sympy",
     "zmq",
     "qprimaryflightdisplay",
-    "drawing3d"
+    "drawing3d",
+    "fast-shape-finder"
 ]
 
 [project.urls]
