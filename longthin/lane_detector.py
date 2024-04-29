@@ -69,7 +69,7 @@ class LaneDetector:
         min_y = None
         if ln_d > 100:
             for _ in range(4):
-                if pps_d.shape[0] < 32:
+                if pps_d.shape[0] < 4:
                     return None, None
                 line = ransac_line(pps_d, inliers, count, delta, k)
                 inliers = inliers.astype(bool)
