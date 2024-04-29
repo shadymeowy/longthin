@@ -316,4 +316,4 @@ parking_visibility_limit:
 planner_alignment_threshold:
   id: 0x3f
   type: f32
-  default: 1.0
+  default: 0.5

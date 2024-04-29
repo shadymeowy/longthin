@@ -73,10 +73,7 @@ class Planner:
             if self.state == State.IDLE:
                 self.button_park = True
             else:
-                # Abort parking
-                self.hcontroller.set_mode(ControllerMode.MANUAL)
-                self.hcontroller.setpoint(0, 0)
-                self.state = State.IDLE
+                self.state = State.RESET
         self.step()
 
     def cb_ev_pose(self, packet):
@@ -149,7 +146,7 @@ class Planner:
             self.hcontroller.set_mode(ControllerMode.MANUAL)
             self.goal_x = None
 
-        u = (time.time() - self.t_start) / 20 * 0.8 + 0.2
+        u = (time.time() - self.t_start) / 50 * 0.8 + 0.2
         if self.direction < 0:
             self.hcontroller.setpoint(u, 0.8)
         else:
