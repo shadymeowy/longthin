@@ -133,6 +133,7 @@ while True:
             hcontroller.set_mode(ControllerMode.DUBINS)
             hcontroller.setpoint(*parking_est.spot_pos, circle=False)
             mean_x = None
+            goal_area = None
 
         if time.time() - last_ev_t > 0.5:
             state = State.APPROACH_NOEV
