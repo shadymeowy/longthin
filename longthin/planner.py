@@ -97,7 +97,7 @@ class Planner:
 
     def is_aligned(self):
         if self.goal_is_recent() and self.lane_is_recent():
-            return abs(self.goal_x - self.mean_x) < 0.33
+            return abs(self.goal_x - self.mean_x) < self.params.planner_alignment_threshold
         return False
 
     def step(self):
@@ -149,11 +149,11 @@ class Planner:
             self.hcontroller.set_mode(ControllerMode.MANUAL)
             self.goal_x = None
 
-        u = (time.time() - self.t_start) / 90 * 0.8 + 0.2
+        u = (time.time() - self.t_start) / 20 * 0.8 + 0.2
         if self.direction < 0:
-            self.hcontroller.setpoint(u, 1.0)
+            self.hcontroller.setpoint(u, 0.8)
         else:
-            self.hcontroller.setpoint(1.0, u)
+            self.hcontroller.setpoint(0.8, u)
 
         if self.goal_is_recent() and abs(self.goal_x) < 0.5:
             self.state = State.PINPOINT
