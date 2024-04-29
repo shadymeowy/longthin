@@ -162,7 +162,7 @@ class Planner:
             self.mean_x = None
             self.goal_area = None
 
-        if time.time() - self.last_ev_t > 0.5:
+        if (time.time() - self.last_ev_t > 0.5 and self.goal_area is not None):
             self.state = State.APPROACH_NOEV
 
         if (self.goal_area is not None
