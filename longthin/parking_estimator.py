@@ -95,7 +95,6 @@ class ParkingEstimator:
             entry_xs3.append(xp)
             entry_ys3.append(yp)
 
-        # TODO: parametrize the spot and approach positions
         mx = np.max([len(entry_xs0), len(entry_xs1), len(entry_xs2), len(entry_xs3)])
         lim = self.params.parking_estimator_xy_limit
         approach_d = self.params.parking_estimator_approach_d

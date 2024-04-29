@@ -2,7 +2,7 @@ from enum import Enum
 from dataclasses import dataclass, asdict
 
 
-LTPARAMS_COUNT = 0x3e
+LTPARAMS_COUNT = 0x3f
 
 
 class LTParamValueType(Enum):
@@ -74,6 +74,7 @@ class LTParamType(Enum):
     DUBINS_RADIUS = 0x3b
     DUBINS_SAFETY_MARGIN = 0x3c
     VISION_CONTROL_MAX_CONTROL = 0x3d
+    PARKING_VISIBILITY_LIMIT = 0x3e
 
 
 param_type_dict = {
@@ -139,6 +140,7 @@ param_type_dict = {
     LTParamType.DUBINS_RADIUS: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.DUBINS_SAFETY_MARGIN: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.VISION_CONTROL_MAX_CONTROL: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.PARKING_VISIBILITY_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
 }
 
 param_default_dict = {
@@ -204,6 +206,7 @@ param_default_dict = {
     LTParamType.DUBINS_RADIUS: 0.2,
     LTParamType.DUBINS_SAFETY_MARGIN: 0.6,
     LTParamType.VISION_CONTROL_MAX_CONTROL: 0.7,
+    LTParamType.PARKING_VISIBILITY_LIMIT: 0.83,
 }
 
 
@@ -271,6 +274,7 @@ class LTParameters:
     dubins_radius: float
     dubins_safety_margin: float
     vision_control_max_control: float
+    parking_visibility_limit: float
 
     @classmethod
     def from_dict(cls, d):

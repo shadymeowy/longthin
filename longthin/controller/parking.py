@@ -15,7 +15,7 @@ class ParkingController(VisionController):
         min_y = packet.min_y
         self.mean_x = mean_x
         # TODO: this needs to be parameterized
-        if min_y is not None and min_y >= 0.83:
+        if min_y is not None and min_y >= self.params.parking_visibility_limit:
             self.is_reached = True
-        if min_y is not None and min_y < 0.83:
+        if min_y is not None and min_y < self.params.parking_visibility_limit:
             self.is_reached = False
