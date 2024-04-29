@@ -302,3 +302,8 @@ dubins_safety_margin:
   id: 0x3c
   type: f32
   default: 0.6
+
+vision_control_max_control:
+  id: 0x3d
+  type: f32
+  default: 0.7

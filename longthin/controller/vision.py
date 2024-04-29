@@ -34,8 +34,7 @@ class VisionController(ControllerABC):
         u_w = (self.params.parking_kp * e
                + self.params.parking_ki * self.e_sum
                + self.params.parking_kd * e_deriv)
-        # TODO: this needs to be parameterized
-        u_v = 0.7
+        u_v = self.params.vision_control_max_control
         u_l = u_v + u_w / 2
         u_r = u_v - u_w / 2
 
