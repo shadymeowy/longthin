@@ -262,3 +262,13 @@ lane_slope_limit:
   id: 0x34
   type: f32
   default: 0.5
+
+planner_goal_area_threshold:
+  id: 0x35
+  type: f32
+  default: 0.005
+
+planner_measurement_count:
+  id: 0x36
+  type: u32
+  default: 50

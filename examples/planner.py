@@ -47,6 +47,7 @@ def cb_ev_pose(packet):
 
 
 node = LTNode()
+params = node.params
 state = State.IDLE
 prev_state = State.IDLE
 state_change = False
@@ -98,7 +99,7 @@ while True:
             direction = hcontroller.controller.gen_path[2].n[2]
             state = State.ORBIT
 
-        if parking_est.measurement_count > 50:
+        if parking_est.measurement_count > params.planner_measurement_count:
             state = State.ALIGNMENT
     elif state == State.ORBIT:
         if state_change:
@@ -118,7 +119,7 @@ while True:
             hcontroller.set_mode(ControllerMode.GOAL)
             hcontroller.setpoint()
 
-        if parking_est.measurement_count > 50:
+        if parking_est.measurement_count > params.planner_measurement_count:
             state = State.ALIGNMENT
     elif state == State.ALIGNMENT:
         if state_change:
@@ -136,9 +137,8 @@ while True:
         if time.time() - last_ev_t > 0.5:
             state = State.APPROACH_NOEV
 
-        # TODO Parameterize this
         if (goal_area is not None
-                    and goal_area > 0.005
+                    and goal_area > params.planner_goal_area_threshold
                     and mean_x is not None
                 ):
             state = State.PARK
@@ -148,7 +148,7 @@ while True:
             hcontroller.setpoint()
 
         if (goal_area is not None
-                    and goal_area > 0.005
+                    and goal_area > params.planner_goal_area_threshold
                     and mean_x is not None
                 ):
             state = State.PARK
