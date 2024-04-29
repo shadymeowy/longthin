@@ -338,7 +338,13 @@ def calculate_penalty(path, box, size):
     intrs = np.concatenate([[p0], intrs, [pend]])
     params = []
     for intr in intrs:
-        params.append(path.param(intr))
+        param = path.param(intr)
+        if param is not None:
+            params.append(param)
+        else:
+            # TODO: investigate why this happens
+            print('param is None', intr)
+            return 1e7
     params = np.array(params)
     intrs = intrs[np.argsort(params)]
     params = np.sort(params)
