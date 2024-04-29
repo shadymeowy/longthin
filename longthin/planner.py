@@ -30,7 +30,9 @@ class Planner:
         self.goal_area = None
         self.mean_x = None
         self.min_y = None
-        self.last_ev_t = 0
+        self.ev_t = 0
+        self.lane_t = 0
+        self.goal_t = 0
         self.hcontroller = HighLevelController(node)
         self.parking_est = ParkingEstimator(node)
         self.node.subscribe(LaneVision, self.cb_lane_vision)
@@ -51,11 +53,13 @@ class Planner:
         self.t_start = 0  # Initialize a timing variable for ORBIT state
 
     def cb_lane_vision(self, packet):
+        self.lane_t = time.time()
         self.mean_x = packet.mean_x
         self.min_y = packet.min_y
         self.step()
 
     def cb_goal_vision(self, packet):
+        self.goal_t = time.time()
         self.goal_x = packet.center_x
         self.goal_area = packet.area
         self.step()
@@ -74,11 +78,25 @@ class Planner:
         self.step()
 
     def cb_ev_pose(self, packet):
-        self.last_ev_t = time.time()
+        self.ev_t = time.time()
         self.step()
 
     def cb_ekf_state(self, packet):
         self.step()
+
+    def ev_is_recent(self):
+        return time.time() - self.ev_t < 0.5
+
+    def lane_is_recent(self):
+        return self.mean_x is not None and time.time() - self.lane_t < 0.5
+
+    def goal_is_recent(self):
+        return self.goal_x is not None and time.time() - self.goal_t < 0.5
+
+    def is_aligned(self):
+        if self.goal_is_recent() and self.lane_is_recent():
+            return abs(self.goal_x - self.mean_x) < 0.33
+        return False
 
     def step(self):
         if self.state != self.prev_state:
@@ -100,16 +118,21 @@ class Planner:
         if self.state_change:
             self.hcontroller.set_mode(ControllerMode.MANUAL)
             self.hcontroller.setpoint(0, 0)
+            self.goal_x = None
+            self.goal_area = None
+            self.mean_x = None
+            self.min_y = None
 
         if self.button_park:
             self.node.publish(EkfReset(0))
             self.parking_est.unsubscribe()
             self.parking_est = ParkingEstimator(self.node)
             self.button_park = False
-            self.goal_x = None
-            self.goal_area = None
-            self.mean_x = None
-            self.min_y = None
+
+            if self.is_aligned():
+                self.state = State.PARK
+                return
+
             self.state = State.TO_CENTER
 
     def state_to_center(self):
@@ -129,6 +152,7 @@ class Planner:
         if self.state_change:
             self.t_start = time.time()
             self.hcontroller.set_mode(ControllerMode.MANUAL)
+            self.goal_x = None
 
         u = (time.time() - self.t_start) / 90 * 0.8 + 0.2
         if self.direction < 0:
@@ -136,13 +160,17 @@ class Planner:
         else:
             self.hcontroller.setpoint(1.0, u)
 
-        if self.goal_x is not None and abs(self.goal_x) < 0.5:
+        if self.goal_is_recent() and abs(self.goal_x) < 0.5:
             self.state = State.PINPOINT
 
     def state_pinpoint(self):
         if self.state_change:
             self.hcontroller.set_mode(ControllerMode.GOAL)
             self.hcontroller.setpoint()
+
+        if self.is_aligned():
+            self.state = State.PARK
+            return
 
         if self.parking_est.measurement_count > self.params.planner_measurement_count:
             self.state = State.ALIGNMENT
@@ -160,24 +188,24 @@ class Planner:
             self.hcontroller.set_mode(ControllerMode.DUBINS)
             self.hcontroller.setpoint(*self.parking_est.spot_pos, circle=False)
             self.mean_x = None
-            self.goal_area = None
+            self.goal_x = None
 
-        if (time.time() - self.last_ev_t > 0.5 and self.goal_area is not None):
-            self.state = State.APPROACH_NOEV
-
-        if (self.goal_area is not None
-                and self.goal_area > self.params.planner_goal_area_threshold
-                and self.mean_x is not None):
+        if (self.goal_is_recent()
+            and self.lane_is_recent()
+            and self.goal_area > self.params.planner_goal_area_threshold):
             self.state = State.PARK
+
+        if not self.ev_is_recent() and self.goal_is_recent():
+            self.state = State.APPROACH_NOEV
 
     def state_approach_noev(self):
         if self.state_change:
             self.hcontroller.set_mode(ControllerMode.GOAL)
             self.hcontroller.setpoint()
 
-        if (self.goal_area is not None
-                and self.goal_area > self.params.planner_goal_area_threshold
-                and self.mean_x is not None):
+        if (self.goal_is_recent()
+            and self.lane_is_recent()
+            and self.goal_area > self.params.planner_goal_area_threshold):
             self.state = State.PARK
 
     def state_park(self):
