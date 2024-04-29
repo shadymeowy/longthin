@@ -16,6 +16,7 @@ class State(enum.Enum):
     APPROACH = 5
     APPROACH_NOEV = 6
     PARK = 7
+    RESET = 8
 
 
 class Planner:
@@ -48,7 +49,8 @@ class Planner:
             State.ALIGNMENT: self.state_alignment,
             State.APPROACH: self.state_approach,
             State.APPROACH_NOEV: self.state_approach_noev,
-            State.PARK: self.state_park
+            State.PARK: self.state_park,
+            State.RESET: self.state_reset,
         }
         self.t_start = 0  # Initialize a timing variable for ORBIT state
 
@@ -107,22 +109,15 @@ class Planner:
             self.state_change = False
 
         self.state_functions[self.state]()
-        packet = self.control()
-        self.node.publish(packet)
+        if self.state != State.IDLE:
+            packet = self.control()
+            self.node.publish(packet)
 
     def control(self):
         packet = self.hcontroller.control()
         return packet
 
     def state_idle(self):
-        if self.state_change:
-            self.hcontroller.set_mode(ControllerMode.MANUAL)
-            self.hcontroller.setpoint(0, 0)
-            self.goal_x = None
-            self.goal_area = None
-            self.mean_x = None
-            self.min_y = None
-
         if self.button_park:
             self.node.publish(EkfReset(0))
             self.parking_est.unsubscribe()
@@ -192,7 +187,7 @@ class Planner:
 
         if (self.goal_is_recent()
             and self.lane_is_recent()
-            and self.goal_area > self.params.planner_goal_area_threshold):
+                and self.goal_area > self.params.planner_goal_area_threshold):
             self.state = State.PARK
 
         if not self.ev_is_recent() and self.goal_is_recent():
@@ -205,7 +200,7 @@ class Planner:
 
         if (self.goal_is_recent()
             and self.lane_is_recent()
-            and self.goal_area > self.params.planner_goal_area_threshold):
+                and self.goal_area > self.params.planner_goal_area_threshold):
             self.state = State.PARK
 
     def state_park(self):
@@ -214,4 +209,20 @@ class Planner:
             self.hcontroller.setpoint()
 
         if self.hcontroller.is_reached:
+            self.state = State.IDLE
+
+    def state_reset(self):
+        if self.state_change:
+            self.hcontroller.set_mode(ControllerMode.MANUAL)
+            self.hcontroller.setpoint(0, 0)
+            self.goal_x = None
+            self.goal_area = None
+            self.mean_x = None
+            self.min_y = None
+            self.ev_t = 0
+            self.lane_t = 0
+            self.goal_t = 0
+            self.reset_t = time.time()
+
+        if time.time() - self.reset_t > 1:
             self.state = State.IDLE
