@@ -3,18 +3,16 @@ import enum
 import time
 from longthin import *
 
-# Some code glued together to make the car park itself from a random position
-# TODO: Refactor this code to make it more readable and maintainable
-
 
 class State(enum.Enum):
     IDLE = 0
     TO_CENTER = 1
     ORBIT = 2
-    TO_SPOT = 3
-    TO_SPOT2 = 4
-    TO_SPOT3 = 5
-    PARK = 6
+    PINPOINT = 3
+    ALIGNMENT = 4
+    APPROACH = 5
+    APPROACH_NOEV = 6
+    PARK = 7
 
 
 def cb_lane_vision(packet):
@@ -43,6 +41,11 @@ def cb_button(packet):
             state = State.IDLE
 
 
+def cb_ev_pose(packet):
+    global last_ev_t
+    last_ev_t = time.time()
+
+
 node = LTNode()
 state = State.IDLE
 prev_state = State.IDLE
@@ -50,6 +53,7 @@ state_change = False
 button_park = False
 goal_x = None
 goal_area = None
+last_ev_t = 0
 
 
 hcontroller = HighLevelController(node)
@@ -57,6 +61,7 @@ parking_est = ParkingEstimator(node)
 node.subscribe(LaneVision, cb_lane_vision)
 node.subscribe(GoalVision, cb_goal_vision)
 node.subscribe(ButtonState, cb_button)
+node.subscribe(EvPose, cb_ev_pose)
 
 while True:
     node.spin_once()
@@ -94,7 +99,7 @@ while True:
             state = State.ORBIT
 
         if parking_est.measurement_count > 50:
-            state = State.TO_SPOT2
+            state = State.ALIGNMENT
     elif state == State.ORBIT:
         if state_change:
             t_start = time.time()
@@ -107,32 +112,45 @@ while True:
             hcontroller.setpoint(1.0, u)
 
         if goal_x is not None and abs(goal_x) < 0.5:
-            state = State.TO_SPOT
-    elif state == State.TO_SPOT:
+            state = State.PINPOINT
+    elif state == State.PINPOINT:
         if state_change:
             hcontroller.set_mode(ControllerMode.GOAL)
             hcontroller.setpoint()
 
         if parking_est.measurement_count > 50:
-            state = State.TO_SPOT2
-    elif state == State.TO_SPOT2:
+            state = State.ALIGNMENT
+    elif state == State.ALIGNMENT:
         if state_change:
             hcontroller.set_mode(ControllerMode.DUBINS)
             hcontroller.setpoint(*parking_est.approach_pos, circle=False)
 
         if hcontroller.is_reached:
-            state = State.TO_SPOT3
-    elif state == State.TO_SPOT3:
+            state = State.APPROACH
+    elif state == State.APPROACH:
         if state_change:
             hcontroller.set_mode(ControllerMode.DUBINS)
             hcontroller.setpoint(*parking_est.spot_pos, circle=False)
+            mean_x = None
+
+        if time.time() - last_ev_t > 0.5:
+            state = State.APPROACH_NOEV
 
         # TODO Parameterize this
         if (goal_area is not None
-                and goal_area > 0.007
-                and mean_x is not None
-                and hcontroller.is_reached
-            ):
+                    and goal_area > 0.005
+                    and mean_x is not None
+                ):
+            state = State.PARK
+    elif state == State.APPROACH_NOEV:
+        if state_change:
+            hcontroller.set_mode(ControllerMode.GOAL)
+            hcontroller.setpoint()
+
+        if (goal_area is not None
+                    and goal_area > 0.005
+                    and mean_x is not None
+                ):
             state = State.PARK
     elif state == State.PARK:
         if state_change:
