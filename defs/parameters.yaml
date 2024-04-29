@@ -38,22 +38,22 @@ ed_kp:
   type: f32
   default: 1.0
 
-parking_kp:
+vision_kp:
   id: 0x08
   type: f32
   default: 1.0
 
-parking_ki:
+vision_ki:
   id: 0x09
   type: f32
   default: 0.
 
-parking_kd:
+vision_kd:
   id: 0x0a
   type: f32
   default: 3.0
 
-parking_ki_limit:
+vision_ki_limit:
   id: 0x0b
   type: f32
   default: 100.0

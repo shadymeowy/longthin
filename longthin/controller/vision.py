@@ -27,13 +27,13 @@ class VisionController(ControllerABC):
 
         e = self.mean_x
         self.e_sum += e * dt
-        ki_limit = self.params.parking_ki_limit
+        ki_limit = self.params.vision_ki_limit
         self.e_sum = np.clip(self.e_sum, -ki_limit, ki_limit)
         e_deriv = (e - self.e_last) / dt
         self.e_last = e
-        u_w = (self.params.parking_kp * e
-               + self.params.parking_ki * self.e_sum
-               + self.params.parking_kd * e_deriv)
+        u_w = (self.params.vision_kp * e
+               + self.params.vision_ki * self.e_sum
+               + self.params.vision_kd * e_deriv)
         u_v = self.params.vision_control_max_control
         u_l = u_v + u_w / 2
         u_r = u_v - u_w / 2
