@@ -327,12 +327,41 @@ def path_sr(p1, p2, v1, v2, R=1., n=np.array([0, 0, -1])):
     return path
 
 
+def calculate_penalty(path, box, size):
+    area_w, area_h = size
+    intrs = box.intersection(path)
+    if len(intrs) == 0:
+        return 0
+
+    p0 = path.point(0)
+    pend = path.point(path.length)
+    intrs = np.concatenate([[p0], intrs, [pend]])
+    params = []
+    for intr in intrs:
+        params.append(path.param(intr))
+    params = np.array(params)
+    intrs = intrs[np.argsort(params)]
+    params = np.sort(params)
+
+    inside = (abs(p0[0]) < area_w/2 and abs(p0[1]) < area_h/2)
+    penalty = 0
+    param_prev = 0
+    for intr in intrs:
+        param = path.param(intr)
+        if inside:
+            penalty += param - param_prev
+        param_prev = param
+        inside = not inside
+    return penalty
+
+
 def _dubins(method, p1, p2, v1, v2, R, reverse, vps):
     n = np.array([0, 0, 1], dtype=np.float32) * (-1 if reverse else 1)
     path = method(p1, p2, v1, v2, R, n)
     if path is None:
         return None
 
+    # TODO: do not hardcode this?
     area_w, area_h = 3, 3
     box = Path(
         Line(np.array([-area_w/2, -area_h/2, 0.]), np.array([area_w/2, -area_h/2, 0.])),
@@ -342,8 +371,11 @@ def _dubins(method, p1, p2, v1, v2, R, reverse, vps):
     )
 
     intrs = []
+    total_penalty = 0
     for path_ in path.paths_of(vps):
         intr = box.intersection(path_)
+        penalty = calculate_penalty(path_, box, (area_w, area_h))
+        total_penalty += penalty
         intrs.extend(intr)
     intrs.extend(path.intersection(box))
     intrs = np.array(intrs)
@@ -352,10 +384,8 @@ def _dubins(method, p1, p2, v1, v2, R, reverse, vps):
     import matplotlib.pyplot as plt
     plt.show()"""
 
-    if intrs.size > 0:
-        return None
-
-    return path
+    cost = (total_penalty, path.length)
+    return path, cost
 
 
 def dubins(p1, p2, theta1, theta2, R, vps, methods):
@@ -366,12 +396,13 @@ def dubins(p1, p2, theta1, theta2, R, vps, methods):
     v1 = np.array([np.cos(theta1), np.sin(theta1), 0.], dtype=np.float32)
     v2 = np.array([np.cos(theta2), np.sin(theta2), 0.], dtype=np.float32)
 
-    min_length = np.inf
+    min_cost = (np.inf, np.inf)
     min_path = None
     for method in methods:
         for reverse in [False, True]:
-            path = _dubins(method, p1, p2, v1, v2, R, reverse, vps)
-            if path is not None and path.length < min_length:
-                min_length = path.length
+            path, cost = _dubins(method, p1, p2, v1, v2, R, reverse, vps)
+            if path is not None and cost < min_cost:
+                min_cost = cost
                 min_path = path
+    print(min_cost)
     return min_path
