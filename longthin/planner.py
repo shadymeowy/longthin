@@ -209,7 +209,7 @@ class Planner:
             self.hcontroller.setpoint()
 
         if self.hcontroller.is_reached:
-            self.state = State.IDLE
+            self.state = State.RESET
 
     def state_reset(self):
         if self.state_change:
