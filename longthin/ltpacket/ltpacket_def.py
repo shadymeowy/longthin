@@ -488,6 +488,33 @@ class EkfReset:
 
 
 
+@dataclass
+class LedControl:
+    id: int
+    default_state: int
+    high_time: int
+    low_time: int
+    remaining_cycles: int
+
+    @staticmethod
+    def from_bytes(data):
+        return LedControl(*led_control_struct.unpack(data))
+
+    def to_bytes(self):
+        return led_control_struct.pack(
+            self.id,
+            self.default_state,
+            self.high_time,
+            self.low_time,
+            self.remaining_cycles,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.LED_CONTROL
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -509,6 +536,7 @@ goal_vision_struct = struct.Struct('fff')
 lane_vision_struct = struct.Struct('ff')
 button_state_struct = struct.Struct('BB')
 ekf_reset_struct = struct.Struct('B')
+led_control_struct = struct.Struct('BBIIi')
 
 class LTPacketType(Enum):
     RESERVED = 0
@@ -532,6 +560,7 @@ class LTPacketType(Enum):
     LANE_VISION = 22
     BUTTON_STATE = 23
     EKF_RESET = 24
+    LED_CONTROL = 25
 
     @staticmethod
     def from_type(type_):
@@ -562,5 +591,6 @@ type_map = {
     LTPacketType.LANE_VISION: LaneVision,
     LTPacketType.BUTTON_STATE: ButtonState,
     LTPacketType.EKF_RESET: EkfReset,
+    LTPacketType.LED_CONTROL: LedControl,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

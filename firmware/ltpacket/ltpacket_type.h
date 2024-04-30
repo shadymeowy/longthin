@@ -127,3 +127,11 @@ struct ltpacket_button_state_t {
 struct ltpacket_ekf_reset_t {
     uint8_t reserved;
 };
+
+struct ltpacket_led_control_t {
+    uint8_t id;
+    uint8_t default_state;
+    uint32_t high_time;
+    uint32_t low_time;
+    int32_t remaining_cycles;
+};

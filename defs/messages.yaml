@@ -145,3 +145,12 @@ ekf_reset:
   id: 0x18
   fields:
     reserved: u8
+
+led_control:
+  id: 0x19
+  fields:
+    id: u8
+    default_state: u8
+    high_time: u32
+    low_time: u32
+    remaining_cycles: i32
