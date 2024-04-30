@@ -13,6 +13,4 @@ class ManualController(ControllerABC):
         self.right = right
 
     def control(self):
-        if not self.enabled:
-            return Motor(0, 0)
         return Motor(self.left, self.right)

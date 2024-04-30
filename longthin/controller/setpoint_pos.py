@@ -13,6 +13,4 @@ class SetpointPosController(ControllerABC):
         self.y = y
 
     def control(self):
-        if not self.enabled:
-            return Motor(0, 0)
         return SetpointPos(self.x, self.y)

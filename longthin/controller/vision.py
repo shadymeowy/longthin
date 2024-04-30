@@ -22,9 +22,6 @@ class VisionController(ControllerABC):
             self.last_time = t - 0.01
         dt = t - self.last_time
 
-        if not self.enabled:
-            return Motor(0, 0)
-
         e = self.mean_x
         self.e_sum += e * dt
         ki_limit = self.params.vision_ki_limit

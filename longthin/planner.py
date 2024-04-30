@@ -108,7 +108,8 @@ class Planner:
         self.state_functions[self.state]()
         if self.state != State.IDLE:
             packet = self.control()
-            self.node.publish(packet)
+            if packet is not None:
+                self.node.publish(packet)
 
     def control(self):
         packet = self.hcontroller.control()

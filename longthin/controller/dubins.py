@@ -75,8 +75,7 @@ class DubinsController(ControllerABC):
             packet = Setpoint(1.0, self.ekf_yaw + angle_diff)
         else:
             self.is_reached = True
-            # TODO: remove this
-            packet = Motor(0, 0)
+            packet = None
         return packet
 
     def cb_ekf(self, packet):

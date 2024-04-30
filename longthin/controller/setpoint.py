@@ -13,6 +13,4 @@ class SetpointController(ControllerABC):
         self.yaw = yaw
 
     def control(self):
-        if not self.enabled:
-            return Motor(0, 0)
         return Setpoint(self.vel, self.yaw)
