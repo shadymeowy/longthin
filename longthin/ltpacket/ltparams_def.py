@@ -167,7 +167,7 @@ param_default_dict = {
     LTParamType.FILLER4: 0.0,
     LTParamType.BLINK_PERIOD: 0.0,
     LTParamType.MADGWICK_BETA: 5,
-    LTParamType.IMU_FILTER_TYPE: 3,
+    LTParamType.IMU_FILTER_TYPE: 2,
     LTParamType.MAHONY_KP: 0.37,
     LTParamType.IMU_CALIBRATION_SAMPLES: 500,
     LTParamType.IMU_PUBLISH_PERIOD: 33333,

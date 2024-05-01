@@ -76,7 +76,7 @@ madgwick_beta:
 imu_filter_type:
   id: 0x0f
   type: u32
-  default: 3
+  default: 2
 
 mahony_kp:
   id: 0x10
