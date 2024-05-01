@@ -326,7 +326,7 @@ adc_front_multiplier:
 adc_rear_multiplier:
   id: 0x41
   type: f32
-  default: 1.0
+  default: 0.06594827586
 
 adc_publish_period:
   id: 0x42

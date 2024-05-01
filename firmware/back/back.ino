@@ -118,22 +118,22 @@ void motor_update()
 		if (e_theta > 180) {
 			e_theta -= 360;
 		}
-        u_v = ed_kp * desired_d;
+		u_v = ed_kp * desired_d;
 
 		static float e_theta_last = 0;
 		static float e_theta_sum = 0;
-        e_theta_sum += e_theta * dt;
+		e_theta_sum += e_theta * dt;
 		if (e_theta_sum > theta_ki_limit) {
 			e_theta_sum = theta_ki_limit;
 		} else if (e_theta_sum < -theta_ki_limit) {
 			e_theta_sum = -theta_ki_limit;
 		}
-        float e_theta_deriv = (e_theta - e_theta_last) / dt;
-        e_theta_last = e_theta;
-        u_w = theta_kp * e_theta + theta_ki * e_theta_sum + theta_kd * e_theta_deriv;
+		float e_theta_deriv = (e_theta - e_theta_last) / dt;
+		e_theta_last = e_theta;
+		u_w = theta_kp * e_theta + theta_ki * e_theta_sum + theta_kd * e_theta_deriv;
 
-        u_l = u_v + u_w / 2;
-        u_r = u_v - u_w / 2;
+		u_l = u_v + u_w / 2;
+		u_r = u_v - u_w / 2;
 		if (desired_d == 0) {
 			u_l = 0;
 			u_r = 0;
@@ -371,6 +371,30 @@ void button_publish()
 	}
 }
 
+void adc_init()
+{
+	analogReadResolution(10);
+	pinMode(A0, INPUT);
+}
+
+void adc_process()
+{
+	static uint32_t last_time = 0;
+	uint32_t now = micros();
+	uint32_t period = ltparams_getu(LTPARAMS_ADC_PUBLISH_PERIOD);
+	if (now - last_time < period) {
+		return;
+	}
+	last_time = now;
+	int value = analogRead(A0);
+	float multiplier = ltparams_get(LTPARAMS_ADC_REAR_MULTIPLIER);
+	ltpacket_t packet;
+	packet.type = LTPACKET_TYPE_ADC_READ;
+	packet.adc_read.id = 0;
+	packet.adc_read.value = value * multiplier;
+	ltpacket_send(&packet, serial_write);
+}
+
 void setup()
 {
 	Serial.begin(115200);
@@ -380,6 +404,7 @@ void setup()
 	listen_init();
 	motor_init();
 	button_init();
+	adc_init();
 }
 
 void loop()
@@ -390,6 +415,7 @@ void loop()
 	motor_debug();
 	motor_publish();
 	button_publish();
+	adc_process();
 }
 
 void setup1()
