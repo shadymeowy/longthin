@@ -45,7 +45,7 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
-'longthin' = ['*.yaml']
+'longthin' = ['config/*.yaml']
 
 [project.entry-points."console_scripts"]
 longthin-basicsim = "longthin.basic_sim:main"

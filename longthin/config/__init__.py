@@ -7,11 +7,16 @@ from importlib.resources import read_text
 def load_config():
     if 'LTCONFIG' in os.environ:
         path = os.environ['LTCONFIG']
+    else:
+        path = 'default.yaml'
+
+    if os.path.exists(path):
         with open(path) as f:
             dct = yaml.safe_load(f)
     else:
-        txt = read_text('longthin', 'default.yaml')
+        txt = read_text('longthin.config', path)
         dct = yaml.safe_load(txt)
+
     return to_namedtuple('Config', dct)
 
 
