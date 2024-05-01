@@ -135,3 +135,8 @@ struct ltpacket_led_control_t {
     uint32_t low_time;
     int32_t remaining_cycles;
 };
+
+struct ltpacket_adc_read_t {
+    uint8_t id;
+    float value;
+};

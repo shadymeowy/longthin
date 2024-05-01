@@ -154,3 +154,9 @@ led_control:
     high_time: u32
     low_time: u32
     remaining_cycles: i32
+
+adc_read:
+  id: 0x1a
+  fields:
+    id: u8
+    value: f32

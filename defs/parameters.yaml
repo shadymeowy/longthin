@@ -317,3 +317,18 @@ planner_alignment_threshold:
   id: 0x3f
   type: f32
   default: 0.5
+
+adc_front_multiplier:
+  id: 0x40
+  type: f32
+  default: 0.0096565389
+
+adc_rear_multiplier:
+  id: 0x41
+  type: f32
+  default: 1.0
+
+adc_publish_period:
+  id: 0x42
+  type: u32
+  default: 1000000

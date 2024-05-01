@@ -452,6 +452,30 @@ void led_process()
 	}
 }
 
+void adc_init()
+{
+	analogReadResolution(10);
+	pinMode(A2, INPUT);
+}
+
+void adc_process()
+{
+	static uint32_t last_time = 0;
+	uint32_t now = micros();
+	uint32_t period = ltparams_getu(LTPARAMS_ADC_PUBLISH_PERIOD);
+	if (now - last_time < period) {
+		return;
+	}
+	last_time = now;
+	int value = analogRead(A2);
+	float multiplier = ltparams_get(LTPARAMS_ADC_FRONT_MULTIPLIER);
+	ltpacket_t packet;
+	packet.type = LTPACKET_TYPE_ADC_READ;
+	packet.adc_read.id = 0;
+	packet.adc_read.value = value * multiplier;
+	ltpacket_send(&packet, serial_write);
+}
+
 void setup()
 {
 	Wire1.setSDA(18);
@@ -465,6 +489,7 @@ void setup()
 	Serial2.begin(115200);
 
 	led_init();
+	adc_init();
 	listen_init();
 }
 
@@ -474,6 +499,7 @@ void loop()
 	imu_filter();
 	imu_publish();
 	imu_publish_raw();
+	adc_process();
 	listen_process();
 }
 

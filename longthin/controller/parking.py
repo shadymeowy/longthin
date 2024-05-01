@@ -25,4 +25,5 @@ class ParkingController(VisionController):
 
         if not self.enabled:
             return
+        # TODO: limit sending rate
         self.notify.beeping(1-min_y/self.params.parking_visibility_limit)

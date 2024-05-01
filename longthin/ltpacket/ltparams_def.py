@@ -2,7 +2,7 @@ from enum import Enum
 from dataclasses import dataclass, asdict
 
 
-LTPARAMS_COUNT = 0x40
+LTPARAMS_COUNT = 0x43
 
 
 class LTParamValueType(Enum):
@@ -76,6 +76,9 @@ class LTParamType(Enum):
     VISION_CONTROL_MAX_CONTROL = 0x3d
     PARKING_VISIBILITY_LIMIT = 0x3e
     PLANNER_ALIGNMENT_THRESHOLD = 0x3f
+    ADC_FRONT_MULTIPLIER = 0x40
+    ADC_REAR_MULTIPLIER = 0x41
+    ADC_PUBLISH_PERIOD = 0x42
 
 
 param_type_dict = {
@@ -143,6 +146,9 @@ param_type_dict = {
     LTParamType.VISION_CONTROL_MAX_CONTROL: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.PARKING_VISIBILITY_LIMIT: LTParamValueType.LTPARAMS_TYPE_FLOAT,
     LTParamType.PLANNER_ALIGNMENT_THRESHOLD: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.ADC_FRONT_MULTIPLIER: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.ADC_REAR_MULTIPLIER: LTParamValueType.LTPARAMS_TYPE_FLOAT,
+    LTParamType.ADC_PUBLISH_PERIOD: LTParamValueType.LTPARAMS_TYPE_UINT32,
 }
 
 param_default_dict = {
@@ -210,6 +216,9 @@ param_default_dict = {
     LTParamType.VISION_CONTROL_MAX_CONTROL: 0.7,
     LTParamType.PARKING_VISIBILITY_LIMIT: 0.83,
     LTParamType.PLANNER_ALIGNMENT_THRESHOLD: 0.5,
+    LTParamType.ADC_FRONT_MULTIPLIER: 0.0096565389,
+    LTParamType.ADC_REAR_MULTIPLIER: 1.0,
+    LTParamType.ADC_PUBLISH_PERIOD: 1000000,
 }
 
 
@@ -279,6 +288,9 @@ class LTParameters:
     vision_control_max_control: float
     parking_visibility_limit: float
     planner_alignment_threshold: float
+    adc_front_multiplier: float
+    adc_rear_multiplier: float
+    adc_publish_period: int
 
     @classmethod
     def from_dict(cls, d):

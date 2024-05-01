@@ -515,6 +515,27 @@ class LedControl:
 
 
 
+@dataclass
+class AdcRead:
+    id: int
+    value: float
+
+    @staticmethod
+    def from_bytes(data):
+        return AdcRead(*adc_read_struct.unpack(data))
+
+    def to_bytes(self):
+        return adc_read_struct.pack(
+            self.id,
+            self.value,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.ADC_READ
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -537,6 +558,7 @@ lane_vision_struct = struct.Struct('ff')
 button_state_struct = struct.Struct('BB')
 ekf_reset_struct = struct.Struct('B')
 led_control_struct = struct.Struct('BBIIi')
+adc_read_struct = struct.Struct('Bf')
 
 class LTPacketType(Enum):
     RESERVED = 0
@@ -561,6 +583,7 @@ class LTPacketType(Enum):
     BUTTON_STATE = 23
     EKF_RESET = 24
     LED_CONTROL = 25
+    ADC_READ = 26
 
     @staticmethod
     def from_type(type_):
@@ -592,5 +615,6 @@ type_map = {
     LTPacketType.BUTTON_STATE: ButtonState,
     LTPacketType.EKF_RESET: EkfReset,
     LTPacketType.LED_CONTROL: LedControl,
+    LTPacketType.ADC_READ: AdcRead,
 }
 type_map_rev = {v: k for k, v in type_map.items()}
