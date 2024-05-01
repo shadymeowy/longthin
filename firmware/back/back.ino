@@ -233,9 +233,9 @@ void listen_process()
 		if ((ret = packet_reader_push(&reader, c)) >= 0) {
 			data = packet_reader_head(&reader);
 			ltpacket_read_buffer(&packet, data, ret);
-			listen_handle(&packet);
 			Serial1.write(data - 3, ret + 5);
 			// Serial2.write(data - 3, ret + 5);
+			listen_handle(&packet);
 		}
 	}
 	while (Serial1.available()) {
@@ -243,9 +243,9 @@ void listen_process()
 		if ((ret = packet_reader_push(&reader1, c)) >= 0) {
 			data = packet_reader_head(&reader1);
 			ltpacket_read_buffer(&packet, data, ret);
-			listen_handle(&packet);
 			Serial.write(data - 3, ret + 5);
 			Serial2.write(data - 3, ret + 5);
+			listen_handle(&packet);
 		}
 	}
 	/* while (Serial2.available()) {

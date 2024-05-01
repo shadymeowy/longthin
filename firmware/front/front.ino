@@ -47,9 +47,9 @@ void listen_process()
 		if ((ret = packet_reader_push(&reader, c)) >= 0) {
 			data = packet_reader_head(&reader);
 			ltpacket_read_buffer(&packet, data, ret);
-			listen_handle(&packet);
 			Serial1.write(data - 3, ret + 5);
 			Serial2.write(data - 3, ret + 5);
+			listen_handle(&packet);
 		}
 	}
 	while (Serial1.available()) {
@@ -57,9 +57,9 @@ void listen_process()
 		if ((ret = packet_reader_push(&reader1, c)) >= 0) {
 			data = packet_reader_head(&reader1);
 			ltpacket_read_buffer(&packet, data, ret);
-			listen_handle(&packet);
 			Serial.write(data - 3, ret + 5);
 			Serial2.write(data - 3, ret + 5);
+			listen_handle(&packet);
 		}
 	}
 	while (Serial2.available()) {
@@ -67,9 +67,9 @@ void listen_process()
 		if ((ret = packet_reader_push(&reader2, c)) >= 0) {
 			data = packet_reader_head(&reader2);
 			ltpacket_read_buffer(&packet, data, ret);
-			listen_handle(&packet);
 			Serial.write(data - 3, ret + 5);
 			Serial1.write(data - 3, ret + 5);
+			listen_handle(&packet);
 		}
 	}
 }
@@ -115,7 +115,7 @@ void imu_init()
 {
 	mpu6050_init(&imu, 0x68);
 	uint32_t samples = ltparams_getu(LTPARAMS_IMU_CALIBRATION_SAMPLES);
-	mpu6050_calibrate(&imu, samples);
+	// mpu6050_calibrate(&imu, samples);
 	hmc5883l_init(&mag, 0x1E);
 	imu_write_calibration();
 }
