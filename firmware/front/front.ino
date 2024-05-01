@@ -79,7 +79,8 @@ void listen_handle(struct ltpacket_t *packet)
 	enum ltparams_index_t index;
 	switch (packet->type) {
 	case LTPACKET_TYPE_LED:
-		blink = packet->led.state;
+	case LTPACKET_TYPE_LED_CONTROL:
+		led_handle(packet);
 		break;
 	case LTPACKET_TYPE_SETPARAM:
 		index = (enum ltparams_index_t)packet->setparam.param;
@@ -226,7 +227,6 @@ void imu_filter()
 	delta_vel_dt += dt;
 }
 
-
 void imu_publish()
 {
 	static uint32_t last_time = 0;
@@ -293,27 +293,162 @@ void imu_publish_raw()
 	ltpacket_send(&packet, serial_write);
 }
 
+struct led_t {
+	// Internal part
+	uint8_t pin;
+	uint8_t inversion;
+	uint8_t current_state;
+	uint32_t last_change_time;
+	uint32_t tone;
+	// Configurable part
+	uint8_t default_state;
+	uint32_t high_time;
+	uint32_t low_time;
+	int32_t remaining_cycles;
+};
+
+struct led_t leds[] = {
+	{
+		.pin = LED_BUILTIN,
+		.inversion = 0,
+		.current_state = 0,
+		.last_change_time = 0,
+		.tone = 0,
+		.default_state = 0,
+		.high_time = 0,
+		.low_time = 0,
+		.remaining_cycles = 0,
+	},
+	{
+		.pin = 10,
+		.inversion = 1,
+		.current_state = 0,
+		.last_change_time = 0,
+		.tone = 0,
+		.default_state = 0,
+		.high_time = 0,
+		.low_time = 0,
+		.remaining_cycles = 0,
+	},
+	{
+		.pin = 11,
+		.inversion = 1,
+		.current_state = 0,
+		.last_change_time = 0,
+		.tone = 0,
+		.default_state = 0,
+		.high_time = 0,
+		.low_time = 0,
+		.remaining_cycles = 0,
+	},
+	{
+		.pin = 13,
+		.inversion = 1,
+		.current_state = 0,
+		.last_change_time = 0,
+		.tone = 0,
+		.default_state = 0,
+		.high_time = 0,
+		.low_time = 0,
+		.remaining_cycles = 0,
+	},
+	{
+		.pin = 14,
+		.inversion = 0,
+		.current_state = 0,
+		.last_change_time = 0,
+		.tone = 0,
+		.default_state = 0,
+		.high_time = 0,
+		.low_time = 0,
+		.remaining_cycles = 0,
+	},
+};
+
 void led_init()
 {
-	pinMode(LED_BUILTIN, OUTPUT);
+	for (int i = 0; i < sizeof(leds) / sizeof(leds[0]); i++) {
+		pinMode(leds[i].pin, OUTPUT);
+		leds[i].current_state = leds[i].default_state;
+		led_write(i, leds[i].default_state);
+		leds[i].last_change_time = millis();
+	}
+}
+
+void led_handle(struct ltpacket_t *packet)
+{
+	if (packet->type == LTPACKET_TYPE_LED_CONTROL) {
+		uint8_t id = packet->led_control.id;
+		if (id >= sizeof(leds) / sizeof(leds[0])) {
+			return;
+		}
+		led_t *led = &leds[id];
+		bool resetting = led->remaining_cycles == 0;
+		led->default_state = packet->led_control.default_state;
+		led->high_time = packet->led_control.high_time;
+		led->low_time = packet->led_control.low_time;
+		led->remaining_cycles = packet->led_control.remaining_cycles;
+		if (resetting && led->remaining_cycles != 0) {
+			led->current_state = !led->default_state;
+			led->last_change_time = millis();
+			led_write(id, led->current_state);
+		}
+	} else if (packet->type == LTPACKET_TYPE_LED) {
+		uint8_t id = packet->led.index;
+		if (id >= sizeof(leds) / sizeof(leds[0])) {
+			return;
+		}
+		led_t *led = &leds[id];
+		led->default_state = packet->led.state;
+		led->high_time = 0;
+		led->low_time = 0;
+		led->remaining_cycles = 0;
+	}
+}
+
+void led_write(uint8_t id, uint8_t state)
+{
+	if (id >= sizeof(leds) / sizeof(leds[0])) {
+		return;
+	}
+	if (leds[id].tone) {
+		tone(leds[id].pin, (state ^ leds[id].inversion) ? leds[id].tone : 0);
+	} else {
+		digitalWrite(leds[id].pin, state ^ leds[id].inversion);
+	}
 }
 
 void led_process()
 {
-	static unsigned long last_blink = 0;
-	float period = ltparams_get(LTPARAMS_BLINK_PERIOD);
-	if (blink) {
-		unsigned long now = micros();
-		if (period == 0) {
-			digitalWrite(LED_BUILTIN, HIGH);
-			return;
+	uint32_t now = millis();
+	for (int i = 0; i < sizeof(leds) / sizeof(leds[0]); i++) {
+		uint32_t last = leds[i].last_change_time;
+		uint32_t delta = now - last;
+		if (leds[i].remaining_cycles == 0) {
+			led_write(i, leds[i].default_state);
+			leds[i].current_state = leds[i].default_state;
+			leds[i].last_change_time = now;
+		} else if (leds[i].remaining_cycles != 0) {
+			bool change = false;
+			if (leds[i].current_state) {
+				if (delta > leds[i].high_time) {
+					leds[i].current_state = 0;
+					change = true;
+				}
+			} else {
+				if (delta > leds[i].low_time) {
+					leds[i].current_state = 1;
+					change = true;
+				}
+			}
+			if (change) {
+				led_write(i, leds[i].current_state);
+				leds[i].last_change_time = now;
+				if (leds[i].current_state == leds[i].default_state && leds[i].remaining_cycles > 0) {
+					leds[i].remaining_cycles--;
+				}
+			}
 		}
-		if (now - last_blink > period * 1e6) {
-			digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-			last_blink = now;
-		}
-	} else {
-		digitalWrite(LED_BUILTIN, LOW);
 	}
 }
 
