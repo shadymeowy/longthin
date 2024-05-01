@@ -12,6 +12,7 @@ from .video_source import video_source
 from .parking_estimator import ParkingEstimator
 from .path import *
 from .controller import *
+from .notify import *
 try:
     from .raspicam import PiCam
 except ImportError:
