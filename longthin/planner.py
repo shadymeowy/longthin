@@ -101,6 +101,8 @@ class Planner:
             self.state_change = True
             self.notify.info()
             print("State:", self.state)
+            packet = MissionState(self.state.value)
+            self.node.publish(packet)
         else:
             self.state_change = False
 
@@ -120,6 +122,7 @@ class Planner:
             self.parking_est.unsubscribe()
             self.parking_est = ParkingEstimator(self.node)
             self.button_park = False
+            self.mission_start = time.time()
 
             if self.is_aligned():
                 self.state = State.PARK
@@ -224,4 +227,7 @@ class Planner:
 
         if time.time() - self.reset_t > 1:
             self.notify.success()
+            mission_duration = time.time() - self.mission_start
+            packet = MissionSuccess(mission_duration)
+            self.node.publish(packet)
             self.state = State.IDLE

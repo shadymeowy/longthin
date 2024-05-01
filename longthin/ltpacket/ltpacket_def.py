@@ -536,6 +536,44 @@ class AdcRead:
 
 
 
+@dataclass
+class MissionState:
+    state: int
+
+    @staticmethod
+    def from_bytes(data):
+        return MissionState(*mission_state_struct.unpack(data))
+
+    def to_bytes(self):
+        return mission_state_struct.pack(
+            self.state,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.MISSION_STATE
+
+
+
+@dataclass
+class MissionSuccess:
+    duration: float
+
+    @staticmethod
+    def from_bytes(data):
+        return MissionSuccess(*mission_success_struct.unpack(data))
+
+    def to_bytes(self):
+        return mission_success_struct.pack(
+            self.duration,
+        )
+
+    @property
+    def type(self):
+        return LTPacketType.MISSION_SUCCESS
+
+
+
 reserved_struct = struct.Struct('B')
 imu_struct = struct.Struct('ffffffff')
 imu_raw_struct = struct.Struct('fffffffff')
@@ -559,6 +597,8 @@ button_state_struct = struct.Struct('BB')
 ekf_reset_struct = struct.Struct('B')
 led_control_struct = struct.Struct('BBIIi')
 adc_read_struct = struct.Struct('Bf')
+mission_state_struct = struct.Struct('B')
+mission_success_struct = struct.Struct('f')
 
 class LTPacketType(Enum):
     RESERVED = 0
@@ -584,6 +624,8 @@ class LTPacketType(Enum):
     EKF_RESET = 24
     LED_CONTROL = 25
     ADC_READ = 26
+    MISSION_STATE = 27
+    MISSION_SUCCESS = 28
 
     @staticmethod
     def from_type(type_):
@@ -616,5 +658,7 @@ type_map = {
     LTPacketType.EKF_RESET: EkfReset,
     LTPacketType.LED_CONTROL: LedControl,
     LTPacketType.ADC_READ: AdcRead,
+    LTPacketType.MISSION_STATE: MissionState,
+    LTPacketType.MISSION_SUCCESS: MissionSuccess,
 }
 type_map_rev = {v: k for k, v in type_map.items()}

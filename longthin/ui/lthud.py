@@ -6,6 +6,8 @@ from PySide6.QtWidgets import *
 from ..ltpacket import *
 
 to_show = [
+    (MissionState, 'state'),
+    (MissionSuccess, 'duration'),
     (MotorOutput, 'left'),
     (MotorOutput, 'right'),
     (Motor, 'left'),

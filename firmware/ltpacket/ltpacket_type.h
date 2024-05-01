@@ -140,3 +140,11 @@ struct ltpacket_adc_read_t {
     uint8_t id;
     float value;
 };
+
+struct ltpacket_mission_state_t {
+    uint8_t state;
+};
+
+struct ltpacket_mission_success_t {
+    float duration;
+};

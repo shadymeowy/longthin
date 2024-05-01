@@ -160,3 +160,13 @@ adc_read:
   fields:
     id: u8
     value: f32
+
+mission_state:
+  id: 0x1b
+  fields:
+    state: u8
+
+mission_success:
+  id: 0x1c
+  fields:
+    duration: f32
