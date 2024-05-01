@@ -1,0 +1,11 @@
+runner:
+  - cmd: "longthin-bridge"
+  - cmd: "longthin-estimator"
+    args: ["--show"]
+  - cmd: "longthin-ekf"
+  - cmd: "longthin-controller"
+  - cmd: "longthin-planner"
+    restart: true
+  - cmd: "longthin-gcs"
+  - cmd: "longthin-sim"
+  - cmd: "longthin-visualize"
