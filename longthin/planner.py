@@ -5,6 +5,7 @@ import time
 from .ltpacket import *
 from .controller import ControllerMode, HighLevelController
 from .parking_estimator import ParkingEstimator
+from .notify import Notify
 
 
 class State(enum.Enum):
@@ -23,6 +24,8 @@ class Planner:
     def __init__(self, node):
         self.node = node
         self.params = node.params
+        self.config = node.config
+
         self.state = State.IDLE
         self.prev_state = State.IDLE
         self.state_change = False
@@ -34,13 +37,15 @@ class Planner:
         self.ev_t = 0
         self.lane_t = 0
         self.goal_t = 0
+
         self.hcontroller = HighLevelController(node)
         self.parking_est = ParkingEstimator(node)
+        self.notify = Notify(node)
         self.node.subscribe(LaneVision, self.cb_lane_vision)
         self.node.subscribe(GoalVision, self.cb_goal_vision)
         self.node.subscribe(ButtonState, self.cb_button)
         self.node.subscribe(EvPose, self.cb_ev_pose)
-        self.node.subscribe(EkfState, self.cb_ekf_state)
+
         self.state_functions = {
             State.IDLE: self.state_idle,
             State.TO_CENTER: self.state_to_center,
@@ -58,13 +63,11 @@ class Planner:
         self.lane_t = time.time()
         self.mean_x = packet.mean_x
         self.min_y = packet.min_y
-        self.step()
 
     def cb_goal_vision(self, packet):
         self.goal_t = time.time()
         self.goal_x = packet.center_x
         self.goal_area = packet.area
-        self.step()
 
     def cb_button(self, packet):
         index = packet.index
@@ -74,14 +77,9 @@ class Planner:
                 self.button_park = True
             else:
                 self.state = State.RESET
-        self.step()
 
     def cb_ev_pose(self, packet):
         self.ev_t = time.time()
-        self.step()
-
-    def cb_ekf_state(self, packet):
-        self.step()
 
     def ev_is_recent(self):
         return time.time() - self.ev_t < 0.5
@@ -101,6 +99,7 @@ class Planner:
         if self.state != self.prev_state:
             self.prev_state = self.state
             self.state_change = True
+            self.notify.info()
             print("State:", self.state)
         else:
             self.state_change = False
@@ -221,6 +220,8 @@ class Planner:
             self.lane_t = 0
             self.goal_t = 0
             self.reset_t = time.time()
+            self.notify.idle()
 
         if time.time() - self.reset_t > 1:
+            self.notify.success()
             self.state = State.IDLE
