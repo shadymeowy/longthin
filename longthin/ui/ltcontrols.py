@@ -51,12 +51,16 @@ class LTControls(QWidget):
 
         self.send_ekfreset_button = QPushButton("EKF Reset")
         layout.addWidget(self.send_ekfreset_button)
+
+        self.send_reboot_button = QPushButton("Reboot")
+        layout.addWidget(self.send_reboot_button)
         self.setLayout(layout)
 
         self.send_motor_button.clicked.connect(self.send_motor)
         self.send_setpoint_button.clicked.connect(self.send_setpoint)
         self.send_parking_button.clicked.connect(self.send_parking)
         self.send_ekfreset_button.clicked.connect(self.send_ekfreset)
+        self.send_reboot_button.clicked.connect(self.send_reboot)
         self.stop_movement_button.clicked.connect(self.stop_movement)
         self.toggle_led_button.clicked.connect(self.toggle_leds)
 
@@ -82,6 +86,9 @@ class LTControls(QWidget):
 
     def send_ekfreset(self):
         self.node.publish(EkfReset(0))
+
+    def send_reboot(self):
+        self.node.publish(Reboot(0))
 
     def stop_movement(self):
         self.packet = None
