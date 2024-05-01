@@ -14,8 +14,10 @@ class LTPFD(QPrimaryFlightDisplay):
         super(LTPFD, self).__init__(parent)
         self.node = node
         self.node.subscribe(Imu, self.cb_imu)
+        self.node.subscribe(AdcRead, self.cb_adc)
         self.setWindowTitle("Longthin PFD")
 
+        self.battery = 100
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(1000 / 30)
@@ -26,3 +28,14 @@ class LTPFD(QPrimaryFlightDisplay):
         self.roll = euler[0]
         self.pitch = euler[1]
         self.heading = np.rad2deg(euler[2])
+
+    def cb_adc(self, packet):
+        # TODO: Add this to config
+        if packet.id == 1:
+            value = packet.value / 8.4 * 100
+            self.battery = min(self.battery, value)
+        elif packet.id == 0:
+            value = packet.value / 16.8 * 100
+            self.battery = min(self.battery, value)
+        else:
+            raise ValueError("Invalid ADC ID")

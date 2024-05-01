@@ -12,14 +12,17 @@ to_show = [
     (Motor, 'right'),
     (Setpoint, 'vel'),
     (Setpoint, 'yaw'),
-    (ControlDebug, 'current_yaw'),
-    (ControlDebug, 'desired_yaw'),
     (SimState, 'x'),
     (SimState, 'y'),
     (SimState, 'yaw'),
     (EvPose, 'x'),
     (EvPose, 'y'),
-    (EvPose, 'yaw')]
+    (EvPose, 'yaw'),
+    (ControlDebug, 'current_yaw'),
+    (ControlDebug, 'desired_yaw'),
+    (AdcRead, 'id'),
+    (AdcRead, 'value')
+]
 
 
 class LTHUD(QWidget):

@@ -471,7 +471,7 @@ void adc_process()
 	float multiplier = ltparams_get(LTPARAMS_ADC_FRONT_MULTIPLIER);
 	ltpacket_t packet;
 	packet.type = LTPACKET_TYPE_ADC_READ;
-	packet.adc_read.id = 0;
+	packet.adc_read.id = 1;
 	packet.adc_read.value = value * multiplier;
 	ltpacket_send(&packet, serial_write);
 }
