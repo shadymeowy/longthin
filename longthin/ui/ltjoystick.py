@@ -92,7 +92,7 @@ class LTJoystick(QWidget):
         self.draw_arrow(self.current_imu)
 
     def draw_ekf(self):
-        timeout = 1 / 1e6
+        timeout = 1
         if time.time() - self.last_ekf_time > timeout:
             return
         self.painter.setPen(self.fg2)
