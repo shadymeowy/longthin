@@ -131,3 +131,5 @@ manual_control:
   mixed_2: 0.1
 
 runner:
+  - cmd: "longthin-bridge"
+    args: []
