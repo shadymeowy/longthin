@@ -13,8 +13,9 @@ class DubinsController(ControllerABC):
         self.gen_path = None
         self.is_limited = True
 
-        self.ekf_pos = None
-        self.ekf_yaw = None
+        # TODO: fix thisa
+        self.ekf_pos = np.array([1.5, 1.5, 0])
+        self.ekf_yaw = 0
         self.node.subscribe(EkfState, self.cb_ekf)
 
     def setpoint(self, target_x, target_y, circle=False):
