@@ -224,7 +224,7 @@ void led_handle(struct ltpacket_t *packet)
 		led->high_time = packet->led_control.high_time;
 		led->low_time = packet->led_control.low_time;
 		led->remaining_cycles = packet->led_control.remaining_cycles;
-		if (resetting) {
+		if (resetting && led->remaining_cycles != 0) {
 			led->current_state = !led->default_state;
 			led->last_change_time = millis();
 			led_write(id, led->current_state);
@@ -262,9 +262,9 @@ void led_process()
 		uint32_t delta = now - last;
 		if (leds[i].remaining_cycles == 0) {
 			led_write(i, leds[i].default_state);
-			leds[i].current_state = 0;
+			leds[i].current_state = leds[i].default_state;
 			leds[i].last_change_time = now;
-		} else if (leds[i].remaining_cycles > 0 || leds[i].remaining_cycles == -1) {
+		} else if (leds[i].remaining_cycles != 0) {
 			bool change = false;
 			if (leds[i].current_state) {
 				if (delta > leds[i].high_time) {
@@ -280,7 +280,7 @@ void led_process()
 			if (change) {
 				led_write(i, leds[i].current_state);
 				leds[i].last_change_time = now;
-				if (leds[i].current_state == leds[i].default_state) {
+				if (leds[i].current_state == leds[i].default_state && leds[i].remaining_cycles > 0) {
 					leds[i].remaining_cycles--;
 				}
 			}
