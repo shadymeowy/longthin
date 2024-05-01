@@ -76,7 +76,7 @@ madgwick_beta:
 imu_filter_type:
   id: 0x0f
   type: u32
-  default: 2
+  default: 3
 
 mahony_kp:
   id: 0x10
@@ -91,12 +91,12 @@ imu_calibration_samples:
 imu_publish_period:
   id: 0x12
   type: u32
-  default: 33333
+  default: 10000
 
 motor_pwm_refresh_period:
   id: 0x13
   type: u32
-  default: 33333
+  default: 10000
 
 control_debug_enable:
   id: 0x14
