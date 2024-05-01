@@ -58,6 +58,7 @@ class Planner:
             State.RESET: self.state_reset,
         }
         self.t_start = 0  # Initialize a timing variable for ORBIT state
+        self.notify.idle()
 
     def cb_lane_vision(self, packet):
         self.lane_t = time.time()
@@ -223,7 +224,6 @@ class Planner:
             self.lane_t = 0
             self.goal_t = 0
             self.reset_t = time.time()
-            self.notify.idle()
 
         if time.time() - self.reset_t > 1:
             self.notify.success()
