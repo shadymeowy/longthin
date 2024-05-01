@@ -1,0 +1,5 @@
+runner:
+  - cmd: "longthin-bridge"
+    args: ["/dev/ttyUSB0"]
+  - cmd: "longthin-gcs"
+    args: []

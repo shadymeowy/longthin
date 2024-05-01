@@ -1,0 +1,9 @@
+runner:
+  - cmd: "longthin-bridge"
+    args: ["/dev/ttyAMA0"]
+  - cmd: "longthin-estimator"
+    args: []
+  - cmd: "longthin-ekf"
+    args: []
+  - cmd: "longthin-planner"
+    args: []
