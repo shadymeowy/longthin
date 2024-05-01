@@ -91,12 +91,12 @@ imu_calibration_samples:
 imu_publish_period:
   id: 0x12
   type: u32
-  default: 10000
+  default: 33333
 
 motor_pwm_refresh_period:
   id: 0x13
   type: u32
-  default: 10000
+  default: 33333
 
 control_debug_enable:
   id: 0x14
