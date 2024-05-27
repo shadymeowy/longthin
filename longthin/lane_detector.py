@@ -92,6 +92,7 @@ class LaneDetector:
 
             mean_x = sum(intercepts) / 4
             if debug:
+                image = image.copy()
                 for line in lines:
                     image = draw_line(image, **line)
                 for x in intercepts:
