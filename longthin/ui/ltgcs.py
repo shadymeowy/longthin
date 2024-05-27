@@ -22,6 +22,7 @@ class LTGCS(QMainWindow):
         self.setWindowTitle('LTGCS')
         self.setWindowState(Qt.WindowMaximized)
         self.node = node
+        self.config = node.config
 
         # Tab central widget
         self.central_widget = QTabWidget()
@@ -99,3 +100,86 @@ class LTGCS(QMainWindow):
 
         # set minimum size to parameters dock
         self.params_dock.setMinimumWidth(400)
+
+        self.move_x = 0
+        self.move_y = 0
+        self.is_zero_sent = True
+
+        # Timer for updating motor
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_motor)
+        self.timer.start(100)
+
+    def keyPressEvent(self, event):
+        super().keyPressEvent(event)
+        if event.isAutoRepeat():
+            return
+        key = event.key()
+        if key == Qt.Key.Key_W:
+            self.move_x = 1
+        elif key == Qt.Key.Key_S:
+            self.move_x = -1
+        elif key == Qt.Key.Key_A:
+            self.move_y = -1
+        elif key == Qt.Key.Key_D:
+            self.move_y = 1
+        else:
+            return
+        self.update_motor()
+
+    def keyReleaseEvent(self, event):
+        super().keyReleaseEvent(event)
+        if event.isAutoRepeat():
+            return
+        key = event.key()
+        if key == Qt.Key.Key_W:
+            self.move_x = 0
+        elif key == Qt.Key.Key_S:
+            self.move_x = 0
+        elif key == Qt.Key.Key_A:
+            self.move_y = 0
+        elif key == Qt.Key.Key_D:
+            self.move_y = 0
+        else:
+            return
+        self.update_motor()
+
+    def update_motor(self):
+        x = self.move_x
+        y = self.move_y
+        conf = self.config.manual_control
+        f = conf.forward_backward
+        l = conf.left_right
+        m1 = conf.mixed_1
+        m2 = conf.mixed_2
+
+        if x == 0 and y == 0:
+            if not self.is_zero_sent:
+                self.is_zero_sent = True
+                self.set_motor(0, 0)
+        else:
+            self.is_zero_sent = False
+            if x == 0:
+                # turn left or right without moving forward
+                self.set_motor(l * y, -l * y)
+            elif y == 0:
+                # go forward or backward without turning
+                self.set_motor(x * f, x * f)
+            elif x > 0:
+                if y > 0:
+                    # go forward and turn right
+                    self.set_motor(m1, m2)
+                else:
+                    # go forward and turn left
+                    self.set_motor(m2, m1)
+            else:
+                if y > 0:
+                    # go backward and turn left
+                    self.set_motor(-m2, -m1)
+                else:
+                    # go backward and turn right
+                    self.set_motor(-m1, -m2)
+
+    def set_motor(self, left, right):
+        packet = Motor(left, right)
+        self.node.publish(packet)
