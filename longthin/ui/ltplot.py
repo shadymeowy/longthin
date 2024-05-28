@@ -23,7 +23,7 @@ class LTPlot(QWidget):
         self.label_typs = QLabel('Types:')
         self.text_typs = QLineEdit()
         self.text_typs.setPlaceholderText('Packet and properties to plot')
-        self.text_typs.setText('sim_state.x,sim_state.y motor_output.left,motor_output.right')
+        self.text_typs.setText('ev_pose.x,ekf_state.x ev_pose.y,ekf_state.y motor_output.left,motor_output.right control_debug.desired_yaw,control_debug.current_yaw')
         self.text_typs.returnPressed.connect(self.init_plot)
 
         self.label_duration = QLabel('Duration:')
